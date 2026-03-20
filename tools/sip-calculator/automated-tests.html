@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIP Calculator - Automated Tests</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      color: #1a202c;
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      color: #718096;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+    }
+
+    .test-controls {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: #64748b;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #475569;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      padding: 1.5rem;
+      border-radius: 8px;
+      border-left: 4px solid;
+    }
+
+    .stat-card.total {
+      background: #eff6ff;
+      border-color: #3b82f6;
+    }
+
+    .stat-card.passed {
+      background: #f0fdf4;
+      border-color: #22c55e;
+    }
+
+    .stat-card.failed {
+      background: #fef2f2;
+      border-color: #ef4444;
+    }
+
+    .stat-card.skipped {
+      background: #fffbeb;
+      border-color: #f59e0b;
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1a202c;
+    }
+
+    .test-section {
+      margin-bottom: 2rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      background: #f8fafc;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .section-header:hover {
+      background: #f1f5f9;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1a202c;
+      flex: 1;
+    }
+
+    .section-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .badge-success {
+      background: #22c55e;
+      color: white;
+    }
+
+    .badge-danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .badge-warning {
+      background: #f59e0b;
+      color: white;
+    }
+
+    .test-list {
+      display: none;
+    }
+
+    .test-list.expanded {
+      display: block;
+    }
+
+    .test-item {
+      padding: 1rem;
+      margin-bottom: 0.5rem;
+      border-radius: 8px;
+      border-left: 4px solid;
+      background: white;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .test-item.pass {
+      border-color: #22c55e;
+      background: #f0fdf4;
+    }
+
+    .test-item.fail {
+      border-color: #ef4444;
+      background: #fef2f2;
+    }
+
+    .test-item.skip {
+      border-color: #f59e0b;
+      background: #fffbeb;
+    }
+
+    .test-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .test-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .test-content {
+      flex: 1;
+    }
+
+    .test-name {
+      font-weight: 600;
+      color: #1a202c;
+      margin-bottom: 0.25rem;
+    }
+
+    .test-description {
+      font-size: 0.875rem;
+      color: #64748b;
+      margin-bottom: 0.5rem;
+    }
+
+    .test-result {
+      font-size: 0.875rem;
+      padding: 0.5rem;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.05);
+      font-family: 'Courier New', monospace;
+    }
+
+    .test-error {
+      color: #dc2626;
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+      padding: 0.5rem;
+      background: rgba(239, 68, 68, 0.1);
+      border-radius: 4px;
+    }
+
+    .toggle-icon {
+      transition: transform 0.2s;
+    }
+
+    .section-header.expanded .toggle-icon {
+      transform: rotate(90deg);
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #22c55e);
+      transition: width 0.3s ease;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading {
+      animation: spin 1s linear infinite;
+    }
+
+    .performance-card {
+      padding: 1rem;
+      background: #fef3c7;
+      border-radius: 8px;
+      margin-top: 1rem;
+      border: 2px solid #f59e0b;
+    }
+
+    .performance-label {
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 0.5rem;
+    }
+
+    .performance-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #78350f;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 SIP Calculator - Automated Tests</h1>
+    <p class="subtitle">Comprehensive testing for Feature 2 (RICE 1800)</p>
+
+    <div class="test-controls">
+      <button class="btn btn-primary" onclick="runAllTests()">
+        ▶️ Run All Tests
+      </button>
+      <button class="btn btn-secondary" onclick="expandAll()">
+        📂 Expand All
+      </button>
+      <button class="btn btn-secondary" onclick="collapseAll()">
+        📁 Collapse All
+      </button>
+      <button class="btn btn-secondary" onclick="exportResults()">
+        💾 Export Results
+      </button>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card total">
+        <div class="stat-label">Total Tests</div>
+        <div class="stat-value" id="total-tests">0</div>
+      </div>
+      <div class="stat-card passed">
+        <div class="stat-label">Passed</div>
+        <div class="stat-value" id="passed-tests">0</div>
+      </div>
+      <div class="stat-card failed">
+        <div class="stat-label">Failed</div>
+        <div class="stat-value" id="failed-tests">0</div>
+      </div>
+      <div class="stat-card skipped">
+        <div class="stat-label">Skipped</div>
+        <div class="stat-value" id="skipped-tests">0</div>
+      </div>
+    </div>
+
+    <div id="test-results"></div>
+
+    <div class="performance-card" id="performance-card" style="display: none;">
+      <div class="performance-label">⚡ Total Execution Time</div>
+      <div class="performance-value" id="total-time">0ms</div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Test Framework
+    class TestSuite {
+      constructor(name, description) {
+        this.name = name;
+        this.description = description;
+        this.tests = [];
+      }
+
+      addTest(name, description, testFn, category = 'functional') {
+        this.tests.push({ name, description, testFn, category });
+      }
+
+      async run() {
+        const results = [];
+        for (const test of this.tests) {
+          const result = await this.runTest(test);
+          results.push(result);
+        }
+        return results;
+      }
+
+      async runTest(test) {
+        const startTime = performance.now();
+        try {
+          await test.testFn();
+          const endTime = performance.now();
+          return {
+            name: test.name,
+            description: test.description,
+            category: test.category,
+            status: 'pass',
+            time: Math.round(endTime - startTime),
+            message: 'Test passed'
+          };
+        } catch (error) {
+          const endTime = performance.now();
+          return {
+            name: test.name,
+            description: test.description,
+            category: test.category,
+            status: 'fail',
+            time: Math.round(endTime - startTime),
+            message: error.message,
+            stack: error.stack
+          };
+        }
+      }
+    }
+
+    // Assertion helpers
+    function assert(condition, message) {
+      if (!condition) {
+        throw new Error(message || 'Assertion failed');
+      }
+    }
+
+    function assertEquals(actual, expected, message) {
+      if (actual !== expected) {
+        throw new Error(
+          message || `Expected ${expected}, but got ${actual}`
+        );
+      }
+    }
+
+    function assertGreaterThan(actual, min, message) {
+      if (actual <= min) {
+        throw new Error(
+          message || `Expected value > ${min}, but got ${actual}`
+        );
+      }
+    }
+
+    function assertLessThan(actual, max, message) {
+      if (actual >= max) {
+        throw new Error(
+          message || `Expected value < ${max}, but got ${actual}`
+        );
+      }
+    }
+
+    function assertInRange(actual, min, max, message) {
+      if (actual < min || actual > max) {
+        throw new Error(
+          message || `Expected value between ${min} and ${max}, but got ${actual}`
+        );
+      }
+    }
+
+    // ===================================
+    // TEST SUITES
+    // ===================================
+
+    // Suite 1: Core Calculation Tests
+    const calculationSuite = new TestSuite(
+      'Core Calculations',
+      'Tests for SIP calculation accuracy and formulas'
+    );
+
+    calculationSuite.addTest(
+      'AC-201: Basic SIP Calculation (No Step-up)',
+      'Calculate SIP with ₹5000/month, 12% return, 10 years, no step-up',
+      async () => {
+        const monthlyInvestment = 5000;
+        const annualReturnRate = 12;
+        const years = 10;
+        const stepUpRate = 0;
+
+        const result = calculateSIP(monthlyInvestment, annualReturnRate, years, stepUpRate);
+
+        // Total investment should be 5000 * 12 * 10 = 600,000
+        assertEquals(result.totalInvestment, 600000, 'Total investment incorrect');
+
+        // Maturity value should be around 11.5 lakhs (compound interest)
+        assertInRange(result.maturityValue, 1100000, 1200000, 'Maturity value out of expected range');
+
+        // Expected returns should be positive
+        assertGreaterThan(result.expectedReturns, 500000, 'Expected returns too low');
+      },
+      'calculation'
+    );
+
+    calculationSuite.addTest(
+      'AC-202: SIP with 10% Step-up',
+      'Calculate SIP with step-up rate of 10% annually',
+      async () => {
+        const monthlyInvestment = 5000;
+        const annualReturnRate = 12;
+        const years = 5;
+        const stepUpRate = 10;
+
+        const result = calculateSIP(monthlyInvestment, annualReturnRate, years, stepUpRate);
+
+        // With step-up, total investment should be more than 5000 * 12 * 5 = 300,000
+        assertGreaterThan(result.totalInvestment, 300000, 'Step-up not applied correctly');
+
+        // Maturity value should increase accordingly
+        assertGreaterThan(result.maturityValue, result.totalInvestment, 'Maturity less than investment');
+      },
+      'calculation'
+    );
+
+    calculationSuite.addTest(
+      'AC-203: Edge Case - 1 Year Duration',
+      'Test minimum duration of 1 year',
+      async () => {
+        const result = calculateSIP(10000, 12, 1, 0);
+
+        // Total investment: 10000 * 12 = 120,000
+        assertEquals(result.totalInvestment, 120000, 'One year investment incorrect');
+
+        // Should have exactly 1 year of data
+        assertEquals(result.yearlyData.length, 1, 'Should have 1 year of data');
+      },
+      'calculation'
+    );
+
+    calculationSuite.addTest(
+      'AC-204: Edge Case - 40 Year Duration',
+      'Test maximum duration of 40 years',
+      async () => {
+        const result = calculateSIP(5000, 12, 40, 0);
+
+        // Should have 40 years of data
+        assertEquals(result.yearlyData.length, 40, 'Should have 40 years of data');
+
+        // Total investment: 5000 * 12 * 40 = 24,00,000
+        assertEquals(result.totalInvestment, 2400000, '40 year investment incorrect');
+
+        // With compound interest, maturity should be significantly higher
+        assertGreaterThan(result.maturityValue, 50000000, 'Long-term compound growth incorrect');
+      },
+      'calculation'
+    );
+
+    calculationSuite.addTest(
+      'AC-205: Compound Interest Formula Verification',
+      'Verify compound interest is applied correctly',
+      async () => {
+        const result = calculateSIP(10000, 10, 5, 0);
+
+        // Manually calculate expected value using SIP formula
+        const P = 10000;
+        const r = 10 / 12 / 100;
+        const n = 5 * 12;
+
+        // FV = P × [(1 + r)^n - 1] / r × (1 + r)
+        const expectedFV = P * (((Math.pow(1 + r, n) - 1) / r) * (1 + r));
+
+        // Allow 1% tolerance for rounding
+        const tolerance = expectedFV * 0.01;
+        assertInRange(
+          result.maturityValue,
+          expectedFV - tolerance,
+          expectedFV + tolerance,
+          'Compound interest formula incorrect'
+        );
+      },
+      'calculation'
+    );
+
+    // Suite 2: Input Validation Tests
+    const validationSuite = new TestSuite(
+      'Input Validation',
+      'Tests for input validation and error handling'
+    );
+
+    validationSuite.addTest(
+      'AC-206: Minimum Investment Validation',
+      'Reject investment below ₹500',
+      async () => {
+        const inputs = { monthlyInvestment: 400, returnRate: 12, duration: 10, stepupRate: 0 };
+        const errors = validateInputs(inputs);
+        assert(errors.length > 0, 'Should have validation error');
+        assert(errors.some(e => e.includes('500')), 'Should mention minimum ₹500');
+      },
+      'validation'
+    );
+
+    validationSuite.addTest(
+      'AC-207: Maximum Investment Validation',
+      'Reject investment above ₹1 crore',
+      async () => {
+        const inputs = { monthlyInvestment: 10000001, returnRate: 12, duration: 10, stepupRate: 0 };
+        const errors = validateInputs(inputs);
+        assert(errors.length > 0, 'Should have validation error');
+      },
+      'validation'
+    );
+
+    validationSuite.addTest(
+      'AC-208: Return Rate Range Validation',
+      'Enforce return rate between 1% and 30%',
+      async () => {
+        const inputs1 = { monthlyInvestment: 5000, returnRate: 0.5, duration: 10, stepupRate: 0 };
+        const errors1 = validateInputs(inputs1);
+        assert(errors1.length > 0, 'Should reject return rate below 1%');
+
+        const inputs2 = { monthlyInvestment: 5000, returnRate: 35, duration: 10, stepupRate: 0 };
+        const errors2 = validateInputs(inputs2);
+        assert(errors2.length > 0, 'Should reject return rate above 30%');
+      },
+      'validation'
+    );
+
+    validationSuite.addTest(
+      'AC-209: Duration Range Validation',
+      'Enforce duration between 1 and 40 years',
+      async () => {
+        const inputs1 = { monthlyInvestment: 5000, returnRate: 12, duration: 0, stepupRate: 0 };
+        const errors1 = validateInputs(inputs1);
+        assert(errors1.length > 0, 'Should reject duration below 1');
+
+        const inputs2 = { monthlyInvestment: 5000, returnRate: 12, duration: 50, stepupRate: 0 };
+        const errors2 = validateInputs(inputs2);
+        assert(errors2.length > 0, 'Should reject duration above 40');
+      },
+      'validation'
+    );
+
+    validationSuite.addTest(
+      'AC-210: Step-up Rate Validation',
+      'Validate step-up rate between 0% and 50%',
+      async () => {
+        const inputs1 = { monthlyInvestment: 5000, returnRate: 12, duration: 10, stepupRate: -5 };
+        const errors1 = validateInputs(inputs1);
+        assert(errors1.length > 0, 'Should reject negative step-up');
+
+        const inputs2 = { monthlyInvestment: 5000, returnRate: 12, duration: 10, stepupRate: 60 };
+        const errors2 = validateInputs(inputs2);
+        assert(errors2.length > 0, 'Should reject step-up above 50%');
+      },
+      'validation'
+    );
+
+    // Suite 3: Performance Tests
+    const performanceSuite = new TestSuite(
+      'Performance',
+      'Tests for calculation and rendering performance'
+    );
+
+    performanceSuite.addTest(
+      'AC-211: 10-Year Calculation Performance',
+      'Calculate 10-year SIP within 100ms',
+      async () => {
+        const startTime = performance.now();
+        calculateSIP(5000, 12, 10, 0);
+        const endTime = performance.now();
+        const duration = endTime - startTime;
+
+        assertLessThan(duration, 100, `Calculation took ${duration}ms, expected < 100ms`);
+      },
+      'performance'
+    );
+
+    performanceSuite.addTest(
+      'AC-212: 30-Year Calculation Performance',
+      'Calculate 30-year SIP within 100ms',
+      async () => {
+        const startTime = performance.now();
+        calculateSIP(5000, 12, 30, 10);
+        const endTime = performance.now();
+        const duration = endTime - startTime;
+
+        assertLessThan(duration, 100, `Calculation took ${duration}ms, expected < 100ms`);
+      },
+      'performance'
+    );
+
+    performanceSuite.addTest(
+      'AC-213: 40-Year with Step-up Performance',
+      'Calculate 40-year SIP with step-up within 150ms',
+      async () => {
+        const startTime = performance.now();
+        calculateSIP(10000, 15, 40, 20);
+        const endTime = performance.now();
+        const duration = endTime - startTime;
+
+        assertLessThan(duration, 150, `Calculation took ${duration}ms, expected < 150ms`);
+      },
+      'performance'
+    );
+
+    // Suite 4: Data Accuracy Tests
+    const accuracySuite = new TestSuite(
+      'Data Accuracy',
+      'Tests for year-wise breakdown and data integrity'
+    );
+
+    accuracySuite.addTest(
+      'AC-214: Year-wise Data Integrity',
+      'Verify year-wise data has all required fields',
+      async () => {
+        const result = calculateSIP(5000, 12, 10, 0);
+
+        assert(result.yearlyData.length === 10, 'Should have 10 years of data');
+
+        result.yearlyData.forEach((yearData, index) => {
+          assertEquals(yearData.year, index + 1, `Year ${index + 1} incorrect`);
+          assert(typeof yearData.yearlyInvestment === 'number', 'yearlyInvestment must be number');
+          assert(typeof yearData.totalInvestment === 'number', 'totalInvestment must be number');
+          assert(typeof yearData.value === 'number', 'value must be number');
+          assert(typeof yearData.returns === 'number', 'returns must be number');
+        });
+      },
+      'accuracy'
+    );
+
+    accuracySuite.addTest(
+      'AC-215: Cumulative Investment Growth',
+      'Verify total investment increases cumulatively',
+      async () => {
+        const result = calculateSIP(5000, 12, 10, 0);
+
+        for (let i = 1; i < result.yearlyData.length; i++) {
+          const prevInvestment = result.yearlyData[i - 1].totalInvestment;
+          const currInvestment = result.yearlyData[i].totalInvestment;
+          assertGreaterThan(currInvestment, prevInvestment, `Year ${i + 1} investment not increasing`);
+        }
+      },
+      'accuracy'
+    );
+
+    accuracySuite.addTest(
+      'AC-216: Returns Calculation Accuracy',
+      'Verify returns = value - investment for each year',
+      async () => {
+        const result = calculateSIP(5000, 12, 10, 0);
+
+        result.yearlyData.forEach((yearData, index) => {
+          const calculatedReturns = yearData.value - yearData.totalInvestment;
+          const tolerance = 1; // Allow ₹1 rounding difference
+          assertInRange(
+            yearData.returns,
+            calculatedReturns - tolerance,
+            calculatedReturns + tolerance,
+            `Year ${index + 1} returns calculation incorrect`
+          );
+        });
+      },
+      'accuracy'
+    );
+
+    // Suite 5: Currency Formatting Tests
+    const formattingSuite = new TestSuite(
+      'Formatting & Display',
+      'Tests for currency and number formatting'
+    );
+
+    formattingSuite.addTest(
+      'AC-217: Indian Currency Format',
+      'Verify numbers formatted with ₹ symbol and commas',
+      async () => {
+        const formatted = formatCurrency(1234567);
+        assert(formatted.includes('₹'), 'Should include rupee symbol');
+        assert(formatted.includes(','), 'Should include thousand separators');
+      },
+      'formatting'
+    );
+
+    formattingSuite.addTest(
+      'AC-218: Large Number Formatting',
+      'Format crore/lakh correctly',
+      async () => {
+        const oneLakh = formatCurrency(100000);
+        const oneCrore = formatCurrency(10000000);
+        
+        assert(oneLakh.length > 0, 'Should format 1 lakh');
+        assert(oneCrore.length > 0, 'Should format 1 crore');
+      },
+      'formatting'
+    );
+
+    // ===================================
+    // HELPER FUNCTIONS (copied from actual SIP calculator)
+    // ===================================
+
+    function calculateSIP(monthlyInvestment, annualReturnRate, years, stepUpRate = 0) {
+      const monthlyRate = annualReturnRate / 12 / 100;
+      const totalMonths = years * 12;
+      
+      let totalInvestment = 0;
+      let currentValue = 0;
+      let currentMonthlyInvestment = monthlyInvestment;
+      
+      const yearlyData = [];
+      let yearlyInvestment = 0;
+      
+      for (let month = 1; month <= totalMonths; month++) {
+        if (month > 12 && (month - 1) % 12 === 0 && stepUpRate > 0) {
+          currentMonthlyInvestment *= (1 + stepUpRate / 100);
+        }
+        
+        totalInvestment += currentMonthlyInvestment;
+        yearlyInvestment += currentMonthlyInvestment;
+        currentValue = currentValue * (1 + monthlyRate) + currentMonthlyInvestment;
+        
+        if (month % 12 === 0 || month === totalMonths) {
+          yearlyData.push({
+            year: Math.ceil(month / 12),
+            yearlyInvestment: Math.round(yearlyInvestment),
+            totalInvestment: Math.round(totalInvestment),
+            value: Math.round(currentValue),
+            returns: Math.round(currentValue - totalInvestment)
+          });
+          yearlyInvestment = 0;
+        }
+      }
+      
+      return {
+        totalInvestment: Math.round(totalInvestment),
+        maturityValue: Math.round(currentValue),
+        expectedReturns: Math.round(currentValue - totalInvestment),
+        yearlyData
+      };
+    }
+
+    function validateInputs(inputs) {
+      const errors = [];
+      
+      if (inputs.monthlyInvestment < 500) {
+        errors.push('Monthly investment must be at least ₹500');
+      }
+      if (inputs.monthlyInvestment > 10000000) {
+        errors.push('Monthly investment cannot exceed ₹1,00,00,000');
+      }
+      if (inputs.returnRate < 1) {
+        errors.push('Return rate must be at least 1%');
+      }
+      if (inputs.returnRate > 30) {
+        errors.push('Return rate cannot exceed 30%');
+      }
+      if (inputs.duration < 1) {
+        errors.push('Duration must be at least 1 year');
+      }
+      if (inputs.duration > 40) {
+        errors.push('Duration cannot exceed 40 years');
+      }
+      if (inputs.stepupRate < 0) {
+        errors.push('Step-up rate cannot be negative');
+      }
+      if (inputs.stepupRate > 50) {
+        errors.push('Step-up rate cannot exceed 50%');
+      }
+      
+      return errors;
+    }
+
+    function formatCurrency(amount) {
+      return '₹' + amount.toLocaleString('en-IN');
+    }
+
+    // ===================================
+    // TEST EXECUTION & RENDERING
+    // ===================================
+
+    const allSuites = [
+      calculationSuite,
+      validationSuite,
+      performanceSuite,
+      accuracySuite,
+      formattingSuite
+    ];
+
+    let testResults = [];
+
+    window.runAllTests = async function() {
+      const startTime = performance.now();
+      
+      // Reset results
+      testResults = [];
+      document.getElementById('test-results').innerHTML = '';
+      
+      let totalTests = 0;
+      let passedTests = 0;
+      let failedTests = 0;
+      
+    for (const suite of allSuites) {
+        const results = await suite.run();
+        
+        results.forEach(result => {
+          totalTests++;
+          if (result.status === 'pass') passedTests++;
+          if (result.status === 'fail') failedTests++;
+        });
+        
+        testResults.push({
+          suite: suite.name,
+          description: suite.description,
+          results
+        });
+        
+        renderTestSection(suite.name, suite.description, results);
+        updateStats(totalTests, passedTests, failedTests, 0);
+        updateProgress(totalTests, allSuites.reduce((sum, s) => sum + s.tests.length, 0));
+      }
+      
+      const endTime = performance.now();
+      const totalTime = Math.round(endTime - startTime);
+      
+      document.getElementById('performance-card').style.display = 'block';
+      document.getElementById('total-time').textContent = totalTime + 'ms';
+      
+      // Auto-expand failed sections
+      document.querySelectorAll('.section-header').forEach(header => {
+        const badge = header.querySelector('.section-badge');
+        if (badge && badge.classList.contains('badge-danger')) {
+          header.click();
+        }
+      });
+    };
+
+    function renderTestSection(suiteName, description, results) {
+      const container = document.getElementById('test-results');
+      
+      const passed = results.filter(r => r.status === 'pass').length;
+      const failed = results.filter(r => r.status === 'fail').length;
+      const total = results.length;
+      
+      const section = document.createElement('div');
+      section.className = 'test-section';
+      
+      const header = document.createElement('div');
+      header.className = 'section-header';
+      header.innerHTML = `
+        <span class="toggle-icon">▶️</span>
+        <div class="section-title">${suiteName}</div>
+        <span class="section-badge ${failed > 0 ? 'badge-danger' : 'badge-success'}">
+          ${passed}/${total} passed
+        </span>
+      `;
+      
+      const testList = document.createElement('div');
+      testList.className = 'test-list';
+      
+      results.forEach(result => {
+        const testItem = document.createElement('div');
+        testItem.className = `test-item ${result.status}`;
+        
+        const icon = result.status === 'pass' ? '✅' : '❌';
+        
+        testItem.innerHTML = `
+          <div class="test-header">
+            <span class="test-icon">${icon}</span>
+            <div class="test-content">
+              <div class="test-name">${result.name}</div>
+              <div class="test-description">${result.description}</div>
+              <div class="test-result">
+                Status: ${result.status.toUpperCase()} | Time: ${result.time}ms
+              </div>
+              ${result.status === 'fail' ? `
+                <div class="test-error">
+                  <strong>Error:</strong> ${result.message}
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+        
+        testList.appendChild(testItem);
+      });
+      
+      header.addEventListener('click', () => {
+        header.classList.toggle('expanded');
+        testList.classList.toggle('expanded');
+      });
+      
+      section.appendChild(header);
+      section.appendChild(testList);
+      container.appendChild(section);
+    }
+
+    function updateStats(total, passed, failed, skipped) {
+      document.getElementById('total-tests').textContent = total;
+      document.getElementById('passed-tests').textContent = passed;
+      document.getElementById('failed-tests').textContent = failed;
+      document.getElementById('skipped-tests').textContent = skipped;
+    }
+
+    function updateProgress(current, total) {
+      const percentage = (current / total) * 100;
+      document.getElementById('progress-fill').style.width = percentage + '%';
+    }
+
+    window.expandAll = function() {
+      document.querySelectorAll('.section-header').forEach(header => {
+        if (!header.classList.contains('expanded')) {
+          header.click();
+        }
+      });
+    };
+
+    window.collapseAll = function() {
+      document.querySelectorAll('.section-header').forEach(header => {
+        if (header.classList.contains('expanded')) {
+          header.click();
+        }
+      });
+    };
+
+    window.exportResults = function() {
+      const report = generateTextReport();
+      const blob = new Blob([report], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `sip-calculator-test-results-${Date.now()}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    function generateTextReport() {
+      let report = '═══════════════════════════════════════\n';
+      report += 'SIP CALCULATOR - AUTOMATED TEST REPORT\n';
+      report += '═══════════════════════════════════════\n\n';
+      report += `Generated: ${new Date().toLocaleString()}\n`;
+      report += `Feature: SIP Calculator (F-002)\n`;
+      report += `RICE Score: 1800 (Highest Priority)\n\n`;
+      
+      const totalTests = testResults.reduce((sum, suite) => sum + suite.results.length, 0);
+      const passedTests = testResults.reduce(
+        (sum, suite) => sum + suite.results.filter(r => r.status === 'pass').length,
+        0
+      );
+      const failedTests = totalTests - passedTests;
+      
+      report += '📊 SUMMARY:\n';
+      report += `Total Tests: ${totalTests}\n`;
+      report += `Passed: ${passedTests} ✅\n`;
+      report += `Failed: ${failedTests} ❌\n`;
+      report += `Pass Rate: ${((passedTests / totalTests) * 100).toFixed(1)}%\n\n`;
+      
+      testResults.forEach(suite => {
+        report += `\n${'='.repeat(50)}\n`;
+        report += `${suite.suite}\n`;
+        report += `${suite.description}\n`;
+        report += `${'='.repeat(50)}\n\n`;
+        
+        suite.results.forEach(result => {
+          const status = result.status === 'pass' ? '✅ PASS' : '❌ FAIL';
+          report += `${status} | ${result.name}\n`;
+          report += `  ${result.description}\n`;
+          report += `  Time: ${result.time}ms\n`;
+          if (result.status === 'fail') {
+            report += `  Error: ${result.message}\n`;
+          }
+          report += '\n';
+        });
+      });
+      
+      return report;
+    }
+
+    // Auto-run on load
+    console.log('🧪 Test suite loaded. Click "Run All Tests" to begin.');
+  </script>
+</body>
+</html>

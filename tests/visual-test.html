@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevToolbox - Visual Test Suite</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 2rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: #60a5fa;
+    }
+
+    .test-grid {
+      display: grid;
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .test-section {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 2rem;
+      border: 2px solid #334155;
+    }
+
+    .test-section h2 {
+      color: #60a5fa;
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+    }
+
+    .test-item {
+      background: #0f172a;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-left: 4px solid #475569;
+    }
+
+    .test-item.passed {
+      border-left-color: #10b981;
+    }
+
+    .test-item.failed {
+      border-left-color: #ef4444;
+    }
+
+    .test-item h3 {
+      color: #cbd5e1;
+      font-size: 1.125rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .test-item p {
+      color: #94a3b8;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+
+    .test-steps {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #1e293b;
+      border-radius: 6px;
+    }
+
+    .test-steps ol {
+      margin-left: 1.5rem;
+      color: #cbd5e1;
+    }
+
+    .test-steps li {
+      margin-bottom: 0.5rem;
+    }
+
+    .expected {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 3px solid #10b981;
+      border-radius: 4px;
+    }
+
+    .expected strong {
+      color: #10b981;
+    }
+
+    .test-button {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 1rem;
+      margin-right: 1rem;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .test-button:hover {
+      background: #2563eb;
+    }
+
+    .test-button.secondary {
+      background: #64748b;
+    }
+
+    .test-button.secondary:hover {
+      background: #475569;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+
+    .status-badge.pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-badge.testing {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .test-results {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: #1e293b;
+      border-radius: 8px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #334155;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #60a5fa);
+      transition: width 0.3s;
+    }
+
+    code {
+      background: #0f172a;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      color: #fbbf24;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🧪 DevToolbox Visual Test Suite</h1>
+    <p style="color: #94a3b8;">Comprehensive testing for all tool functionality and UI</p>
+    <div style="margin-top: 1.5rem;">
+      <a href="/" class="test-button">← Back to Home</a>
+      <button class="test-button" onclick="runAllTests()">Run All Tests</button>
+    </div>
+  </div>
+
+  <div class="test-grid">
+    <!-- Test Section 1: Library Loading -->
+    <div class="test-section">
+      <h2>📚 Library Loading Tests</h2>
+      
+      <div class="test-item" id="test-chartjs">
+        <h3>Test 1: Chart.js Loading <span class="status-badge pending">Pending</span></h3>
+        <p>Verifies that Chart.js library loads correctly for SIP and EMI calculators</p>
+        <div class="test-steps">
+          <strong>Steps:</strong>
+          <ol>
+            <li>Navigate to SIP Calculator</li>
+            <li>Enter: ₹5000/month, 12% return, 10 years</li>
+            <li>Click "Calculate SIP"</li>
+          </ol>
+          <div class="expected">
+            <strong>Expected:</strong> Chart displays without "Chart is not defined" error
+          </div>
+        </div>
+        <a href="/#/sip-calculator" class="test-button">Test SIP Calculator</a>
+        <a href="/#/emi-calculator" class="test-button">Test EMI Calculator</a>
+      </div>
+
+      <div class="test-item" id="test-jsdiff">
+        <h3>Test 2: jsdiff Loading <span class="status-badge pending">Pending</span></h3>
+        <p>Verifies that jsdiff library loads correctly for Text Diff tool</p>
+        <div class="test-steps">
+          <strong>Steps:</strong>
+          <ol>
+            <li>Navigate to Text Diff Checker</li>
+            <li>Enter different text in both panels</li>
+            <li>Click "Compare"</li>
+          </ol>
+          <div class="expected">
+            <strong>Expected:</strong> Diff highlights without "diffLines is not defined" error
+          </div>
+        </div>
+        <a href="/#/text-diff" class="test-button">Test Text Diff</a>
+      </div>
+
+      <div class="test-item" id="test-markdown-libs">
+        <h3>Test 3: Markdown Libraries <span class="status-badge pending">Pending</span></h3>
+        <p>Verifies turndown, marked, and DOMPurify load for HTML/Markdown tool</p>
+        <div class="test-steps">
+          <strong>Steps:</strong>
+          <ol>
+            <li>Navigate to HTML ↔ Markdown Converter</li>
+            <li>Enter HTML: <code>&lt;h1&gt;Test&lt;/h1&gt;&lt;p&gt;Content&lt;/p&gt;</code></li>
+            <li>Click "Convert to Markdown"</li>
+          </ol>
+          <div class="expected">
+            <strong>Expected:</strong> Conversion works, preview displays correctly
+          </div>
+        </div>
+        <a href="/#/html-markdown" class="test-button">Test HTML/Markdown</a>
+      </div>
+    </div>
+
+    <!-- Test Section 2: UI/UX Tests -->
+    <div class="test-section">
+      <h2>🎨 UI/UX Tests</h2>
+      
+      <div class="test-item" id="test-theme-toggle">
+        <h3>Test 4: Theme Toggle <span class="status-badge pending">Pending</span></h3>
+        <p>Verifies theme toggle works on all pages without duplicate icons</p>
+        <div class="test-steps">
+          <strong>Steps:</strong>
+          <ol>
+            <li>Check home page - should see ONE theme toggle (top right)</li>
+            <li>Click toggle - theme should switch</li>
+            <li>Navigate to any tool</li>
+            <li>Click toggle again - theme should switch</li>
+          </ol>
+          <div class="expected">
+            <strong>Expected:</strong> Only ONE theme toggle button visible, works on all pages
+          </div>
+        </div>
+        <button class="test-button" onclick="testThemeToggle()">Test Theme Toggle</button>
+      </div>
+
+      <div class="test-item" id="test-json-schema-ui">
+        <h3>Test 5: JSON Schema Button Alignment <span class="status-badge pending">Pending</span></h3>
+        <p>Verifies JSON Schema buttons are properly aligned in 2x2 grid</p>
+        <div class="test-steps">
+          <strong>Steps:</strong>
+          <ol>
+            <li>Navigate to JSON Schema Validator</li>
+            <li>Observe button layout</li>
+            <li>Verify on desktop: 2x2 grid (2 columns)</li>
+            <li>Verify on mobile: Single column (resize browser)</li>
+          </ol>
+          <div class="expected">
+            <strong>Expected:</strong> Buttons: "Validate", "Generate Schema" on row 1; "Minify", "Beautify" on row 2
+          </div>
+        </div>
+        <a href="/#/json-schema" class="test-button">Test JSON Schema UI</a>
+      </div>
+
+      <div class="test-item" id="test-ui-consistency">
+        <h3>Test 6: UI Consistency <span class="status-badge pending">Pending</span></h3>
+        <p>Verifies consistent styling across all tools</p>
+        <div class="test-steps">
+          <strong>Steps:</strong>
+          <ol>
+            <li>Visit each tool: JSON Schema, SIP Calc, EMI Calc, Text Diff, HTML/MD</li>
+            <li>Check header format (logo, title, theme toggle)</li>
+            <li>Check button styles (primary, secondary)</li>
+            <li>Check input/textarea styling</li>
+            <li>Check responsive layout</li>
+          </ol>
+          <div class="expected">
+            <strong>Expected:</strong> All tools have consistent header, buttons, and layout
+          </div>
+        </div>
+        <button class="test-button" onclick="testAllTools()">Visit All Tools</button>
+      </div>
+    </div>
+
+    <!-- Test Section 3: Functionality Tests -->
+    <div class="test-section">
+      <h2>⚙️ Functionality Tests</h2>
+      
+      <div class="test-item" id="test-json-schema-gen">
+        <h3>Test 7: JSON Schema Generation <span class="status-badge pending">Pending</span></h3>
+        <p>Verifies "Generate Schema" button exists and works</p>
+        <div class="test-steps">
+          <strong>Steps:</strong>
+          <ol>
+            <li>Navigate to JSON Schema</li>
+            <li>Enter JSON: <code>{"name": "Test", "age": 25, "active": true}</code></li>
+            <li>Click "📋 Generate Schema"</li>
+          </ol>
+          <div class="expected">
+            <strong>Expected:</strong> Output shows valid JSON Schema with type, properties, required fields
+          </div>
+        </div>
+        <a href="/#/json-schema" class="test-button">Test Schema Generation</a>
+      </div>
+
+      <div class="test-item" id="test-calculations">
+        <h3>Test 8: Calculator Functionality <span class="status-badge pending">Pending</span></h3>
+        <p>Verifies all calculations work correctly</p>
+        <div class="test-steps">
+          <strong>Steps:</strong>
+          <ol>
+            <li>SIP: ₹5000/month, 12%, 10 years → Should show ~₹11.5 lakhs</li>
+            <li>EMI: ₹10L loan, 8%, 20 years → Should show ~₹8,364/month</li>
+          </ol>
+          <div class="expected">
+            <strong>Expected:</strong> Correct calculations, charts display, no errors
+          </div>
+        </div>
+        <a href="/#/sip-calculator" class="test-button">Test SIP</a>
+        <a href="/#/emi-calculator" class="test-button">Test EMI</a>
+      </div>
+    </div>
+
+    <!-- Test Results Summary -->
+    <div class="test-section">
+      <h2>📊 Test Results Summary</h2>
+      <div class="test-results">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+          <div>
+            <strong style="font-size: 1.5rem; color: #60a5fa;">0/8</strong>
+            <span style="color: #94a3b8; margin-left: 0.5rem;">tests passed</span>
+          </div>
+          <div style="text-align: right;">
+            <div><strong id="passed-count" style="color: #10b981;">0</strong> Passed</div>
+            <div><strong id="failed-count" style="color: #ef4444;">0</strong> Failed</div>
+            <div><strong id="pending-count" style="color: #fbbf24;">8</strong> Pending</div>
+          </div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 0%;"></div>
+        </div>
+        <p style="color: #94a3b8; margin-top: 1rem;">
+          ℹ️ Manual testing required. Use the test buttons to verify each functionality.
+          Mark tests as passed/failed in browser console.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function testThemeToggle() {
+      const toggle = document.querySelector('[data-theme-toggle]');
+      if (toggle) {
+        alert('Theme toggle found! Click it to test theme switching.');
+        toggle.focus();
+      } else {
+        alert('⚠️ Theme toggle not found!');
+      }
+    }
+
+    function testAllTools() {
+      const tools = [
+        '/#/json-schema',
+        '/#/sip-calculator',
+        '/#/emi-calculator',
+        '/#/text-diff',
+        '/#/html-markdown'
+      ];
+      alert(`Will open ${tools.length} tools in sequence. Check UI consistency in each.`);
+      let index = 0;
+      const interval = setInterval(() => {
+        if (index < tools.length) {
+          window.location.hash = tools[index];
+          index++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 3000);
+    }
+
+    function runAllTests() {
+      alert('Manual test suite started. Please follow each test step and verify results.');
+      document.querySelectorAll('.status-badge.pending').forEach(badge => {
+        badge.textContent = 'Testing';
+        badge.classList.remove('pending');
+        badge.classList.add('testing');
+      });
+    }
+
+    // Console helpers
+    console.log('%c🧪 DevToolbox Visual Test Suite', 'font-size: 20px; font-weight: bold; color: #60a5fa;');
+    console.log('%cUse these commands to mark test results:', 'font-size: 14px; color: #94a3b8;');
+    console.log('  pass(testNumber) - Mark test as passed');
+    console.log('  fail(testNumber) - Mark test as failed');
+    console.log('Example: pass(1) to mark Test 1 as passed');
+
+    window.pass = function(testNum) {
+      console.log(`%c✓ Test ${testNum} PASSED`, 'color: #10b981; font-weight: bold;');
+    };
+
+    window.fail = function(testNum, reason) {
+      console.log(`%c✗ Test ${testNum} FAILED: ${reason || 'No reason provided'}`, 'color: #ef4444; font-weight: bold;');
+    };
+  </script>
+</body>
+</html>

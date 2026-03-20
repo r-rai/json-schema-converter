@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON Schema Validator & Converter - DevToolbox</title>
+  <link rel="stylesheet" href="/shared/css/variables.css">
+  <link rel="stylesheet" href="/shared/css/reset.css">
+  <link rel="stylesheet" href="/shared/css/components.css">
+  <link rel="stylesheet" href="/shared/css/themes.css">
+  <link rel="stylesheet" href="/shared/css/utilities.css">
+  <link rel="stylesheet" href="/shared/css/responsive.css">
+  <link rel="stylesheet" href="./json-schema.css">
+  <link rel="stylesheet" href="/shared/css/tool-styles.css">
+</head>
+<body>
+  <header class="header">
+    <nav class="nav">
+      <a href="/" class="logo">DevToolbox</a>
+      <button data-theme-toggle class="btn btn-ghost" aria-label="Toggle theme">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </nav>
+    <div class="page-header">
+      <h1>📋 JSON Schema Validator & Converter</h1>
+      <p class="subtitle">Validate, minify, and beautify JSON data</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="tool-layout">
+      <!-- Input Section -->
+      <section class="input-section">
+        <div class="section-header">
+          <h2>Input JSON</h2>
+          <div class="action-group">
+            <button id="clear-input-btn" class="btn btn-ghost btn-sm" aria-label="Clear input">
+              🗑️ Clear
+            </button>
+            <button id="paste-btn" class="btn btn-ghost btn-sm" aria-label="Paste from clipboard">
+              📋 Paste
+            </button>
+          </div>
+        </div>
+        
+        <textarea
+          id="json-input"
+          class="json-editor"
+          placeholder='Enter or paste JSON here... Example: {"name": "John", "age": 30}'
+          aria-label="JSON input editor"
+          spellcheck="false"
+        ></textarea>
+
+        <div class="input-stats" aria-live="polite">
+          <span id="input-char-count">0 characters</span>
+          <span id="input-line-count">0 lines</span>
+        </div>
+      </section>
+
+      <!-- Actions Section -->
+      <section class="actions-section">
+        <div class="action-buttons">
+          <button id="validate-btn" class="btn btn-primary btn-large">
+            ✓ Validate JSON
+          </button>
+          
+          <button id="generate-schema-btn" class="btn btn-primary btn-large">
+            📋 Generate Schema
+          </button>
+          
+          <button id="minify-btn" class="btn btn-secondary btn-large">
+            🗜️ Minify
+          </button>
+          
+          <button id="beautify-btn" class="btn btn-secondary btn-large">
+            ✨ Beautify
+          </button>
+        </div>
+        
+        <div class="indent-controls">
+          <label for="indent-select" class="indent-label">Indentation:</label>
+          <select id="indent-select" class="indent-select" aria-label="Indentation style">
+            <option value="2">2 spaces</option>
+            <option value="4">4 spaces</option>
+            <option value="\t">Tab</option>
+          </select>
+        </div>
+
+        <div id="status-message" class="status-message" role="status" aria-live="polite"></div>
+      </section>
+
+      <!-- Output Section -->
+      <section class="output-section">
+        <div class="section-header">
+          <h2>Output</h2>
+          <div class="action-group">
+            <button id="copy-output-btn" class="btn btn-ghost btn-sm" aria-label="Copy output to clipboard" disabled>
+              📋 Copy
+            </button>
+            <button id="download-btn" class="btn btn-ghost btn-sm" aria-label="Download as JSON file" disabled>
+              💾 Download
+            </button>
+          </div>
+        </div>
+        
+        <textarea
+          id="json-output"
+          class="json-editor"
+          placeholder="Output will appear here..."
+          aria-label="JSON output display"
+          readonly
+        ></textarea>
+
+        <div class="output-stats" aria-live="polite">
+          <span id="output-char-count">0 characters</span>
+          <span id="output-reduction"></span>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

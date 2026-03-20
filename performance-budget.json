@@ -1,0 +1,113 @@
+{
+  "version": "1.0.0",
+  "description": "Performance budget for DevToolbox - Sprint 2",
+  "lastUpdated": "2026-03-20",
+  "budgets": [
+    {
+      "name": "Core Infrastructure",
+      "description": "Shared router, theme, utilities, storage",
+      "files": [
+        "shared/js/router.js",
+        "shared/js/theme.js",
+        "shared/js/utils.js",
+        "shared/js/storage.js",
+        "shared/js/error-boundary.js",
+        "shared/js/state-manager.js"
+      ],
+      "maxSize": "40KB",
+      "critical": true
+    },
+    {
+      "name": "Shared Components",
+      "description": "Reusable UI components",
+      "files": [
+        "shared/components/button.js",
+        "shared/components/card.js",
+        "shared/components/input.js",
+        "shared/components/modal.js"
+      ],
+      "maxSize": "20KB",
+      "critical": true
+    },
+    {
+      "name": "Shared CSS",
+      "description": "Global styles and utilities",
+      "files": [
+        "shared/css/*.css"
+      ],
+      "maxSize": "30KB",
+      "critical": false
+    },
+    {
+      "name": "SIP Calculator",
+      "description": "SIP calculation tool",
+      "files": [
+        "tools/sip-calculator/sip-calculator.js",
+        "tools/sip-calculator/sip-calculator.css"
+      ],
+      "maxSize": "15KB",
+      "critical": false
+    },
+    {
+      "name": "EMI Calculator",
+      "description": "EMI calculation tool",
+      "files": [
+        "tools/emi-calculator/emi-calculator.js",
+        "tools/emi-calculator/emi-calculator.css"
+      ],
+      "maxSize": "18KB",
+      "critical": false
+    },
+    {
+      "name": "Text Diff",
+      "description": "Text comparison tool",
+      "files": [
+        "tools/text-diff/text-diff.js",
+        "tools/text-diff/text-diff.css"
+      ],
+      "maxSize": "14KB",
+      "critical": false
+    },
+    {
+      "name": "HTML/Markdown Converter",
+      "description": "HTML and Markdown conversion tool",
+      "files": [
+        "tools/html-markdown/html-markdown.js",
+        "tools/html-markdown/html-markdown.css"
+      ],
+      "maxSize": "15KB",
+      "critical": false
+    },
+    {
+      "name": "JSON Schema Enhancement",
+      "description": "JSON Schema validation and enhancement",
+      "files": [
+        "tools/json-schema-enhancement/json-schema-enhancement.js",
+        "tools/json-schema-enhancement/json-schema-enhancement.css"
+      ],
+      "maxSize": "12KB",
+      "critical": false
+    },
+    {
+      "name": "External Libraries",
+      "description": "Third-party dependencies",
+      "files": [
+        "lib/*.js"
+      ],
+      "maxSize": "300KB",
+      "critical": false,
+      "info": "Already optimized in Sprint 1"
+    }
+  ],
+  "thresholds": {
+    "error": 1.0,
+    "warning": 0.9,
+    "info": 0.8
+  },
+  "notes": [
+    "Critical budgets must never be exceeded",
+    "Non-critical budgets should trigger warnings at 90%",
+    "All sizes are measured after minification",
+    "Gzip compression typically reduces sizes by 60-70%"
+  ]
+}

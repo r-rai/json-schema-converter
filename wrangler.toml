@@ -1,0 +1,42 @@
+# Cloudflare Pages Configuration
+# Project name (must match Cloudflare Pages project name)
+name = "json-schema-converter"
+
+# Compatibility date for Cloudflare runtime
+compatibility_date = "2024-01-15"
+
+# Environment: production or staging
+env = "production"
+
+# Build configuration
+[build]
+# No build command needed - static HTML/CSS/JS only
+command = ""
+cwd = ""
+
+# Output directory where static files are located
+# "." means root directory (index.html in root)
+upload.dir = "."
+
+# Routes for path-based deployments (optional)
+# Only needed if using Cloudflare Workers for path routing
+[[routes]]
+pattern = "app.mydomain.com/jsonschema/*"
+zone_name = "mydomain.com"
+
+# Security Headers for Cloudflare Pages
+# Protects against XSS, clickjacking, and other web vulnerabilities
+# Sprint 3: Added upgrade-insecure-requests for HTTPS enforcement
+[[headers]]
+for = "/*"
+  [headers.values]
+  Content-Security-Policy = "default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests;"
+  X-Content-Type-Options = "nosniff"
+  X-Frame-Options = "DENY"
+  Referrer-Policy = "strict-origin-when-cross-origin"
+  Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+  Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+
+# Observability
+[observability]
+enabled = true

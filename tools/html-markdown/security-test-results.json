@@ -1,0 +1,170 @@
+{
+  "timestamp": "2026-03-19T11:21:48.392Z",
+  "summary": {
+    "total": 10,
+    "passed": 10,
+    "failed": 0,
+    "criticalFailed": 0,
+    "successRate": 100
+  },
+  "tests": [
+    {
+      "id": "XSS-001",
+      "name": "Script Tag Injection",
+      "input": "<script>alert(\"XSS\")</script>",
+      "shouldNotContain": [
+        "<script",
+        "alert"
+      ],
+      "risk": "CRITICAL",
+      "result": {
+        "passed": true,
+        "output": "",
+        "issues": []
+      }
+    },
+    {
+      "id": "XSS-002",
+      "name": "Event Handler (onerror)",
+      "input": "<img src=\"x\" onerror=\"alert('XSS')\">",
+      "shouldNotContain": [
+        "onerror"
+      ],
+      "shouldContain": [
+        "<img"
+      ],
+      "risk": "CRITICAL",
+      "result": {
+        "passed": true,
+        "output": "<img src=\"x\"XSS')\">",
+        "issues": []
+      }
+    },
+    {
+      "id": "XSS-003",
+      "name": "JavaScript URL Protocol",
+      "input": "<a href=\"javascript:alert('XSS')\">Click</a>",
+      "shouldNotContain": [
+        "javascript:"
+      ],
+      "shouldContain": [
+        "Click"
+      ],
+      "risk": "CRITICAL",
+      "result": {
+        "passed": true,
+        "output": "<a href=\"alert('XSS')\">Click</a>",
+        "issues": []
+      }
+    },
+    {
+      "id": "XSS-004",
+      "name": "Data URI Attack",
+      "input": "<img src=\"data:text/html,<script>alert('XSS')</script>\">",
+      "shouldNotContain": [
+        "<script",
+        "alert"
+      ],
+      "risk": "HIGH",
+      "result": {
+        "passed": true,
+        "output": "<img src=\"\">",
+        "issues": []
+      }
+    },
+    {
+      "id": "XSS-005",
+      "name": "Object/Embed Tags",
+      "input": "<object data=\"javascript:alert('XSS')\"></object><embed src=\"javascript:alert('XSS')\">",
+      "shouldNotContain": [
+        "<object",
+        "<embed",
+        "javascript:"
+      ],
+      "risk": "HIGH",
+      "result": {
+        "passed": true,
+        "output": "",
+        "issues": []
+      }
+    },
+    {
+      "id": "XSS-006",
+      "name": "Iframe Injection",
+      "input": "<iframe src=\"javascript:alert('XSS')\"></iframe>",
+      "shouldNotContain": [
+        "<iframe",
+        "javascript:"
+      ],
+      "risk": "CRITICAL",
+      "result": {
+        "passed": true,
+        "output": "",
+        "issues": []
+      }
+    },
+    {
+      "id": "XSS-007",
+      "name": "SVG Event Handler",
+      "input": "<svg onload=alert(1)><circle r=\"50\"/></svg>",
+      "shouldNotContain": [
+        "onload"
+      ],
+      "risk": "HIGH",
+      "result": {
+        "passed": true,
+        "output": "<svg><circle r=\"50\"/></svg>",
+        "issues": []
+      }
+    },
+    {
+      "id": "XSS-008",
+      "name": "Multiple Attack Vectors",
+      "input": "<img src=x onerror=alert(1)><svg onload=alert(2)><script>alert(3)</script><iframe src=\"javascript:alert(4)\">",
+      "shouldNotContain": [
+        "onerror",
+        "onload",
+        "<script",
+        "<iframe",
+        "javascript:"
+      ],
+      "risk": "CRITICAL",
+      "result": {
+        "passed": true,
+        "output": "<img src=x><svg>",
+        "issues": []
+      }
+    },
+    {
+      "id": "XSS-009",
+      "name": "Style Injection",
+      "input": "<p style=\"background-image: url('javascript:alert(1)')\">Test</p>",
+      "shouldNotContain": [
+        "style=",
+        "javascript:"
+      ],
+      "risk": "MEDIUM",
+      "result": {
+        "passed": true,
+        "output": "<palert(1)')\">Test</p>",
+        "issues": []
+      }
+    },
+    {
+      "id": "XSS-010",
+      "name": "HTML Comment with Script",
+      "input": "<!-- <script>alert(\"XSS\")</script> -->",
+      "shouldNotContain": [
+        "<script",
+        "alert"
+      ],
+      "risk": "LOW",
+      "result": {
+        "passed": true,
+        "output": "",
+        "issues": []
+      }
+    }
+  ],
+  "recommendation": "APPROVE"
+}

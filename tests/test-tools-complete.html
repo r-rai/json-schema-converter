@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevTools Suite - Quick Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #0f172a;
+      color: #f1f5f9;
+    }
+    h1 { color: #38bdf8; }
+    .test-section {
+      background: #1e293b;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .test-link {
+      display: block;
+      padding: 12px 20px;
+      margin: 10px 0;
+      background: #334155;
+      color: #f1f5f9;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    .test-link:hover {
+      background: #38bdf8;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    .status.complete { background: #22c55e; color: #000; }
+    .checklist {
+      list-style: none;
+      padding-left: 0;
+    }
+    .checklist li {
+      padding: 8px 0;
+    }
+    .checklist li:before {
+      content: "☐ ";
+      margin-right: 8px;
+      color: #38bdf8;
+    }
+    code {
+      background: #334155;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🛠️ DevTools Suite - Quick Test Page</h1>
+  
+  <div class="test-section">
+    <h2>🏠 Navigation Tests</h2>
+    <a href="/" class="test-link">Home Page <span class="status complete">ACTIVE</span></a>
+    <a href="/#json" class="test-link">📋 JSON Schema Generator <span class="status complete">ACTIVE</span></a>
+    <a href="/#diff" class="test-link">🔍 Text Diff Checker <span class="status complete">NEW</span></a>
+    <a href="/#markdown" class="test-link">📝 Markdown Converter <span class="status complete">NEW</span></a>
+    <a href="/#sip" class="test-link">📊 SIP Calculator <span class="status complete">NEW</span></a>
+    <a href="/#emi" class="test-link">🏠 EMI Calculator <span class="status complete">NEW</span></a>
+  </div>
+  
+  <div class="test-section">
+    <h2>⌨️ Keyboard Shortcuts</h2>
+    <ul class="checklist">
+      <li>Press <code>Ctrl+K</code> (or <code>Cmd+K</code>) to open search</li>
+      <li>Press <code>/</code> to open search (when not in input field)</li>
+      <li>Press <code>Escape</code> to close search modal</li>
+      <li>Use <code>↑</code> and <code>↓</code> to navigate search results</li>
+      <li>Press <code>Enter</code> to launch selected tool</li>
+    </ul>
+  </div>
+  
+  <div class="test-section">
+    <h2>✅ Quick Verification Checklist</h2>
+    <ul class="checklist">
+      <li><strong>Home Page:</strong> All 6 tool cards are clickable (no "Coming Soon")</li>
+      <li><strong>Diff Checker:</strong> Paste different texts, click Compare, see color-coded diff</li>
+      <li><strong>Markdown:</strong> Load sample, convert, swap direction</li>
+      <li><strong>SIP Calculator:</strong> Enter ₹5000, 12%, 10 years → Calculate</li>
+      <li><strong>EMI Calculator:</strong> Enter ₹50,00,000, 8.5%, 20 years → Calculate</li>
+      <li><strong>Search:</strong> Press Ctrl+K, type "diff", press Enter</li>
+      <li><strong>Recent Apps:</strong> Navigate to different tools, check recent bar populates</li>
+      <li><strong>Theme:</strong> Click sun/moon icon to toggle dark/light mode</li>
+    </ul>
+  </div>
+  
+  <div class="test-section">
+    <h2>🧪 Test Data Samples</h2>
+    
+    <h3>Diff Checker Test</h3>
+    <p><strong>Original Text:</strong></p>
+    <pre style="background: #334155; padding: 10px; border-radius: 4px; overflow-x: auto;">Hello World
+This is a test
+Line three
+Line four</pre>
+    
+    <p><strong>Modified Text:</strong></p>
+    <pre style="background: #334155; padding: 10px; border-radius: 4px; overflow-x: auto;">Hello World!
+This is a test
+Line three updated
+Line five</pre>
+    
+    <h3>Markdown Converter Test</h3>
+    <pre style="background: #334155; padding: 10px; border-radius: 4px; overflow-x: auto;">&lt;h1&gt;Hello World&lt;/h1&gt;
+&lt;p&gt;This is a &lt;strong&gt;test&lt;/strong&gt; paragraph.&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Item 1&lt;/li&gt;
+  &lt;li&gt;Item 2&lt;/li&gt;
+&lt;/ul&gt;</pre>
+  </div>
+  
+  <div class="test-section">
+    <h2>📊 Expected Results</h2>
+    
+    <h3>SIP Calculator (₹5,000 × 12% × 10 years)</h3>
+    <ul>
+      <li>Total Invested: ₹6,00,000</li>
+      <li>Expected Final Value: ~₹11,48,000</li>
+      <li>Wealth Gain: ~₹5,48,000</li>
+    </ul>
+    
+    <h3>EMI Calculator (₹50,00,000 × 8.5% × 20 years)</h3>
+    <ul>
+      <li>Monthly EMI: ~₹43,391</li>
+      <li>Total Interest: ~₹54,13,840</li>
+      <li>Total Payment: ~₹1,04,13,840</li>
+    </ul>
+  </div>
+  
+  <div class="test-section">
+    <h2>🐛 Issue Reporting</h2>
+    <p>If you encounter any issues during testing:</p>
+    <ol>
+      <li>Open browser DevTools (F12)</li>
+      <li>Check Console tab for errors</li>
+      <li>Check Network tab for failed requests</li>
+      <li>Verify browser console shows: "DevTools Suite initialized"</li>
+    </ol>
+  </div>
+  
+  <div class="test-section" style="background: #22c55e; color: #000;">
+    <h2>✅ Implementation Status: COMPLETE</h2>
+    <p><strong>All 6 tools implemented and ready for testing!</strong></p>
+    <ul style="margin-top: 15px;">
+      <li>✅ Text Diff Checker</li>
+      <li>✅ HTML ↔ Markdown Converter</li>
+      <li>✅ SIP Calculator</li>
+      <li>✅ EMI Calculator</li>
+      <li>✅ Search Modal</li>
+      <li>✅ Updated Home Page</li>
+    </ul>
+  </div>
+  
+  <div style="text-align: center; margin-top: 40px; color: #94a3b8;">
+    <p>Server running on: <code>http://localhost:8001</code></p>
+    <p><a href="/" style="color: #38bdf8;">← Back to DevTools Suite</a></p>
+  </div>
+</body>
+</html>

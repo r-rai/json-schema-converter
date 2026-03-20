@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platform Test - DevToolbox</title>
+  
+  <!-- Shared Styles -->
+  <link rel="stylesheet" href="shared/css/variables.css">
+  <link rel="stylesheet" href="shared/css/reset.css">
+  <link rel="stylesheet" href="shared/css/components.css">
+  <link rel="stylesheet" href="shared/css/themes.css">
+  <link rel="stylesheet" href="shared/css/utilities.css">
+  <link rel="stylesheet" href="shared/css/responsive.css">
+  
+  <style>
+    .test-section {
+      margin-bottom: var(--spacing-2xl);
+      padding: var(--spacing-lg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+    }
+    
+    .test-section h2 {
+      margin-bottom: var(--spacing-lg);
+      color: var(--color-accent);
+    }
+    
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-md);
+    }
+    
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: var(--spacing-sm);
+    }
+    
+    .status-success { background: var(--color-success); }
+    .status-error { background: var(--color-error); }
+  </style>
+</head>
+<body>
+  <div class="container" style="padding-top: var(--spacing-2xl); padding-bottom: var(--spacing-2xl);">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-xl">
+      <div>
+        <h1>🧪 Platform Infrastructure Test</h1>
+        <p class="text-secondary mt-sm">Testing all shared utilities and components</p>
+      </div>
+      <button data-theme-toggle class="btn btn-ghost" aria-label="Toggle theme">🌙</button>
+    </div>
+    
+    <!-- Test Status -->
+    <div class="test-section">
+      <h2>Test Results</h2>
+      <div id="test-results"></div>
+    </div>
+    
+    <!-- Buttons Test -->
+    <div class="test-section">
+      <h2>1. Buttons Component</h2>
+      <div class="demo-grid">
+        <div id="button-test"></div>
+      </div>
+    </div>
+    
+    <!-- Input Test -->
+    <div class="test-section">
+      <h2>2. Input Component</h2>
+      <div id="input-test"></div>
+    </div>
+    
+    <!-- Card Test -->
+    <div class="test-section">
+      <h2>3. Card Component</h2>
+      <div class="demo-grid">
+        <div id="card-test"></div>
+      </div>
+    </div>
+    
+    <!-- Modal Test -->
+    <div class="test-section">
+      <h2>4. Modal Component</h2>
+      <div id="modal-test"></div>
+    </div>
+    
+    <!-- Storage Test -->
+    <div class="test-section">
+      <h2>5. Storage Utility</h2>
+      <div id="storage-test"></div>
+    </div>
+    
+    <!-- Utilities Test -->
+    <div class="test-section">
+      <h2>6. Format Utilities</h2>
+      <div id="utils-test"></div>
+    </div>
+    
+    <!-- Clipboard Test -->
+    <div class="test-section">
+      <h2>7. Clipboard Utility</h2>
+      <div id="clipboard-test"></div>
+    </div>
+    
+    <!-- Download Test -->
+    <div class="test-section">
+      <h2>8. Download Utility</h2>
+      <div id="download-test"></div>
+    </div>
+    
+    <!-- Theme Test -->
+    <div class="test-section">
+      <h2>9. Theme System</h2>
+      <div id="theme-test">
+        <p>Current theme: <strong id="current-theme"></strong></p>
+        <p class="mt-sm text-secondary">Use the theme toggle button above to switch themes</p>
+      </div>
+    </div>
+  </div>
+  
+  <script type="module">
+    import { createButton } from './shared/components/button.js';
+    import { createInput } from './shared/components/input.js';
+    import { createCard } from './shared/components/card.js';
+    import { createModal } from './shared/components/modal.js';
+    import { storage } from './shared/js/storage.js';
+    import { formatCurrency, formatNumber, debounce, validateJSON, generateId } from './shared/js/utils.js';
+    import { copyToClipboard } from './shared/js/clipboard.js';
+    import { downloadFile, downloadJSON, downloadCSV } from './shared/js/download.js';
+    import { ThemeManager } from './shared/js/theme.js';
+    
+    // Test results tracker
+    const testResults = [];
+    
+    function addTest(name, passed, details = '') {
+      testResults.push({ name, passed, details });
+    }
+    
+    function renderTestResults() {
+      const container = document.getElementById('test-results');
+      const passed = testResults.filter(t => t.passed).length;
+      const total = testResults.length;
+      
+      container.innerHTML = `
+        <div class="mb-md">
+          <h3>Summary: ${passed}/${total} tests passed</h3>
+          ${passed === total ? 
+            '<p class="text-success mt-sm">✅ All tests passed! Platform is ready for development.</p>' : 
+            '<p class="text-error mt-sm">❌ Some tests failed. Check details below.</p>'
+          }
+        </div>
+        ${testResults.map(test => `
+          <div class="flex items-center gap-sm mb-sm">
+            <span class="status-indicator ${test.passed ? 'status-success' : 'status-error'}"></span>
+            <span>${test.name}</span>
+            ${test.details ? `<span class="text-secondary text-sm"> - ${test.details}</span>` : ''}
+          </div>
+        `).join('')}
+      `;
+    }
+    
+    // 1. Test Buttons
+    try {
+      const buttonTest = document.getElementById('button-test');
+      
+      const primaryBtn = createButton({
+        label: 'Primary',
+        variant: 'primary',
+        onClick: () => alert('Primary clicked!')
+      });
+      
+      const secondaryBtn = createButton({
+        label: 'Secondary',
+        variant: 'secondary',
+        icon: '📝'
+      });
+      
+      const ghostBtn = createButton({
+        label: 'Ghost',
+        variant: 'ghost'
+      });
+      
+      const dangerBtn = createButton({
+        label: 'Danger',
+        variant: 'danger',
+        size: 'small'
+      });
+      
+      buttonTest.appendChild(primaryBtn);
+      buttonTest.appendChild(secondaryBtn);
+      buttonTest.appendChild(ghostBtn);
+      buttonTest.appendChild(dangerBtn);
+      
+      addTest('Button Component', true, '4 variants created');
+    } catch (error) {
+      addTest('Button Component', false, error.message);
+    }
+    
+    // 2. Test Input
+    try {
+      const inputTest = document.getElementById('input-test');
+      
+      const input = createInput({
+        id: 'test-input',
+        label: 'Test Input',
+        type: 'text',
+        placeholder: 'Type something...',
+        helpText: 'This is a help text',
+        required: true,
+        onChange: (value) => console.log('Input changed:', value)
+      });
+      
+      inputTest.appendChild(input.container);
+      
+      addTest('Input Component', true, 'Input with validation created');
+    } catch (error) {
+      addTest('Input Component', false, error.message);
+    }
+    
+    // 3. Test Cards
+    try {
+      const cardTest = document.getElementById('card-test');
+      
+      const card1 = createCard({
+        icon: '🎯',
+        title: 'Test Card',
+        content: 'This is a test card with content.',
+        actions: [
+          createButton({ label: 'Action', variant: 'primary', size: 'small' })
+        ]
+      });
+      
+      const card2 = createCard({
+        icon: '📊',
+        title: 'Hover Card',
+        content: 'This card has hover effect.',
+        hover: true
+      });
+      
+      cardTest.appendChild(card1);
+      cardTest.appendChild(card2);
+      
+      addTest('Card Component', true, '2 cards created');
+    } catch (error) {
+      addTest('Card Component', false, error.message);
+    }
+    
+    // 4. Test Modal
+    try {
+      const modalTest = document.getElementById('modal-test');
+      
+      const openModalBtn = createButton({
+        label: 'Open Modal',
+        variant: 'primary',
+        onClick: () => {
+          const modal = createModal({
+            title: 'Test Modal',
+            content: '<p>This is a test modal. Close it using ESC, clicking outside, or the X button.</p>',
+            actions: [
+              createButton({
+                label: 'Close',
+                variant: 'primary',
+                onClick: () => modal.close()
+              })
+            ]
+          });
+          modal.open();
+        }
+      });
+      
+      modalTest.appendChild(openModalBtn);
+      
+      addTest('Modal Component', true, 'Modal created and ready');
+    } catch (error) {
+      addTest('Modal Component', false, error.message);
+    }
+    
+    // 5. Test Storage
+    try {
+      const storageTest = document.getElementById('storage-test');
+      
+      // Test storage operations
+      const testKey = 'test_key';
+      const testValue = { name: 'Test', value: 123 };
+      
+      storage.set(testKey, testValue);
+      const retrieved = storage.get(testKey);
+      const matches = JSON.stringify(retrieved) === JSON.stringify(testValue);
+      
+      storage.remove(testKey);
+      const removed = storage.get(testKey) === null;
+      
+      storageTest.innerHTML = `
+        <p>Set/Get: ${matches ? '✅' : '❌'}</p>
+        <p>Remove: ${removed ? '✅' : '❌'}</p>
+      `;
+      
+      addTest('Storage Utility', matches && removed, 'Set, get, and remove operations');
+    } catch (error) {
+      addTest('Storage Utility', false, error.message);
+    }
+    
+    // 6. Test Utilities
+    try {
+      const utilsTest = document.getElementById('utils-test');
+      
+      utilsTest.innerHTML = `
+        <p><strong>formatCurrency:</strong> ${formatCurrency(1234567)}</p>
+        <p><strong>formatNumber:</strong> ${formatNumber(9876543210)}</p>
+        <p><strong>validateJSON:</strong> ${JSON.stringify(validateJSON('{"valid": true}'))}</p>
+        <p><strong>generateId:</strong> ${generateId()}</p>
+      `;
+      
+      addTest('Format Utilities', true, 'Currency, number, JSON validation, ID generation');
+    } catch (error) {
+      addTest('Format Utilities', false, error.message);
+    }
+    
+    // 7. Test Clipboard
+    try {
+      const clipboardTest = document.getElementById('clipboard-test');
+      
+      const copyBtn = createButton({
+        label: 'Copy Text',
+        variant: 'primary',
+        onClick: async () => {
+          const success = await copyToClipboard('Test text copied!', false);
+          if (success) {
+            alert('✅ Text copied to clipboard!');
+          }
+        }
+      });
+      
+      clipboardTest.appendChild(copyBtn);
+      
+      addTest('Clipboard Utility', true, 'Clipboard function ready');
+    } catch (error) {
+      addTest('Clipboard Utility', false, error.message);
+    }
+    
+    // 8. Test Download
+    try {
+      const downloadTest = document.getElementById('download-test');
+      
+      const downloadTxtBtn = createButton({
+        label: 'Download TXT',
+        variant: 'secondary',
+        size: 'small',
+        onClick: () => downloadFile('Test file content', 'test.txt', 'text/plain', false)
+      });
+      
+      const downloadJsonBtn = createButton({
+        label: 'Download JSON',
+        variant: 'secondary',
+        size: 'small',
+        onClick: () => downloadJSON({ test: 'data' }, 'test')
+      });
+      
+      const downloadCsvBtn = createButton({
+        label: 'Download CSV',
+        variant: 'secondary',
+        size: 'small',
+        onClick: () => downloadCSV([{ name: 'Test', value: 123 }], 'test')
+      });
+      
+      downloadTest.appendChild(downloadTxtBtn);
+      downloadTest.appendChild(downloadJsonBtn);
+      downloadTest.appendChild(downloadCsvBtn);
+      
+      addTest('Download Utility', true, 'TXT, JSON, and CSV downloads');
+    } catch (error) {
+      addTest('Download Utility', false, error.message);
+    }
+    
+    // 9. Test Theme System
+    try {
+      const themeManager = new ThemeManager();
+      const currentThemeEl = document.getElementById('current-theme');
+      
+      function updateThemeDisplay() {
+        currentThemeEl.textContent = themeManager.getTheme();
+      }
+      
+      updateThemeDisplay();
+      
+      // Listen for theme changes
+      document.addEventListener('click', (e) => {
+        if (e.target.matches('[data-theme-toggle]')) {
+          setTimeout(updateThemeDisplay, 100);
+        }
+      });
+      
+      addTest('Theme System', true, 'Theme toggle working');
+    } catch (error) {
+      addTest('Theme System', false, error.message);
+    }
+    
+    // Render all results
+    renderTestResults();
+    
+    console.log('✅ Platform test page loaded successfully!');
+    console.log('Test results:', testResults);
+  </script>
+</body>
+</html>

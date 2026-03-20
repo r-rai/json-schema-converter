@@ -1,0 +1,35 @@
+{
+  "name": "json-schema-converter",
+  "version": "1.0.0",
+  "description": "JSON Schema Generator & Validator - Browser-based, no server needed",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python -m http.server 8000",
+    "test": "echo \"No automated tests configured\"",
+    "check-size": "node tools/check-bundle-size.js",
+    "check-size-verbose": "node tools/check-bundle-size.js --verbose",
+    "check-size-json": "node tools/check-bundle-size.js --json"
+  },
+  "keywords": [
+    "json",
+    "schema",
+    "generator",
+    "validator",
+    "json-schema",
+    "converter",
+    "cloudflare-pages"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/json-schema-converter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YOUR_USERNAME/json-schema-converter/issues"
+  },
+  "homepage": "https://app.mydomain.com/jsonschema",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

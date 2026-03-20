@@ -1,0 +1,4526 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="DevToolbox - Developer tools for everyday tasks. Fast, private, and open source.">
+  <meta name="keywords" content="developer tools, JSON validator, SIP calculator, EMI calculator, text diff, markdown converter">
+  <title>DevToolbox - Developer Tools Platform</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛠️</text></svg>">
+  
+  <style>
+    /* ========================================
+       RESET & BASE STYLES
+       ======================================== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    /* ========================================
+       DESIGN TOKENS (CSS VARIABLES)
+       ======================================== */
+    :root {
+      /* Colors - Dark Theme (Default) */
+      --color-bg-primary: #0f172a;
+      --color-bg-secondary: #1e293b;
+      --color-bg-tertiary: #334155;
+      --color-text-primary: #f1f5f9;
+      --color-text-secondary: #cbd5e1;
+      --color-text-muted: #94a3b8;
+      --color-accent: #38bdf8;
+      --color-accent-hover: #0ea5e9;
+      --color-success: #22c55e;
+      --color-error: #ef4444;
+      --color-warning: #f59e0b;
+      
+      /* Spacing */
+      --spacing-xs: 0.25rem;
+      --spacing-sm: 0.5rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.5rem;
+      --spacing-xl: 2rem;
+      --spacing-2xl: 3rem;
+      
+      /* Typography */
+      --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      --font-size-xs: 0.75rem;
+      --font-size-sm: 0.875rem;
+      --font-size-base: 1rem;
+      --font-size-lg: 1.125rem;
+      --font-size-xl: 1.25rem;
+      --font-size-2xl: 1.5rem;
+      --font-size-3xl: 2rem;
+      
+      /* Border Radius */
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+      --radius-full: 9999px;
+      
+      /* Shadows */
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
+      --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.3);
+      
+      /* Z-Index */
+      --z-base: 0;
+      --z-dropdown: 100;
+      --z-sticky: 1000;
+      --z-modal: 2000;
+      
+      /* Layout */
+      --header-height: 56px;
+      --recent-bar-height: 48px;
+      --max-width-content: 1400px;
+      
+      /* Transitions */
+      --transition-quick: 150ms ease;
+      --transition-normal: 200ms ease;
+      --transition-slow: 300ms ease-in-out;
+    }
+    
+    [data-theme="light"] {
+      --color-bg-primary: #ffffff;
+      --color-bg-secondary: #f8fafc;
+      --color-bg-tertiary: #e2e8f0;
+      --color-text-primary: #0f172a;
+      --color-text-secondary: #475569;
+      --color-text-muted: #64748b;
+      --color-accent: #0284c7;
+      --color-accent-hover: #0369a1;
+    }
+    
+    /* ========================================
+       BODY & BASE
+       ======================================== */
+    body {
+      font-family: var(--font-family);
+      background-color: var(--color-bg-primary);
+      color: var(--color-text-primary);
+      line-height: 1.5;
+      overflow-x: hidden;
+      transition: background-color var(--transition-normal), color var(--transition-normal);
+    }
+    
+    /* ========================================
+       GLOBAL HEADER
+       ======================================== */
+    .global-header {
+      position: sticky;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--header-height);
+      background-color: var(--color-bg-secondary);
+      border-bottom: 1px solid var(--color-accent);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      z-index: var(--z-sticky);
+      box-shadow: var(--shadow-md);
+      transition: background-color var(--transition-normal), border-color var(--transition-normal);
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      width: 200px;
+    }
+    
+    .header-center {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 120px;
+      justify-content: flex-end;
+    }
+    
+    .home-button,
+    .search-button,
+    .theme-toggle {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      background: transparent;
+      cursor: pointer;
+      transition: all var(--transition-quick);
+      font-size: 1.2rem;
+    }
+    
+    .home-button:hover,
+    .search-button:hover,
+    .theme-toggle:hover {
+      background-color: var(--color-bg-tertiary);
+      transform: scale(1.05);
+    }
+    
+    .home-button:active,
+    .search-button:active,
+    .theme-toggle:active {
+      transform: scale(0.95);
+    }
+    
+    .home-button:focus-visible,
+    .search-button:focus-visible,
+    .theme-toggle:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+    }
+    
+    .app-title {
+      font-size: var(--font-size-xl);
+      font-weight: 600;
+      color: var(--color-accent);
+      letter-spacing: -0.02em;
+      margin: 0;
+      white-space: nowrap;
+    }
+    
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+    }
+    
+    .breadcrumb-item {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      transition: color var(--transition-quick);
+    }
+    
+    .breadcrumb-item:hover {
+      color: var(--color-text-primary);
+    }
+    
+    .breadcrumb-item.active {
+      color: var(--color-text-primary);
+      font-weight: 500;
+    }
+    
+    .breadcrumb-separator {
+      color: var(--color-text-muted);
+    }
+    
+    /* ========================================
+       RECENT APPS BAR
+       ======================================== */
+    .recent-apps-bar {
+      height: var(--recent-bar-height);
+      background-color: var(--color-bg-primary);
+      border-bottom: 1px solid var(--color-bg-tertiary);
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      overflow-x: auto;
+      overflow-y: hidden;
+      transition: background-color var(--transition-normal);
+    }
+    
+    .recent-apps-bar.empty {
+      display: none;
+    }
+    
+    .recent-label {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    
+    .recent-apps-list {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex: 1;
+    }
+    
+    .recent-app-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.375rem 0.75rem;
+      height: 32px;
+      border-radius: var(--radius-full);
+      background-color: var(--color-bg-secondary);
+      border: 1px solid var(--color-bg-tertiary);
+      color: var(--color-text-primary);
+      font-size: var(--font-size-sm);
+      text-decoration: none;
+      cursor: pointer;
+      transition: all var(--transition-quick);
+      white-space: nowrap;
+      max-width: 140px;
+    }
+    
+    .recent-app-chip:hover {
+      border-color: var(--color-accent);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .recent-app-chip.active {
+      background-color: var(--color-accent);
+      color: var(--color-bg-primary);
+      font-weight: 600;
+      border-color: var(--color-accent);
+    }
+    
+    .recent-app-icon {
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    
+    .recent-app-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .clear-recent-btn {
+      margin-left: auto;
+      padding: 0.375rem 0.75rem;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: color var(--transition-quick);
+      white-space: nowrap;
+    }
+    
+    .clear-recent-btn:hover {
+      color: var(--color-error);
+    }
+    
+    /* ========================================
+       HOME PAGE
+       ======================================== */
+    .home-container {
+      max-width: var(--max-width-content);
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      min-height: calc(100vh - var(--header-height));
+    }
+    
+    .home-header {
+      margin-bottom: 2rem;
+    }
+    
+    .home-title {
+      font-size: var(--font-size-3xl);
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 0.5rem;
+    }
+    
+    .home-description {
+      font-size: var(--font-size-base);
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+    
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    
+    /* ========================================
+       TOOL CARD COMPONENT
+       ======================================== */
+    .tool-card {
+      background-color: var(--color-bg-secondary);
+      border: 1px solid var(--color-bg-tertiary);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      height: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: all var(--transition-normal);
+      cursor: pointer;
+    }
+    
+    .tool-card:hover {
+      border-color: var(--color-accent);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .tool-card:active {
+      transform: translateY(-2px);
+    }
+    
+    .tool-card-placeholder {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    
+    .tool-card-placeholder:hover {
+      transform: none;
+      border-color: var(--color-bg-tertiary);
+      box-shadow: none;
+    }
+    
+    .card-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-color: rgba(56, 189, 248, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      font-size: 2rem;
+    }
+    
+    .card-title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: 0.5rem;
+    }
+    
+    .card-description {
+      flex: 1;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+    
+    .card-action {
+      width: 100%;
+      margin-top: auto;
+    }
+    
+    /* ========================================
+       JSON TOOL STYLES
+       ======================================== */
+    .json-tool-wrapper {
+      max-width: var(--max-width-content);
+      margin: 0 auto;
+      padding: var(--spacing-xl);
+    }
+    
+    /* Info/Help Panel */
+    .info-panel {
+      background: var(--color-bg-secondary);
+      border: 1px solid var(--color-accent);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+      max-height: 500px;
+      overflow: hidden;
+      transition: all var(--transition-slow);
+    }
+    
+    .info-panel.collapsed {
+      max-height: 0;
+      padding: 0;
+      margin-bottom: 0;
+      border-width: 0;
+      opacity: 0;
+    }
+    
+    .info-panel h3 {
+      color: var(--color-accent);
+      font-size: var(--font-size-xl);
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .info-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--spacing-lg);
+    }
+    
+    .info-item {
+      display: flex;
+      gap: var(--spacing-md);
+      align-items: flex-start;
+    }
+    
+    .info-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      color: var(--color-bg-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    
+    .info-text strong {
+      display: block;
+      color: var(--color-text-primary);
+      margin-bottom: 0.25rem;
+    }
+    
+    .info-text p {
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-sm);
+      margin: 0;
+    }
+    
+    /* Actions Section */
+    .actions {
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: var(--spacing-md);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .help-toggle-btn {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1rem;
+      background-color: var(--color-bg-secondary);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-accent);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition-quick);
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+    }
+    
+    .help-toggle-btn:hover {
+      background-color: var(--color-bg-tertiary);
+      transform: translateY(-1px);
+    }
+    
+    .help-icon {
+      font-size: 1.2rem;
+    }
+    
+    /* Main Grid - Dynamic Layout for Progressive Schema Reveal */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--spacing-xl);
+      margin-bottom: var(--spacing-xl);
+      transition: grid-template-columns 0.3s ease-out;
+    }
+    
+    /* When schema is visible: side-by-side layout */
+    .main-grid[data-schema-visible="true"] {
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    }
+    
+    /* Mobile: always stack */
+    @media (max-width: 1100px) {
+      .main-grid,
+      .main-grid[data-schema-visible="true"] {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* Schema panel entrance animation */
+    .schema-output-wrapper {
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
+    /* Panel Styles */
+    .panel {
+      background: var(--color-bg-secondary);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-bg-tertiary);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      height: 600px;
+    }
+    
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-md);
+      padding: var(--spacing-md) var(--spacing-lg);
+      background: var(--color-bg-primary);
+      border-bottom: 1px solid var(--color-accent);
+      flex-wrap: wrap;
+    }
+    
+    .panel-header h2 {
+      font-size: var(--font-size-lg);
+      color: var(--color-accent);
+      margin: 0;
+    }
+    
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+    
+    .draft-selector-compact {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      font-size: var(--font-size-sm);
+    }
+    
+    .draft-selector-compact label {
+      color: var(--color-text-secondary);
+      font-weight: 500;
+    }
+    
+    .draft-select {
+      padding: 0.375rem 0.75rem;
+      background-color: var(--color-bg-tertiary);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-accent);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      cursor: pointer;
+      transition: all var(--transition-quick);
+    }
+    
+    .draft-select:hover {
+      background-color: var(--color-bg-secondary);
+    }
+    
+    .draft-select:focus {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+    }
+    
+    .panel-header-badge {
+      padding: 0.25rem 0.625rem;
+      background: var(--color-bg-tertiary);
+      color: var(--color-text-muted);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+    }
+    
+    .panel-content {
+      flex: 1;
+      padding: var(--spacing-lg);
+      overflow: auto;
+    }
+    
+    .panel-content textarea {
+      width: 100%;
+      height: 100%;
+      min-height: 400px;
+      background-color: var(--color-bg-tertiary);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-accent);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-md);
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      resize: vertical;
+      line-height: 1.5;
+    }
+    
+    .panel-content textarea:focus {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+    }
+    
+    .output-display {
+      width: 100%;
+      height: 100%;
+      min-height: 400px;
+      background-color: var(--color-bg-tertiary);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-accent);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-md);
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    
+    .output-display.empty {
+      color: var(--color-text-muted);
+      font-style: italic;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Panel Toolbar for Formatting Controls */
+    .panel-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--spacing-sm) var(--spacing-lg);
+      background: var(--color-bg-tertiary);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      min-height: 44px;
+    }
+    
+    .toolbar-group {
+      display: flex;
+      gap: var(--spacing-sm);
+      align-items: center;
+    }
+    
+    .toolbar-hint {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    /* Responsive toolbar adjustments */
+    @media (max-width: 768px) {
+      .toolbar-hint {
+        display: none;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .panel-toolbar {
+        padding: var(--spacing-xs) var(--spacing-md);
+      }
+      
+      .toolbar-group .btn-small {
+        font-size: 1.2rem;
+        padding: 0.5rem;
+      }
+      
+      .toolbar-group .btn-small span {
+        display: none;
+      }
+    }
+    
+    .control-bar {
+      display: flex;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-md) var(--spacing-lg);
+      background: var(--color-bg-primary);
+      border-top: 1px solid var(--color-bg-tertiary);
+      flex-wrap: wrap;
+    }
+    
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius-sm);
+      border: none;
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-quick);
+      text-decoration: none;
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .btn-primary {
+      background-color: var(--color-accent);
+      color: var(--color-bg-primary);
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--color-accent-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .btn-secondary {
+      background-color: var(--color-bg-tertiary);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-bg-tertiary);
+    }
+    
+    .btn-secondary:hover:not(:disabled) {
+      background-color: var(--color-bg-secondary);
+      border-color: var(--color-accent);
+      transform: translateY(-1px);
+    }
+    
+    .btn-small {
+      padding: 0.375rem 0.75rem;
+      font-size: var(--font-size-xs);
+    }
+    
+    /* Validation Results */
+    .validation-result {
+      background: var(--color-bg-secondary);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+      margin-top: var(--spacing-xl);
+      border: 2px solid;
+    }
+    
+    .validation-result.success {
+      border-color: var(--color-success);
+    }
+    
+    .validation-result.error {
+      border-color: var(--color-error);
+    }
+    
+    .validation-result h3 {
+      margin: 0 0 var(--spacing-md) 0;
+      font-size: var(--font-size-xl);
+    }
+    
+    .validation-result.success h3 {
+      color: var(--color-success);
+    }
+    
+    .validation-result.error h3 {
+      color: var(--color-error);
+    }
+    
+    .error-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .error-item {
+      padding: var(--spacing-sm) var(--spacing-md);
+      background: var(--color-bg-tertiary);
+      border-radius: var(--radius-sm);
+      margin-bottom: var(--spacing-sm);
+      font-family: 'Courier New', monospace;
+      font-size: var(--font-size-sm);
+    }
+    
+    .error-item strong {
+      color: var(--color-accent);
+    }
+    
+    /* Toast Notifications */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      padding: 1rem 1.5rem;
+      background: var(--color-bg-secondary);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-xl);
+      border: 1px solid;
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      z-index: var(--z-modal);
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    .toast.success {
+      border-color: var(--color-success);
+      color: var(--color-success);
+    }
+    
+    .toast.error {
+      border-color: var(--color-error);
+      color: var(--color-error);
+    }
+    
+    .toast.warning {
+      border-color: var(--color-warning);
+      color: var(--color-warning);
+    }
+    
+    .toast.info {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      .json-tool-wrapper {
+        padding: var(--spacing-md);
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .help-toggle-btn {
+        margin-left: 0;
+      }
+      
+      .panel {
+        height: auto;
+        min-height: 400px;
+      }
+      
+      .panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .draft-selector-compact {
+        width: 100%;
+        justify-content: space-between;
+      }
+    }
+    
+
+    
+    .card-action {
+      width: 100%;
+      height: 40px;
+      background-color: var(--color-accent);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-quick);
+      font-family: var(--font-family);
+    }
+    
+    .card-action:hover {
+      background-color: var(--color-accent-hover);
+    }
+    
+    .card-action:active {
+      transform: scale(0.98);
+    }
+    
+    .card-action:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-quick);
+      border: none;
+      font-family: var(--font-family);
+    }
+    
+    .btn-primary {
+      background-color: var(--color-accent);
+      color: #ffffff;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--color-accent-hover);
+    }
+    
+    .btn-secondary {
+      background-color: var(--color-bg-tertiary);
+      color: var(--color-text-primary);
+    }
+    
+    .btn-secondary:hover {
+      background-color: var(--color-bg-tertiary);
+      filter: brightness(1.1);
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    /* ========================================
+       TOOL CONTAINER (for individual tools)
+       ======================================== */
+    .tool-container {
+      max-width: var(--max-width-content);
+      margin: 0 auto;
+      padding: 1.5rem;
+      min-height: calc(100vh - var(--header-height));
+      display: none;
+    }
+    
+    .tool-container.active {
+      display: block;
+    }
+    
+    .tool-header {
+      margin-bottom: var(--spacing-xl);
+      text-align: center;
+    }
+    
+    .tool-title {
+      font-size: var(--font-size-3xl);
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-sm);
+      font-weight: 700;
+    }
+    
+    .tool-description {
+      font-size: var(--font-size-base);
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+    
+    /* ========================================
+       LOADING SPINNER
+       ======================================== */
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--color-bg-tertiary);
+      border-top-color: var(--color-accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* ========================================
+       RESPONSIVE BREAKPOINTS
+       ======================================== */
+    @media (max-width: 900px) {
+      .tools-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+      }
+    }
+    
+    @media (max-width: 600px) {
+      .tools-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      
+      .home-container {
+        padding: 1rem;
+      }
+      
+      .app-title {
+        display: none;
+      }
+      
+      .global-header {
+        padding: 0 1rem;
+      }
+      
+      .header-left {
+        width: auto;
+      }
+      
+      .header-right {
+        width: auto;
+      }
+      
+      .breadcrumb {
+        font-size: 0.75rem;
+      }
+    }
+    
+    /* ========================================
+       ACCESSIBILITY
+       ======================================== */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+    
+    button:focus-visible,
+    a:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+    }
+    
+    /* ========================================
+       UTILITY CLASSES
+       ======================================== */
+    .hidden {
+      display: none !important;
+    }
+    
+    /* ========================================
+       DIFF CHECKER STYLES
+       ======================================== */
+    .diff-options {
+      display: flex;
+      gap: var(--spacing-md);
+      align-items: center;
+      padding: var(--spacing-md);
+      background: var(--color-bg-secondary);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--spacing-lg);
+      flex-wrap: wrap;
+    }
+    
+    .form-select {
+      padding: 0.5rem 1rem;
+      background: var(--color-bg-tertiary);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-accent);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      cursor: pointer;
+    }
+    
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      font-size: var(--font-size-sm);
+    }
+    
+    .checkbox-label input[type="checkbox"] {
+      cursor: pointer;
+    }
+    
+    .diff-panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .diff-panel {
+      background: var(--color-bg-secondary);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-lg);
+    }
+    
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .panel-header h3 {
+      font-size: var(--font-size-lg);
+      color: var(--color-text-primary);
+      margin: 0;
+    }
+    
+    .char-count {
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+    }
+    
+    .diff-panel textarea {
+      width: 100%;
+      min-height: 300px;
+      background: var(--color-bg-tertiary);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-accent);
+      border-radius: var(--radius-sm);
+      padding: var(--spacing-md);
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      resize: vertical;
+      line-height: 1.5;
+    }
+    
+    .action-bar {
+      display: flex;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-lg);
+      flex-wrap: wrap;
+    }
+    
+    .diff-results {
+      background: var(--color-bg-secondary);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-lg);
+      margin-top: var(--spacing-lg);
+    }
+    
+    .diff-output {
+      background: var(--color-bg-tertiary);
+      border-radius: var(--radius-sm);
+      padding: var(--spacing-md);
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    
+    .diff-line {
+      padding: 0.25rem 0.5rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    
+    .diff-added {
+      background-color: rgba(34, 197, 94, 0.15);
+      color: var(--color-success);
+      border-left: 3px solid var(--color-success);
+    }
+    
+    .diff-removed {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: var(--color-error);
+      border-left: 3px solid var(--color-error);
+    }
+    
+    .diff-unchanged {
+      color: var(--color-text-secondary);
+    }
+    
+    .diff-stats {
+      display: flex;
+      gap: var(--spacing-md);
+      flex-wrap: wrap;
+    }
+    
+    .stat-item {
+      padding: 0.25rem 0.75rem;
+      background: var(--color-bg-tertiary);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+    }
+    
+    .stat-added { color: var(--color-success); }
+    .stat-removed { color: var(--color-error); }
+    
+    /* ========================================
+       MARKDOWN CONVERTER STYLES
+       ======================================== */
+    .converter-panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .converter-panel {
+      background: var(--color-bg-secondary);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-lg);
+    }
+    
+    .panel-actions {
+      display: flex;
+      gap: var(--spacing-sm);
+    }
+    
+    .btn-icon {
+      background: transparent;
+      border: none;
+      font-size: var(--font-size-lg);
+      cursor: pointer;
+      padding: 0.25rem;
+      transition: transform var(--transition-quick);
+    }
+    
+    .btn-icon:hover {
+      transform: scale(1.1);
+    }
+    
+    .converter-panel textarea {
+      width: 100%;
+      min-height: 300px;
+      background: var(--color-bg-tertiary);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-accent);
+      border-radius: var(--radius-sm);
+      padding: var(--spacing-md);
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      resize: vertical;
+      line-height: 1.5;
+    }
+    
+    /* ========================================
+       CALCULATOR STYLES (SIP & EMI)
+       ======================================== */
+    .calculator-form {
+      background: var(--color-bg-secondary);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-xl);
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .form-group {
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .form-group label {
+      display: block;
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-sm);
+      margin-bottom: var(--spacing-sm);
+      font-weight: 500;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--color-bg-tertiary);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-accent);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-base);
+      transition: border-color var(--transition-quick);
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--color-accent-hover);
+    }
+    
+    .input-with-prefix {
+      position: relative;
+    }
+    
+    .input-with-prefix .prefix {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--color-text-muted);
+      font-weight: 500;
+    }
+    
+    .input-with-prefix input {
+      padding-left: 2.5rem;
+    }
+    
+    .btn-large {
+      width: 100%;
+      padding: 1rem;
+      font-size: var(--font-size-base);
+      margin-top: var(--spacing-md);
+    }
+    
+    .calculator-results {
+      background: var(--color-bg-secondary);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-xl);
+    }
+    
+    .results-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .result-card {
+      background: var(--color-bg-tertiary);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-lg);
+      text-align: center;
+    }
+    
+    .card-label {
+      color: var(--color-text-muted);
+      font-size: var(--font-size-sm);
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .card-value {
+      color: var(--color-text-primary);
+      font-size: var(--font-size-2xl);
+      font-weight: 700;
+    }
+    
+    .card-value.success {
+      color: var(--color-success);
+    }
+    
+    .card-value.accent {
+      color: var(--color-accent);
+    }
+    
+    .results-table-container {
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .results-table-container h3 {
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--color-bg-tertiary);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    
+    .results-table th,
+    .results-table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--color-bg-secondary);
+    }
+    
+    .results-table th {
+      background: var(--color-bg-secondary);
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-sm);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .results-table td {
+      color: var(--color-text-primary);
+      font-size: var(--font-size-sm);
+    }
+    
+    .results-table td.success {
+      color: var(--color-success);
+    }
+    
+    .results-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    
+    /* ========================================
+       SEARCH MODAL
+       ======================================== */
+    .search-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 10vh;
+      z-index: var(--z-modal);
+    }
+    
+    .search-modal.active {
+      display: flex;
+    }
+    
+    .search-modal-content {
+      background: var(--color-bg-secondary);
+      border-radius: var(--radius-lg);
+      width: 90%;
+      max-width: 600px;
+      box-shadow: var(--shadow-xl);
+      overflow: hidden;
+    }
+    
+    .search-input-container {
+      padding: var(--spacing-lg);
+      border-bottom: 1px solid var(--color-bg-tertiary);
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--color-bg-tertiary);
+      color: var(--color-text-primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-lg);
+    }
+    
+    .search-input:focus {
+      outline: none;
+    }
+    
+    .search-results {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .search-result-item {
+      padding: var(--spacing-lg);
+      cursor: pointer;
+      border-bottom: 1px solid var(--color-bg-tertiary);
+      transition: background var(--transition-quick);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+    
+    .search-result-item:hover,
+    .search-result-item.selected {
+      background: var(--color-bg-tertiary);
+    }
+    
+    .search-result-item:last-child {
+      border-bottom: none;
+    }
+    
+    .search-result-icon {
+      font-size: 1.5rem;
+    }
+    
+    .search-result-info {
+      flex: 1;
+    }
+    
+    .search-result-title {
+      color: var(--color-text-primary);
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    
+    .search-result-description {
+      color: var(--color-text-muted);
+      font-size: var(--font-size-sm);
+    }
+    
+    .search-empty {
+      padding: var(--spacing-xl);
+      text-align: center;
+      color: var(--color-text-muted);
+    }
+    
+    /* ========================================
+       RESPONSIVE UPDATES FOR NEW TOOLS
+       ======================================== */
+    @media (max-width: 768px) {
+      .diff-panels,
+      .converter-panels {
+        grid-template-columns: 1fr;
+      }
+      
+      .action-bar {
+        flex-direction: column;
+      }
+      
+      .action-bar .btn {
+        width: 100%;
+      }
+      
+      .diff-panel textarea,
+      .converter-panel textarea {
+        min-height: 250px;
+      }
+    }
+    
+    /* ========================================
+       SCHEMA SOURCE PANEL
+       ======================================== */
+    .schema-source-panel {
+      background: var(--color-bg-secondary);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-xl);
+      margin-top: var(--spacing-lg);
+      border: 1px solid var(--color-accent);
+    }
+    
+    .schema-source-panel h3 {
+      margin: 0 0 var(--spacing-lg) 0;
+      color: var(--color-text-primary);
+      font-size: var(--font-size-xl);
+    }
+    
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .radio-label {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--spacing-md);
+      padding: var(--spacing-md);
+      background: var(--color-bg-tertiary);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-quick);
+      border: 2px solid transparent;
+    }
+    
+    .radio-label:hover {
+      background: var(--color-bg-primary);
+      border-color: var(--color-accent);
+    }
+    
+    .radio-label input[type=\"radio\"] {
+      margin-top: 0.25rem;
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+    }
+    
+    .radio-label input[type=\"radio\"]:checked + span {
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+    
+    .radio-label > span:first-of-type {
+      flex: 1;
+    }
+    
+    .radio-description {
+      display: block;
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      margin-top: var(--spacing-xs);
+    }
+    
+    .custom-schema-input {
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .custom-schema-input label {
+      display: block;
+      margin-bottom: var(--spacing-sm);
+      color: var(--color-text-primary);
+      font-weight: 600;
+    }
+    
+    .custom-schema-input textarea {
+      width: 100%;
+      min-height: 300px;
+      background: var(--color-bg-tertiary);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-accent);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-md);
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      resize: vertical;
+      line-height: 1.5;
+    }
+    
+    .custom-schema-input textarea:focus {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+    }
+    
+    .helper-text {
+      margin-top: var(--spacing-sm);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
+      font-style: italic;
+    }
+    
+    .schema-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-sm) var(--spacing-md);
+      background: var(--color-bg-tertiary);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      margin-top: var(--spacing-md);
+    }
+    
+    .schema-indicator.custom {
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--color-accent);
+      border: 1px solid var(--color-accent);
+    }
+    
+    /* ========================================
+       EMI PREPAYMENT SECTION
+       ======================================== */
+    .prepayment-section {
+      background: var(--color-bg-secondary);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+      border: 1px solid var(--color-bg-tertiary);
+    }
+    
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      padding: var(--spacing-md);
+      background: var(--color-bg-tertiary);
+      border-radius: var(--radius-md);
+      transition: background var(--transition-quick);
+    }
+    
+    .section-header:hover {
+      background: var(--color-bg-primary);
+    }
+    
+    .section-header h3 {
+      margin: 0;
+      color: var(--color-text-primary);
+      font-size: var(--font-size-lg);
+    }
+    
+    .toggle-icon {
+      background: transparent;
+      border: none;
+      color: var(--color-accent);
+      font-size: var(--font-size-xl);
+      cursor: pointer;
+      transition: transform var(--transition-normal);
+    }
+    
+    .toggle-icon.expanded {
+      transform: rotate(180deg);
+    }
+    
+    .prepayment-form {
+      padding-top: var(--spacing-lg);
+    }
+    
+    .form-select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--color-bg-tertiary);
+      color: var(--color-text-primary);
+      border: 1px solid var(--color-accent);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-base);
+      cursor: pointer;
+      transition: border-color var(--transition-quick);
+    }
+    
+    .form-select:focus {
+      outline: none;
+      border-color: var(--color-accent-hover);
+    }
+    
+    .prepayment-comparison {
+      background: var(--color-bg-secondary);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-xl);
+      margin-top: var(--spacing-lg);
+      border: 1px solid var(--color-success);
+    }
+    
+    .prepayment-comparison h3 {
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-lg);
+      font-size: var(--font-size-xl);
+    }
+    
+    .comparison-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .comparison-card {
+      background: var(--color-bg-tertiary);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-lg);
+      border: 2px solid transparent;
+    }
+    
+    .comparison-card.highlight {
+      border-color: var(--color-success);
+      background: rgba(34, 197, 94, 0.05);
+    }
+    
+    .card-header {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      margin-bottom: var(--spacing-lg);
+      color: var(--color-text-primary);
+      padding-bottom: var(--spacing-sm);
+      border-bottom: 1px solid var(--color-bg-primary);
+    }
+    
+    .card-header.success {
+      color: var(--color-success);
+    }
+    
+    .card-metric {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-md);
+      padding: var(--spacing-sm) 0;
+    }
+    
+    .metric-label {
+      color: var(--color-text-muted);
+      font-size: var(--font-size-sm);
+    }
+    
+    .metric-value {
+      color: var(--color-text-primary);
+      font-weight: 700;
+      font-size: var(--font-size-lg);
+    }
+    
+    .metric-value.success {
+      color: var(--color-success);
+    }
+    
+    .savings-banner {
+      background: linear-gradient(135deg, var(--color-success) 0%, #16a34a 100%);
+      color: white;
+      padding: var(--spacing-lg);
+      border-radius: var(--radius-md);
+      text-align: center;
+      font-size: var(--font-size-lg);
+      margin-top: var(--spacing-lg);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .savings-banner strong {
+      font-size: var(--font-size-xl);
+    }
+    
+    @media (max-width: 900px) {
+      .comparison-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Global Header -->
+  <header class="global-header" role="banner">
+    <div class="header-left">
+      <button class="home-button" onclick="navigateHome()" aria-label="Go to home page">
+        <span class="icon">🏠</span>
+      </button>
+      <h1 class="app-title">Dev Tools</h1>
+    </div>
+    
+    <div class="header-center">
+      <nav class="breadcrumb" aria-label="Breadcrumb" id="breadcrumb">
+        <span class="breadcrumb-item">Tools Dashboard</span>
+      </nav>
+    </div>
+    
+    <div class="header-right">
+      <button class="search-button" onclick="openSearch()" aria-label="Search tools (Ctrl+K)">
+        <span class="icon">🔍</span>
+      </button>
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme" id="themeToggleBtn">
+        <span class="icon" id="themeIcon">☀️</span>
+      </button>
+    </div>
+  </header>
+  
+  <!-- Recent Apps Bar -->
+  <aside class="recent-apps-bar" id="recentAppsBar" aria-label="Recently used tools">
+    <span class="recent-label">Recent:</span>
+    <div class="recent-apps-list" id="recentAppsList"></div>
+    <button class="clear-recent-btn" onclick="clearRecentApps()" aria-label="Clear recent apps">
+      Clear
+    </button>
+  </aside>
+  
+  <!-- Home Page -->
+  <div id="homePage" class="home-container">
+    <div class="home-header">
+      <h2 class="home-title">Developer Tools</h2>
+      <p class="home-description">
+        Select a tool to get started. All tools run locally in your browser for privacy and speed.
+      </p>
+    </div>
+    
+    <div class="tools-grid">
+      <article class="tool-card" onclick="launchTool('json')" tabindex="0" onkeypress="handleCardKeypress(event, 'json')">
+        <div class="card-icon"><span>📋</span></div>
+        <h3 class="card-title">JSON Schema Generator</h3>
+        <p class="card-description">
+          Generate JSON schemas, validate data, minify and beautify JSON with multiple draft version support.
+        </p>
+        <button class="card-action btn btn-primary">Launch Tool</button>
+      </article>
+      
+      <article class="tool-card" onclick="launchTool('markdown')" tabindex="0" onkeypress="handleCardKeypress(event, 'markdown')">
+        <div class="card-icon"><span>📝</span></div>
+        <h3 class="card-title">Markdown Converter</h3>
+        <p class="card-description">
+          Convert between HTML and Markdown formats with live preview
+        </p>
+        <button class="card-action btn btn-primary">Launch Tool</button>
+      </article>
+      
+      <article class="tool-card" onclick="launchTool('diff')" tabindex="0" onkeypress="handleCardKeypress(event, 'diff')">
+        <div class="card-icon"><span>🔍</span></div>
+        <h3 class="card-title">Text Diff Checker</h3>
+        <p class="card-description">
+          Compare texts to identify changes with line-by-line highlighting
+        </p>
+        <button class="card-action btn btn-primary">Launch Tool</button>
+      </article>
+      
+      <article class="tool-card" onclick="launchTool('sip')" tabindex="0" onkeypress="handleCardKeypress(event, 'sip')">
+        <div class="card-icon"><span>📊</span></div>
+        <h3 class="card-title">SIP Calculator</h3>
+        <p class="card-description">
+          Calculate mutual fund SIP returns and investment growth
+        </p>
+        <button class="card-action btn btn-primary">Launch Tool</button>
+      </article>
+      
+      <article class="tool-card" onclick="launchTool('emi')" tabindex="0" onkeypress="handleCardKeypress(event, 'emi')">
+        <div class="card-icon"><span>🏠</span></div>
+        <h3 class="card-title">EMI Calculator</h3>
+        <p class="card-description">
+          Calculate home loan EMI with prepayment scenarios
+        </p>
+        <button class="card-action btn btn-primary">Launch Tool</button>
+      </article>
+      
+      <article class="tool-card tool-card-placeholder" tabindex="0">
+        <div class="card-icon"><span>➕</span></div>
+        <h3 class="card-title">More Tools</h3>
+        <p class="card-description">
+          Additional utilities and converters coming soon
+        </p>
+        <button class="card-action btn btn-secondary" disabled>Coming Soon</button>
+      </article>
+    </div>
+  </div>
+  
+  <!-- JSON Tool Container (wrapped existing tool) -->
+  <div id="tool-json" class="tool-container" style="display:none;">
+    <!-- JSON Schema Generator Tool Content -->
+    <div class="json-tool-wrapper">
+      <!-- Info/Help Panel (Collapsible) -->
+      <div class="info-panel collapsed" id="infoPanel" aria-hidden="true">
+        <h3>ℹ️ How to Use</h3>
+        <div class="info-content">
+          <div class="info-item">
+            <div class="info-icon">1</div>
+            <div class="info-text">
+              <strong>Select Schema Draft</strong>
+              <p>Choose JSON Schema version (draft-07 recommended)</p>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon">2</div>
+            <div class="info-text">
+              <strong>Paste JSON</strong>
+              <p>Enter any valid JSON in the left panel</p>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon">3</div>
+            <div class="info-text">
+              <strong>Generate Schema</strong>
+              <p>Click to create schema with draft header</p>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon">4</div>
+            <div class="info-text">
+              <strong>Validate & Export</strong>
+              <p>Verify data and download JSON/schema files</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="actions">
+        <div class="action-buttons">
+          <button class="btn btn-primary" onclick="generateSchema()">
+            ⚙️ Generate Schema from JSON
+          </button>
+          <button class="btn btn-primary" onclick="validateJSON()">
+            ✓ Validate JSON Against Schema
+          </button>
+          <button class="btn btn-secondary" onclick="loadSample()">
+            📦 Load Sample Data
+          </button>
+          <button class="help-toggle-btn" onclick="toggleHelp()" aria-label="Toggle help information" aria-expanded="false">
+            <span class="help-icon">ℹ️</span>
+            <span>Help</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Schema Source Selection Panel (appears when validating) -->
+      <div class="schema-source-panel" id="schemaSourcePanel" style="display:none;">
+        <h3>Select Schema Source</h3>
+        
+        <div class="radio-group" role="radiogroup" aria-label="Schema source selection">
+          <label class="radio-label">
+            <input type="radio" name="schemaSource" value="generated" checked onchange="toggleSchemaInput()">
+            <span>
+              Use Generated Schema
+              <span class="radio-description">Use the schema created from JSON above</span>
+            </span>
+          </label>
+          
+          <label class="radio-label">
+            <input type="radio" name="schemaSource" value="custom" onchange="toggleSchemaInput()">
+            <span>
+              Paste Custom Schema
+              <span class="radio-description">Validate against your own JSON Schema</span>
+            </span>
+          </label>
+        </div>
+        
+        <div id="customSchemaInput" class="custom-schema-input" style="display:none;">
+          <label for="customSchema">Paste JSON Schema</label>
+          <textarea id="customSchema" placeholder="Paste your JSON Schema here...&#10;&#10;Example:&#10;{&#10;  &quot;$schema&quot;: &quot;http://json-schema.org/draft-07/schema#&quot;,&#10;  &quot;type&quot;: &quot;object&quot;,&#10;  &quot;properties&quot;: {&#10;    &quot;name&quot;: { &quot;type&quot;: &quot;string&quot; }&#10;  },&#10;  &quot;required&quot;: [&quot;name&quot;]&#10;}" spellcheck="false"></textarea>
+          <p class="helper-text">Supports JSON Schema draft-04, draft-06, draft-07, 2019-09, and 2020-12</p>
+        </div>
+        
+        <div class="action-bar">
+          <button class="btn btn-primary" onclick="runValidation()">
+            ✓ Validate Now
+          </button>
+          <button class="btn btn-secondary" onclick="closeSchemaPanel()">
+            Cancel
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Grid with JSON Input and Schema Output -->
+      <div class="main-grid" data-schema-visible="false">
+        <div>
+          <div class="panel">
+            <div class="panel-header">
+              <h2>JSON Input</h2>
+              <span class="panel-header-badge" id="jsonSize">0 bytes</span>
+            </div>
+            
+            <!-- Formatting Toolbar -->
+            <div class="panel-toolbar" role="toolbar" aria-label="JSON formatting controls">
+              <div class="toolbar-group">
+                <button class="btn btn-secondary btn-small" onclick="beautifyJSON()" aria-label="Beautify JSON">
+                  🎨 <span>Beautify</span>
+                </button>
+                <button class="btn btn-secondary btn-small" onclick="minifyJSON()" aria-label="Minify JSON">
+                  🗜️ <span>Minify</span>
+                </button>
+              </div>
+              <span class="toolbar-hint">Format JSON</span>
+            </div>
+            
+            <div class="panel-content">
+              <textarea id="jsonInput" placeholder="Paste your JSON here..." spellcheck="false"></textarea>
+            </div>
+            <div class="control-bar">
+              <button class="btn btn-secondary btn-small" onclick="copyToClipboard('jsonInput')">
+                📋 Copy JSON
+              </button>
+              <button class="btn btn-secondary btn-small" onclick="downloadJSON()">
+                ⬇️ Download JSON
+              </button>
+              <button class="btn btn-secondary btn-small" onclick="clearJSON()">
+                🗑️ Clear
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schema Output Wrapper - Hidden Initially for Progressive Reveal -->
+        <div class="schema-output-wrapper" id="schemaOutputWrapper" style="display:none;" aria-live="polite">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <h2 id="schemaOutputHeading" tabindex="-1">JSON Schema Output</h2>
+              </div>
+              <div class="draft-selector-compact">
+                <label for="draftSelect">Schema Draft:</label>
+                <select id="draftSelect" class="draft-select" onchange="updateSchemaDraft()" aria-label="Select JSON Schema draft version">
+                  <option value="http://json-schema.org/draft-04/schema#">Draft-04</option>
+                  <option value="http://json-schema.org/draft-06/schema#">Draft-06</option>
+                  <option value="http://json-schema.org/draft-07/schema#" selected>Draft-07 ⭐</option>
+                  <option value="https://json-schema.org/draft/2019-09/schema">Draft 2019-09</option>
+                  <option value="https://json-schema.org/2020-12/schema">Draft 2020-12</option>
+                </select>
+              </div>
+              <span class="panel-header-badge" id="schemaSize">0 bytes</span>
+            </div>
+            <div class="panel-content">
+              <div class="output-display empty" id="schemaOutput">
+                Schema will appear here after generation...
+              </div>
+            </div>
+            <div class="control-bar">
+              <button class="btn btn-secondary btn-small" onclick="copyToClipboard('schemaOutput')">
+                📋 Copy Schema
+              </button>
+              <button class="btn btn-secondary btn-small" onclick="downloadSchema()">
+                ⬇️ Download Schema
+              </button>
+              <button class="btn btn-secondary btn-small" onclick="clearSchema()">
+                🗑️ Clear
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Validation Results Container -->
+      <div id="validationResultContainer"></div>
+    </div>
+  </div>
+  
+  <!-- TOOL #1: TEXT DIFF CHECKER -->
+  <div id="tool-diff" class="tool-container" style="display:none;">
+    <div class="tool-header">
+      <h2 class="tool-title">🔍 Text Difference Checker</h2>
+      <p class="tool-description">Compare two text versions to identify changes line-by-line</p>
+    </div>
+    
+    <div class="diff-options">
+      <select id="diffMode" class="form-select">
+        <option value="line">Line-by-Line</option>
+        <option value="word">Word-by-Word</option>
+        <option value="char">Character-by-Character</option>
+      </select>
+      <label class="checkbox-label">
+        <input type="checkbox" id="caseSensitive" checked>
+        Case-sensitive
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="ignoreWhitespace">
+        Ignore whitespace
+      </label>
+    </div>
+    
+    <div class="diff-panels">
+      <div class="diff-panel">
+        <div class="panel-header">
+          <h3>Original Text</h3>
+          <span class="char-count" id="originalCount">0 lines</span>
+        </div>
+        <textarea id="originalText" placeholder="Paste original text here..." oninput="updateLineCount('originalText', 'originalCount')"></textarea>
+      </div>
+      
+      <div class="diff-panel">
+        <div class="panel-header">
+          <h3>Modified Text</h3>
+          <span class="char-count" id="modifiedCount">0 lines</span>
+        </div>
+        <textarea id="modifiedText" placeholder="Paste modified text here..." oninput="updateLineCount('modifiedText', 'modifiedCount')"></textarea>
+      </div>
+    </div>
+    
+    <div class="action-bar">
+      <button class="btn btn-primary" onclick="compareDiff()">
+        🔍 Compare
+      </button>
+      <button class="btn btn-secondary" onclick="swapDiffTexts()">
+        ⇄ Swap
+      </button>
+      <button class="btn btn-secondary" onclick="clearDiff()">
+        Clear All
+      </button>
+      <button class="btn btn-secondary" onclick="copyDiffResults()">
+        📋 Copy Results
+      </button>
+    </div>
+    
+    <div class="diff-results" id="diffResults" style="display:none;">
+      <div class="panel-header">
+        <h3>Comparison Results</h3>
+        <div class="diff-stats" id="diffStats"></div>
+      </div>
+      <div class="diff-output" id="diffOutput"></div>
+    </div>
+  </div>
+  
+  <!-- TOOL #2: HTML ↔ MARKDOWN CONVERTER -->
+  <div id="tool-markdown" class="tool-container" style="display:none;">
+    <div class="tool-header">
+      <h2 class="tool-title">📝 HTML ↔ Markdown Converter</h2>
+      <p class="tool-description">Convert between HTML and Markdown formats</p>
+    </div>
+    
+    <div class="diff-options">
+      <select id="conversionMode" class="form-select" onchange="updateConversionLabels()">
+        <option value="html-to-md">HTML → Markdown</option>
+        <option value="md-to-html">Markdown → HTML</option>
+      </select>
+      <label class="checkbox-label">
+        <input type="checkbox" id="useGFM" checked>
+        GitHub Flavored Markdown
+      </label>
+    </div>
+    
+    <div class="converter-panels">
+      <div class="converter-panel">
+        <div class="panel-header">
+          <h3 id="inputLabel">HTML Input</h3>
+        </div>
+        <textarea id="converterInput" placeholder="Paste HTML here..."></textarea>
+      </div>
+      
+      <div class="converter-panel">
+        <div class="panel-header">
+          <h3 id="outputLabel">Markdown Output</h3>
+          <div class="panel-actions">
+            <button class="btn-icon" onclick="copyConverterOutput()" title="Copy">
+              📋
+            </button>
+            <button class="btn-icon" onclick="downloadConverterOutput()" title="Download">
+              ⬇️
+            </button>
+          </div>
+        </div>
+        <textarea id="converterOutput" readonly></textarea>
+      </div>
+    </div>
+    
+    <div class="action-bar">
+      <button class="btn btn-primary" onclick="convertFormat()">
+        ⚡ Convert
+      </button>
+      <button class="btn btn-secondary" onclick="swapConversionDirection()">
+        ⇄ Swap Direction
+      </button>
+      <button class="btn btn-secondary" onclick="clearConverter()">
+        Clear All
+      </button>
+      <button class="btn btn-secondary" onclick="loadMarkdownSample()">
+        📄 Load Sample
+      </button>
+    </div>
+  </div>
+  
+  <!-- TOOL #3: SIP CALCULATOR -->
+  <div id="tool-sip" class="tool-container" style="display:none;">
+    <div class="tool-header">
+      <h2 class="tool-title">📊 SIP Calculator</h2>
+      <p class="tool-description">Calculate mutual fund SIP returns with year-wise breakdown</p>
+    </div>
+    
+    <div class="calculator-form">
+      <div class="form-group">
+        <label for="sipAmount">Monthly Investment Amount</label>
+        <div class="input-with-prefix">
+          <span class="prefix">₹</span>
+          <input type="number" id="sipAmount" value="5000" min="100" step="100">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="sipRate">Expected Annual Return Rate (%)</label>
+        <input type="number" id="sipRate" value="12" min="1" max="30" step="0.1">
+      </div>
+      
+      <div class="form-group">
+        <label for="sipDuration">Investment Period (Years)</label>
+        <input type="number" id="sipDuration" value="10" min="1" max="40">
+      </div>
+      
+      <button class="btn btn-primary btn-large" onclick="calculateSIP()">
+        📊 Calculate Returns
+      </button>
+    </div>
+    
+    <div class="calculator-results" id="sipResults" style="display:none;">
+      <div class="results-summary">
+        <div class="result-card">
+          <div class="card-label">Total Invested</div>
+          <div class="card-value" id="sipInvested">₹0</div>
+        </div>
+        <div class="result-card">
+          <div class="card-label">Wealth Gain</div>
+          <div class="card-value success" id="sipGain">₹0</div>
+        </div>
+        <div class="result-card">
+          <div class="card-label">Final Value</div>
+          <div class="card-value accent" id="sipFinalValue">₹0</div>
+        </div>
+      </div>
+      
+      <div class="results-table-container">
+        <h3>Year-wise Breakdown</h3>
+        <div style="overflow-x: auto;">
+          <table class="results-table" id="sipBreakdown">
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Invested</th>
+                <th>Est. Value</th>
+                <th>Wealth Gain</th>
+              </tr>
+            </thead>
+            <tbody id="sipTableBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div class="action-bar">
+        <button class="btn btn-secondary" onclick="resetSIPCalculator()">
+          Reset
+        </button>
+        <button class="btn btn-secondary" onclick="exportSIPResults()">
+          📥 Export CSV
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- TOOL #4: EMI CALCULATOR -->
+  <div id="tool-emi" class="tool-container" style="display:none;">
+    <div class="tool-header">
+      <h2 class="tool-title">🏠 Home Loan EMI Calculator</h2>
+      <p class="tool-description">Calculate home loan EMI with detailed amortization schedule</p>
+    </div>
+    
+    <div class="calculator-form">
+      <div class="form-group">
+        <label for="loanAmount">Loan Amount</label>
+        <div class="input-with-prefix">
+          <span class="prefix">₹</span>
+          <input type="number" id="loanAmount" value="5000000" min="10000" step="10000">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="loanRate">Interest Rate (% per annum)</label>
+        <input type="number" id="loanRate" value="8.5" min="1" max="20" step="0.1">
+      </div>
+      
+      <div class="form-group">
+        <label for="loanTenure">Loan Tenure (Years)</label>
+        <input type="number" id="loanTenure" value="20" min="1" max="30">
+      </div>
+      
+      <button class="btn btn-primary btn-large" onclick="calculateEMI()">
+        📊 Calculate EMI
+      </button>
+    </div>
+    
+    <!-- Prepayment Section (Collapsible) -->
+    <div class="prepayment-section" id="prepaymentSection" style="display:none;">
+      <div class="section-header" onclick="togglePrepaymentSection()" role="button" tabindex="0" aria-expanded="false">
+        <h3>⚡ Advanced: Prepayment Planning</h3>
+        <button class="toggle-icon" id="prepaymentToggle" aria-label="Toggle prepayment section">▼</button>
+      </div>
+      
+      <div class="prepayment-form" id="prepaymentForm" style="display:none;">
+        <div class="form-group">
+          <label for="prepaymentType">Prepayment Type</label>
+          <select id="prepaymentType" class="form-select" onchange="updatePrepaymentForm()">
+            <option value="lump-sum">One-Time Lump Sum Payment</option>
+            <option value="monthly-extra">Monthly Extra Payment</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="prepaymentAmount">Prepayment Amount</label>
+          <div class="input-with-prefix">
+            <span class="prefix">₹</span>
+            <input type="number" id="prepaymentAmount" min="1000" step="1000" placeholder="50000">
+          </div>
+        </div>
+        
+        <div class="form-group" id="startMonthGroup">
+          <label for="prepaymentStartMonth">Start From Month</label>
+          <input type="number" id="prepaymentStartMonth" min="1" max="360" value="1" placeholder="1">
+          <p class="helper-text">Month number from loan start (1 = first month)</p>
+        </div>
+        
+        <div class="form-group">
+          <label>Prepayment Strategy</label>
+          <div class="radio-group" role="radiogroup">
+            <label class="radio-label">
+              <input type="radio" name="prepaymentStrategy" value="reduce-tenure" checked>
+              <span>
+                Reduce Loan Tenure
+                <span class="radio-description">Pay off loan faster, keep EMI same</span>
+              </span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="prepaymentStrategy" value="reduce-emi">
+              <span>
+                Reduce Monthly EMI
+                <span class="radio-description">Lower monthly payment, keep tenure same</span>
+              </span>
+            </label>
+          </div>
+        </div>
+        
+        <button class="btn btn-primary btn-large" onclick="calculateEMIWithPrepaymentUI()">
+          📊 Recalculate with Prepayment
+        </button>
+      </div>
+    </div>
+    
+    <!-- Prepayment Comparison Results -->
+    <div class="prepayment-comparison" id="prepaymentComparison" style="display:none;">
+      <h3>💰 Impact Analysis</h3>
+      
+      <div class="comparison-cards">
+        <div class="comparison-card">
+          <div class="card-header">Without Prepayment</div>
+          <div class="card-metric">
+            <span class="metric-label">Total Interest:</span>
+            <span class="metric-value" id="originalInterest">₹0</span>
+          </div>
+          <div class="card-metric">
+            <span class="metric-label">Loan Tenure:</span>
+            <span class="metric-value" id="originalTenure">0 years</span>
+          </div>
+          <div class="card-metric">
+            <span class="metric-label">Total Payment:</span>
+            <span class="metric-value" id="originalTotal">₹0</span>
+          </div>
+        </div>
+        
+        <div class="comparison-card highlight">
+          <div class="card-header success">✓ With Prepayment</div>
+          <div class="card-metric">
+            <span class="metric-label">Total Interest:</span>
+            <span class="metric-value success" id="prepaymentInterest">₹0</span>
+          </div>
+          <div class="card-metric">
+            <span class="metric-label">Loan Tenure:</span>
+            <span class="metric-value success" id="prepaymentTenure">0 years</span>
+          </div>
+          <div class="card-metric">
+            <span class="metric-label">Total Payment:</span>
+            <span class="metric-value success" id="prepaymentTotal">₹0</span>
+          </div>
+          <div class="savings-banner">
+            <strong>💰 Total Savings: </strong>
+            <span id="totalSavings">₹0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="calculator-results" id="emiResults" style="display:none;">
+      <div class="results-summary">
+        <div class="result-card">
+          <div class="card-label">Monthly EMI</div>
+          <div class="card-value accent" id="monthlyEMI">₹0</div>
+        </div>
+        <div class="result-card">
+          <div class="card-label">Total Interest</div>
+          <div class="card-value" id="totalInterest">₹0</div>
+        </div>
+        <div class="result-card">
+          <div class="card-label">Total Payment</div>
+          <div class="card-value" id="totalPayment">₹0</div>
+        </div>
+      </div>
+      
+      <div class="results-table-container">
+        <h3>Amortization Schedule (Year-wise)</h3>
+        <div style="overflow-x: auto;">
+          <table class="results-table" id="emiBreakdown">
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Principal</th>
+                <th>Interest</th>
+                <th>Balance</th>
+              </tr>
+            </thead>
+            <tbody id="emiTableBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div class="action-bar">
+        <button class="btn btn-secondary" onclick="resetEMICalculator()">
+          Reset
+        </button>
+        <button class="btn btn-secondary" onclick="exportEMIResults()">
+          📥 Export CSV
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- SEARCH MODAL -->
+  <div class="search-modal" id="searchModal" onclick="closeSearchModal(event)">
+    <div class="search-modal-content" onclick="event.stopPropagation()">
+      <div class="search-input-container">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search tools..." oninput="handleSearchInput()" onkeydown="handleSearchKeydown(event)">
+      </div>
+      <div class="search-results" id="searchResults">
+        <!-- Search results will be populated here -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- JavaScript -->
+  <script>
+    // ========================================
+    // CONFIGURATION
+    // ========================================
+    const RECENT_APPS_KEY = 'devtools-recent-apps';
+    const MAX_RECENT = 5;
+    const THEME_KEY = 'devtools-theme';
+    
+    const TOOLS = {
+      'json': { name: 'JSON Schema Generator', icon: '📋' },
+      'markdown': { name: 'Markdown Converter', icon: '📝' },
+      'diff': { name: 'Diff Checker', icon: '🔍' },
+      'sip': { name: 'SIP Calculator', icon: '📊' },
+      'emi': { name: 'EMI Calculator', icon: '🏠' }
+    };
+    
+    // ========================================
+    // RECENT APPS MANAGEMENT
+    // ========================================
+    function getRecentApps() {
+      try {
+        const recent = localStorage.getItem(RECENT_APPS_KEY);
+        return recent ? JSON.parse(recent) : [];
+      } catch (e) {
+        console.error('Failed to read recent apps:', e);
+        return [];
+      }
+    }
+    
+    function addToRecentApps(toolId) {
+      try {
+        let recent = getRecentApps();
+        recent = recent.filter(id => id !== toolId);
+        recent.unshift(toolId);
+        recent = recent.slice(0, MAX_RECENT);
+        localStorage.setItem(RECENT_APPS_KEY, JSON.stringify(recent));
+        renderRecentApps();
+      } catch (e) {
+        console.error('Failed to save recent apps:', e);
+      }
+    }
+    
+    function renderRecentApps() {
+      const recent = getRecentApps();
+      const bar = document.getElementById('recentAppsBar');
+      const list = document.getElementById('recentAppsList');
+      
+      if (!bar || !list) return;
+      
+      if (recent.length === 0) {
+        bar.classList.add('empty');
+        return;
+      }
+      
+      bar.classList.remove('empty');
+      const currentTool = getCurrentTool();
+      
+      list.innerHTML = recent.map(toolId => {
+        const tool = TOOLS[toolId];
+        if (!tool) return '';
+        
+        const isActive = currentTool === toolId ? 'active' : '';
+        
+        return `
+          <a href="#${toolId}" class="recent-app-chip ${isActive}" aria-label="${tool.name}">
+            <span class="recent-app-icon">${tool.icon}</span>
+            <span class="recent-app-name">${tool.name}</span>
+          </a>
+        `;
+      }).join('');
+    }
+    
+    function clearRecentApps() {
+      if (confirm('Clear all recent apps?')) {
+        try {
+          localStorage.removeItem(RECENT_APPS_KEY);
+          renderRecentApps();
+        } catch (e) {
+          console.error('Failed to clear recent apps:', e);
+        }
+      }
+    }
+    
+    // ========================================
+    // NAVIGATION
+    // ========================================
+    function getCurrentTool() {
+      const hash = window.location.hash.slice(1);
+      return hash || 'home';
+    }
+    
+    function navigateHome() {
+      window.location.hash = '';
+      updateBreadcrumb('Home');
+    }
+    
+    function updateBreadcrumb(toolName) {
+      const breadcrumb = document.getElementById('breadcrumb');
+      if (!breadcrumb) return;
+      
+      if (toolName === 'Home' || !toolName) {
+        breadcrumb.innerHTML = '<span class="breadcrumb-item">Tools Dashboard</span>';
+      } else {
+        breadcrumb.innerHTML = `
+          <a href="#" class="breadcrumb-item" onclick="navigateHome();return false;">Home</a>
+          <span class="breadcrumb-separator">/</span>
+          <span class="breadcrumb-item active">${toolName}</span>
+        `;
+      }
+    }
+    
+    function launchTool(toolId) {
+      if (!TOOLS[toolId]) {
+        console.warn('Tool not available:', toolId);
+        return;
+      }
+      
+      addToRecentApps(toolId);
+      window.location.hash = toolId;
+      updateBreadcrumb(TOOLS[toolId].name);
+    }
+    
+    function handleCardKeypress(event, toolId) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        launchTool(toolId);
+      }
+    }
+    
+    function updatePageVisibility() {
+      const hash = window.location.hash.slice(1);
+      const homePage = document.getElementById('homePage');
+      const jsonTool = document.getElementById('tool-json');
+      const diffTool = document.getElementById('tool-diff');
+      const markdownTool = document.getElementById('tool-markdown');
+      const sipTool = document.getElementById('tool-sip');
+      const emiTool = document.getElementById('tool-emi');
+      
+      // Hide all
+      if (homePage) homePage.style.display = 'none';
+      if (jsonTool) jsonTool.style.display = 'none';
+      if (diffTool) diffTool.style.display = 'none';
+      if (markdownTool) markdownTool.style.display = 'none';
+      if (sipTool) sipTool.style.display = 'none';
+      if (emiTool) emiTool.style.display = 'none';
+      
+      if (!hash || hash === 'home') {
+        if (homePage) homePage.style.display = 'block';
+        updateBreadcrumb('Home');
+      } else if (hash === 'json') {
+        if (jsonTool) {
+          jsonTool.style.display = 'block';
+          loadJsonTool();
+        }
+        updateBreadcrumb('JSON Schema Generator');
+        addToRecentApps('json');
+      } else if (hash === 'diff') {
+        if (diffTool) diffTool.style.display = 'block';
+        updateBreadcrumb('Text Difference Checker');
+        addToRecentApps('diff');
+      } else if (hash === 'markdown') {
+        if (markdownTool) markdownTool.style.display = 'block';
+        updateBreadcrumb('HTML ↔ Markdown Converter');
+        addToRecentApps('markdown');
+      } else if (hash === 'sip') {
+        if (sipTool) sipTool.style.display = 'block';
+        updateBreadcrumb('SIP Calculator');
+        addToRecentApps('sip');
+      } else if (hash === 'emi') {
+        if (emiTool) emiTool.style.display = 'block';
+        updateBreadcrumb('EMI Calculator');
+        addToRecentApps('emi');
+      }
+    }
+    
+    function loadJsonTool() {
+      const container = document.getElementById('tool-json');
+      if (!container) return;
+      
+      // Tool is already loaded in HTML, just ensure initialization
+      if (!window.jsonToolInitialized) {
+        initializeJsonTool();
+        window.jsonToolInitialized = true;
+      }
+    }
+    
+    // ========================================
+    // THEME MANAGEMENT
+    // ========================================
+    function getTheme() {
+      try {
+        return localStorage.getItem(THEME_KEY) || 'dark';
+      } catch (e) {
+        return 'dark';
+      }
+    }
+    
+    function setTheme(theme) {
+      try {
+        localStorage.setItem(THEME_KEY, theme);
+        document.documentElement.setAttribute('data-theme', theme);
+        updateThemeIcon(theme);
+      } catch (e) {
+        console.error('Failed to save theme:', e);
+      }
+    }
+    
+    function toggleTheme() {
+      const currentTheme = getTheme();
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      setTheme(newTheme);
+    }
+    
+    function updateThemeIcon(theme) {
+      const icon = document.getElementById('themeIcon');
+      if (icon) {
+        icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+      }
+    }
+    
+    // ========================================
+    // SEARCH MODAL
+    // ========================================
+    function openSearch() {
+      const modal = document.getElementById('searchModal');
+      const input = document.getElementById('searchInput');
+      if (modal) {
+        modal.classList.add('active');
+        if (input) {
+          input.value = '';
+          input.focus();
+        }
+        renderSearchResults('');
+      }
+    }
+    
+    function closeSearchModal(event) {
+      const modal = document.getElementById('searchModal');
+      if (modal) {
+        modal.classList.remove('active');
+      }
+    }
+    
+    function handleSearchInput() {
+      const query = document.getElementById('searchInput').value;
+      renderSearchResults(query);
+    }
+    
+    function handleSearchKeydown(event) {
+      const results = document.querySelectorAll('.search-result-item');
+      const selected = document.querySelector('.search-result-item.selected');
+      
+      if (event.key === 'Escape') {
+        closeSearchModal();
+      } else if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        if (!selected && results.length > 0) {
+          results[0].classList.add('selected');
+        } else if (selected) {
+          const index = Array.from(results).indexOf(selected);
+          selected.classList.remove('selected');
+          if (index < results.length - 1) {
+            results[index + 1].classList.add('selected');
+            results[index + 1].scrollIntoView({ block: 'nearest' });
+          } else {
+            results[0].classList.add('selected');
+            results[0].scrollIntoView({ block: 'nearest' });
+          }
+        }
+      } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        if (!selected && results.length > 0) {
+          results[results.length - 1].classList.add('selected');
+        } else if (selected) {
+          const index = Array.from(results).indexOf(selected);
+          selected.classList.remove('selected');
+          if (index > 0) {
+            results[index - 1].classList.add('selected');
+            results[index - 1].scrollIntoView({ block: 'nearest' });
+          } else {
+            results[results.length - 1].classList.add('selected');
+            results[results.length - 1].scrollIntoView({ block: 'nearest' });
+          }
+        }
+      } else if (event.key === 'Enter') {
+        event.preventDefault();
+        if (selected) {
+          selected.click();
+        } else if (results.length > 0) {
+          results[0].click();
+        }
+      }
+    }
+    
+    function renderSearchResults(query) {
+      const resultsContainer = document.getElementById('searchResults');
+      const searchQuery = query.toLowerCase();
+      
+      const toolsList = [
+        { id: 'json', name: 'JSON Schema Generator', icon: '📋', description: 'Generate JSON schemas, validate data, minify and beautify JSON' },
+        { id: 'markdown', name: 'Markdown Converter', icon: '📝', description: 'Convert between HTML and Markdown formats' },
+        { id: 'diff', name: 'Text Diff Checker', icon: '🔍', description: 'Compare texts to identify changes line-by-line' },
+        { id: 'sip', name: 'SIP Calculator', icon: '📊', description: 'Calculate mutual fund SIP returns' },
+        { id: 'emi', name: 'EMI Calculator', icon: '🏠', description: 'Calculate home loan EMI' }
+      ];
+      
+      const filtered = toolsList.filter(tool => {
+        return tool.name.toLowerCase().includes(searchQuery) ||
+               tool.description.toLowerCase().includes(searchQuery) ||
+               tool.id.toLowerCase().includes(searchQuery);
+      });
+      
+      if (filtered.length === 0) {
+        resultsContainer.innerHTML = '<div class="search-empty">No tools found</div>';
+        return;
+      }
+      
+      resultsContainer.innerHTML = filtered.map((tool, index) => `
+        <div class="search-result-item ${index === 0 ? 'selected' : ''}" onclick="launchToolFromSearch('${tool.id}')">
+          <div class="search-result-icon">${tool.icon}</div>
+          <div class="search-result-info">
+            <div class="search-result-title">${tool.name}</div>
+            <div class="search-result-description">${tool.description}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function launchToolFromSearch(toolId) {
+      closeSearchModal();
+      launchTool(toolId);
+    }
+    
+    // Keyboard shortcut for search
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        openSearch();
+      } else if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
+        const target = e.target;
+        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          openSearch();
+        }
+      }
+    });
+    
+    // ========================================
+    // INITIALIZATION
+    // ========================================
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize theme
+      const savedTheme = getTheme();
+      setTheme(savedTheme);
+      
+      // Render recent apps
+      renderRecentApps();
+      
+      // Update page visibility
+      updatePageVisibility();
+      
+      console.log('DevTools Suite initialized');
+    });
+    
+    // Handle hash changes
+    window.addEventListener('hashchange', () => {
+      renderRecentApps();
+      updatePageVisibility();
+    });
+    
+    // ========================================
+    // JSON TOOL FUNCTIONS
+    // ========================================
+    let currentSchema = null;
+    let currentSchemaDraft = "http://json-schema.org/draft-07/schema#";
+    
+    function initializeJsonTool() {
+      // Initialize JSON input size indicator
+      const jsonInput = document.getElementById('jsonInput');
+      if (jsonInput) {
+        jsonInput.addEventListener('input', function() {
+          updateSizeIndicator('jsonSize', this.value.length);
+        });
+      }
+      
+      // Initialize help panel state from localStorage
+      const isExpanded = localStorage.getItem('helpPanelExpanded') === 'true';
+      const panel = document.getElementById('infoPanel');
+      const button = document.querySelector('.help-toggle-btn');
+      
+      if (!isExpanded && panel) {
+        panel.classList.add('collapsed');
+        panel.setAttribute('aria-hidden', 'true');
+      } else if (isExpanded && panel) {
+        panel.classList.remove('collapsed');
+        panel.setAttribute('aria-hidden', 'false');
+      }
+      
+      if (button) {
+        button.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+      }
+      
+      // Keyboard shortcuts for JSON tool
+      document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          const jsonTool = document.getElementById('tool-json');
+          if (jsonTool && jsonTool.style.display !== 'none') {
+            e.preventDefault();
+            generateSchema();
+          }
+        }
+      });
+    }
+    
+    // Update schema draft selection
+    function updateSchemaDraft() {
+      const selectElement = document.getElementById('draftSelect');
+      if (selectElement) {
+        currentSchemaDraft = selectElement.value;
+        const draftName = selectElement.options[selectElement.selectedIndex].text;
+        showToast('Schema draft set to: ' + draftName, 'success');
+      }
+    }
+    
+    // ========================================
+    // JSON FORMATTING FUNCTIONS
+    // ========================================
+    
+    /**
+     * Beautifies (pretty-prints) JSON with 2-space indentation
+     */
+    function beautifyJSON() {
+      const textarea = document.getElementById('jsonInput');
+      const jsonInput = textarea.value.trim();
+      
+      if (!jsonInput) {
+        showToast('No JSON content to format', 'warning');
+        return;
+      }
+      
+      try {
+        const parsed = JSON.parse(jsonInput);
+        textarea.value = JSON.stringify(parsed, null, 2);
+        updateSizeIndicator('jsonSize', textarea.value.length);
+        showToast('JSON beautified ✓', 'success');
+      } catch (e) {
+        showToast(sanitizeText('Invalid JSON: ' + e.message), 'error');
+      }
+    }
+    
+    /**
+     * Minifies JSON by removing all whitespace
+     */
+    function minifyJSON() {
+      const textarea = document.getElementById('jsonInput');
+      const jsonInput = textarea.value.trim();
+      
+      if (!jsonInput) {
+        showToast('No JSON content to format', 'warning');
+        return;
+      }
+      
+      try {
+        const parsed = JSON.parse(jsonInput);
+        textarea.value = JSON.stringify(parsed);
+        updateSizeIndicator('jsonSize', textarea.value.length);
+        showToast('JSON minified ✓', 'success');
+      } catch (e) {
+        showToast(sanitizeText('Invalid JSON: ' + e.message), 'error');
+      }
+    }
+    
+    // ========================================
+    // JSON SCHEMA GENERATION
+    // ========================================
+    
+    /**
+     * Shows the schema output panel with smooth animation
+     * Called when schema is generated or validation runs
+     */
+    function showSchemaOutput() {
+      const grid = document.querySelector('.main-grid');
+      const wrapper = document.getElementById('schemaOutputWrapper');
+      const heading = document.getElementById('schemaOutputHeading');
+      
+      if (!wrapper || wrapper.style.display !== 'none') {
+        return; // Already visible or doesn't exist
+      }
+      
+      // Reveal panel
+      wrapper.style.display = 'block';
+      if (grid) {
+        grid.setAttribute('data-schema-visible', 'true');
+      }
+      
+      // Accessibility: announce and focus after animation
+      setTimeout(() => {
+        if (heading) {
+          heading.focus();
+        }
+        
+        // Mobile: scroll to show output
+        if (window.innerWidth <= 1100) {
+          wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 300); // After animation completes
+    }
+    
+    // Generate JSON Schema from JSON data
+    function generateSchema() {
+      const jsonInput = document.getElementById('jsonInput').value.trim();
+      
+      if (!jsonInput) {
+        showToast('Please paste JSON data first', 'error');
+        return;
+      }
+      
+      // Input size validation - max 5MB to prevent DoS
+      const MAX_INPUT_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+      const inputSize = new Blob([jsonInput]).size;
+      
+      if (inputSize > MAX_INPUT_SIZE) {
+        const sizeMB = (inputSize / (1024 * 1024)).toFixed(2);
+        showToast(sanitizeText(`Input too large: ${sizeMB} MB (max 5 MB)`), 'error');
+        return;
+      }
+      
+      try {
+        const data = JSON.parse(jsonInput);
+        
+        // Generate schema with circular reference protection
+        const generatedSchema = inferSchema(data);
+        
+        // Reconstruct schema object with $schema property FIRST
+        const schema = {
+          $schema: currentSchemaDraft,
+          ...generatedSchema
+        };
+        
+        currentSchema = schema;
+        
+        // Use safe JSON.stringify with circular reference handling
+        const schemaJSON = safeStringify(schema, null, 2);
+        if (schemaJSON === null) {
+          showToast('Error: Schema contains circular references', 'error');
+          return;
+        }
+        
+        // Show the schema output panel
+        showSchemaOutput();
+        
+        document.getElementById('schemaOutput').textContent = schemaJSON;
+        document.getElementById('schemaOutput').classList.remove('empty');
+        updateSizeIndicator('schemaSize', schemaJSON.length);
+        
+        showToast('Schema generated successfully with ' + currentSchemaDraft.split('/').slice(-2)[0] + '!', 'success');
+      } catch (error) {
+        showToast(sanitizeText('Invalid JSON: ' + error.message), 'error');
+      }
+    }
+    
+    // Infer JSON Schema from a JavaScript object with circular reference protection
+    function inferSchema(data, path = '#', seen = new WeakSet(), depth = 0) {
+      // Protection against deep nesting (max 50 levels)
+      const MAX_DEPTH = 50;
+      if (depth > MAX_DEPTH) {
+        throw new Error('Maximum recursion depth exceeded (50 levels)');
+      }
+      
+      if (data === null) {
+        return { type: 'null' };
+      }
+      
+      if (Array.isArray(data)) {
+        // Check for circular reference
+        if (seen.has(data)) {
+          throw new Error('JSON contains circular references');
+        }
+        seen.add(data);
+        
+        const itemSchema = data.length > 0 
+          ? inferSchema(data[0], `${path}[0]`, seen, depth + 1)
+          : { type: 'unknown' };
+        return {
+          type: 'array',
+          items: itemSchema,
+          minItems: 0
+        };
+      }
+      
+      if (typeof data === 'object') {
+        // Check for circular reference
+        if (seen.has(data)) {
+          throw new Error('JSON contains circular references');
+        }
+        seen.add(data);
+        
+        const properties = {};
+        const required = [];
+        
+        for (const key in data) {
+          // Protection against prototype pollution - use Object.hasOwn
+          if (Object.hasOwn(data, key)) {
+            properties[key] = inferSchema(data[key], `${path}.${key}`, seen, depth + 1);
+            required.push(key);
+          }
+        }
+        
+        return {
+          type: 'object',
+          properties,
+          required,
+          additionalProperties: false
+        };
+      }
+      
+      if (typeof data === 'string') {
+        // Detect common string formats
+        if (isEmail(data)) return { type: 'string', format: 'email' };
+        if (isURI(data)) return { type: 'string', format: 'uri' };
+        if (isDate(data)) return { type: 'string', format: 'date' };
+        if (isDateTime(data)) return { type: 'string', format: 'date-time' };
+        return { type: 'string' };
+      }
+      
+      if (typeof data === 'number') {
+        return Number.isInteger(data) ? { type: 'integer' } : { type: 'number' };
+      }
+      
+      if (typeof data === 'boolean') {
+        return { type: 'boolean' };
+      }
+      
+      return { type: typeof data };
+    }
+    
+    // Format detection helpers
+    function isEmail(str) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
+    }
+    
+    function isURI(str) {
+      try {
+        new URL(str);
+        return true;
+      } catch {
+        return /^https?:\/\//.test(str);
+      }
+    }
+    
+    function isDate(str) {
+      return /^\d{4}-\d{2}-\d{2}$/.test(str) && !isNaN(Date.parse(str));
+    }
+    
+    function isDateTime(str) {
+      return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(str) && !isNaN(Date.parse(str));
+    }
+    
+    // ========================================
+    // SCHEMA SOURCE SELECTION
+    // ========================================
+    
+    /**
+     * Shows schema source selection panel when validating
+     */
+    function validateJSON() {
+      const jsonInput = document.getElementById('jsonInput').value.trim();
+      
+      if (!jsonInput) {
+        showToast('Please paste JSON data to validate', 'error');
+        return;
+      }
+      
+      // Show schema source panel
+      document.getElementById('schemaSourcePanel').style.display = 'block';
+      
+      // Reset to default selection (generated schema)
+      document.querySelector('input[name="schemaSource"][value="generated"]').checked = true;
+      toggleSchemaInput();
+      
+      // Scroll to panel
+      document.getElementById('schemaSourcePanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    
+    /**
+     * Toggles visibility of custom schema input based on selection
+     */
+    function toggleSchemaInput() {
+      const schemaSource = document.querySelector('input[name="schemaSource"]:checked').value;
+      const customInput = document.getElementById('customSchemaInput');
+      
+      if (schemaSource === 'custom') {
+        customInput.style.display = 'block';
+      } else {
+        customInput.style.display = 'none';
+      }
+    }
+    
+    /**
+     * Closes the schema source panel
+     */
+    function closeSchemaPanel() {
+      document.getElementById('schemaSourcePanel').style.display = 'none';
+    }
+    
+    /**
+     * Runs validation with selected schema source
+     */
+    function runValidation() {
+      const schemaSource = document.querySelector('input[name="schemaSource"]:checked').value;
+      const jsonInput = document.getElementById('jsonInput').value.trim();
+      
+      // Input size validation
+      const MAX_INPUT_SIZE = 5 * 1024 * 1024; // 5MB
+      const inputSize = new Blob([jsonInput]).size;
+      
+      if (inputSize > MAX_INPUT_SIZE) {
+        const sizeMB = (inputSize / (1024 * 1024)).toFixed(2);
+        showToast(sanitizeText(`Input too large: ${sizeMB} MB (max 5 MB)`), 'error');
+        return;
+      }
+      
+      let schemaToUse;
+      let schemaSourceName;
+      
+      try {
+        if (schemaSource === 'generated') {
+          if (!currentSchema) {
+            showToast('Please generate a schema first', 'error');
+            return;
+          }
+          schemaToUse = currentSchema;
+          schemaSourceName = 'Generated Schema';
+        } else {
+          // Custom schema
+          const customSchemaText = document.getElementById('customSchema').value.trim();
+          
+          if (!customSchemaText) {
+            showToast('Please paste a JSON Schema', 'error');
+            return;
+          }
+          
+          try {
+            schemaToUse = JSON.parse(customSchemaText);
+            
+            // Validate schema structure (must have type or $schema)
+            if (!schemaToUse.type && !schemaToUse.$schema && !schemaToUse.properties) {
+              throw new Error('Invalid JSON Schema format. Schema must have "type", "$schema", or "properties"');
+            }
+            
+            schemaSourceName = 'Custom Schema';
+          } catch (e) {
+            showToast(sanitizeText('Invalid JSON Schema: ' + e.message), 'error');
+            return;
+          }
+        }
+        
+        // Show the schema output panel for validation results
+        showSchemaOutput();
+        
+        // Parse and validate JSON data
+        const data = JSON.parse(jsonInput);
+        const errors = validateData(data, schemaToUse, '#');
+        
+        // Display results with schema source indicator
+        displayValidationResult(errors.length === 0, errors, schemaSourceName);
+        
+        // Close panel
+        closeSchemaPanel();
+        
+      } catch (error) {
+        showToast(sanitizeText('Invalid JSON: ' + error.message), 'error');
+      }
+    }
+    
+    // Simple JSON schema validator with INTEGER BUG FIX
+    function validateData(data, schema, path = '#') {
+      const errors = [];
+      
+      if (!schema.type) {
+        return errors;
+      }
+      
+      // Handle null type explicitly (typeof null returns "object", not "null")
+      if (data === null) {
+        if (schema.type === 'null') {
+          return errors; // Valid null, no error
+        } else {
+          errors.push({
+            path: path,
+            message: `Expected type "${schema.type}" but got null`
+          });
+          return errors;
+        }
+      }
+      
+      // CRITICAL FIX: Handle integer type (JSON Schema "integer" vs JavaScript "number")
+      // JSON Schema distinguishes between "integer" and "number", but typeof returns "number" for both
+      if (schema.type === 'integer') {
+        if (typeof data === 'number') {
+          if (!Number.isInteger(data)) {
+            errors.push({
+              path: path,
+              message: `Expected integer but got non-integer number: ${data}`
+            });
+            return errors;
+          }
+          // Valid integer, continue to property validation below
+        } else {
+          const actualType = Array.isArray(data) ? 'array' : typeof data;
+          errors.push({
+            path: path,
+            message: `Expected type "integer" but got "${actualType}"`
+          });
+          return errors;
+        }
+      } else {
+        // Type checking for non-integer types
+        const actualType = Array.isArray(data) ? 'array' : typeof data;
+        
+        if (actualType !== schema.type && schema.type !== 'unknown') {
+          errors.push({
+            path: path,
+            message: `Expected type "${schema.type}" but got "${actualType}"`
+          });
+          return errors;
+        }
+      }
+      
+      // Object validation
+      if (schema.type === 'object' && typeof data === 'object' && data !== null) {
+        // Check required properties
+        if (schema.required && Array.isArray(schema.required)) {
+          for (const req of schema.required) {
+            if (!(req in data)) {
+              errors.push({
+                path: path,
+                message: `Missing required property: "${req}"`
+              });
+            }
+          }
+        }
+        
+        // Validate properties
+        if (schema.properties) {
+          for (const key in schema.properties) {
+            if (key in data) {
+              const propErrors = validateData(data[key], schema.properties[key], `${path}.${key}`);
+              errors.push(...propErrors);
+            }
+          }
+        }
+        
+        // Check additionalProperties
+        if (schema.additionalProperties === false) {
+          for (const key in data) {
+            if (!(key in (schema.properties || {}))) {
+              errors.push({
+                path: path,
+                message: `Additional property not allowed: "${key}"`
+              });
+            }
+          }
+        }
+      }
+      
+      // Array validation
+      if (schema.type === 'array' && Array.isArray(data)) {
+        if (schema.items) {
+          for (let i = 0; i < data.length; i++) {
+            const itemErrors = validateData(data[i], schema.items, `${path}[${i}]`);
+            errors.push(...itemErrors);
+          }
+        }
+      }
+      
+      return errors;
+    }
+    
+    // Display validation results with XSS protection
+    function displayValidationResult(isValid, errors, schemaSourceName) {
+      const container = document.getElementById('validationResultContainer');
+      
+      // Clear previous content
+      container.innerHTML = '';
+      
+      // Create result div using DOM manipulation (safe from XSS)
+      const resultDiv = document.createElement('div');
+      resultDiv.className = isValid ? 'validation-result success' : 'validation-result error';
+      
+      const heading = document.createElement('h3');
+      heading.textContent = isValid ? '✓ Validation Successful' : '✗ Validation Failed';
+      resultDiv.appendChild(heading);
+      
+      // Add schema source indicator if provided
+      if (schemaSourceName) {
+        const indicator = document.createElement('div');
+        indicator.className = schemaSourceName === 'Custom Schema' ? 'schema-indicator custom' : 'schema-indicator';
+        indicator.textContent = '📋 Validated against: ' + schemaSourceName;
+        resultDiv.appendChild(indicator);
+      }
+      
+      if (isValid) {
+        const para = document.createElement('p');
+        para.style.color = 'var(--color-success)';
+        para.style.margin = '1rem 0 0 0';
+        para.textContent = 'Your JSON matches the schema perfectly!';
+        resultDiv.appendChild(para);
+      } else {
+        const para = document.createElement('p');
+        para.style.color = 'var(--color-error)';
+        para.style.margin = '1rem 0 1rem 0';
+        para.textContent = `Found ${errors.length} error(s):`;
+        resultDiv.appendChild(para);
+        
+        const errorList = document.createElement('ul');
+        errorList.className = 'error-list';
+        
+        // Safely create error items using textContent (prevents XSS)
+        errors.forEach(error => {
+          const li = document.createElement('li');
+          li.className = 'error-item';
+          
+          const strong = document.createElement('strong');
+          strong.textContent = 'Path: ' + error.path;
+          li.appendChild(strong);
+          
+          const message = document.createTextNode(' ' + error.message);
+          li.appendChild(message);
+          
+          errorList.appendChild(li);
+        });
+        
+        resultDiv.appendChild(errorList);
+      }
+      
+      container.appendChild(resultDiv);
+      showToast(isValid ? 'Validation passed!' : 'Validation failed', isValid ? 'success' : 'error');
+    }
+    
+    // Utility functions
+    function loadSample() {
+      const sampleData = {
+        id: 12345,
+        name: "John Doe",
+        email: "john@example.com",
+        age: 30,
+        isActive: true,
+        registeredAt: "2024-01-15T10:30:00Z",
+        website: "https://example.com",
+        roles: ["admin", "editor"],
+        profile: {
+          bio: "Software developer",
+          avatar: "https://example.com/avatar.jpg",
+          skills: ["JavaScript", "Python", "Go"]
+        }
+      };
+      
+      const sampleJSON = safeStringify(sampleData, null, 2);
+      if (sampleJSON === null) {
+        showToast('Error loading sample data', 'error');
+        return;
+      }
+      
+      document.getElementById('jsonInput').value = sampleJSON;
+      updateSizeIndicator('jsonSize', sampleJSON.length);
+      showToast('Sample data loaded', 'success');
+    }
+    
+    function copyToClipboard(elementId) {
+      const element = document.getElementById(elementId);
+      let text;
+      
+      if (element.tagName === 'TEXTAREA') {
+        text = element.value;
+      } else {
+        text = element.textContent;
+      }
+      
+      if (!text.trim() || text === 'Schema will appear here after generation...') {
+        showToast('Nothing to copy', 'error');
+        return;
+      }
+      
+      // Robust clipboard copy with fallback chain
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text)
+          .then(() => {
+            showToast('Copied to clipboard!', 'success');
+          })
+          .catch(() => {
+            copyUsingExecCommand(text);
+          });
+      } else {
+        copyUsingExecCommand(text);
+      }
+    }
+    
+    // Legacy clipboard copy fallback using execCommand
+    function copyUsingExecCommand(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.left = '-9999px';
+      textarea.style.top = '0';
+      document.body.appendChild(textarea);
+      
+      try {
+        textarea.select();
+        textarea.setSelectionRange(0, text.length);
+        const successful = document.execCommand('copy');
+        
+        if (successful) {
+          showToast('Copied to clipboard!', 'success');
+        } else {
+          selectTextForManualCopy(textarea);
+        }
+      } catch (err) {
+        selectTextForManualCopy(textarea);
+      } finally {
+        document.body.removeChild(textarea);
+      }
+    }
+    
+    // Final fallback - select text and show message
+    function selectTextForManualCopy(textarea) {
+      textarea.select();
+      showToast('Please press Ctrl+C (or Cmd+C) to copy', 'warning');
+    }
+    
+    function downloadJSON() {
+      const json = document.getElementById('jsonInput').value.trim();
+      if (!json) {
+        showToast('No JSON to download', 'error');
+        return;
+      }
+      try {
+        // Validate it's actual JSON before download
+        JSON.parse(json);
+        downloadFile(json, 'data.json', 'application/json');
+      } catch (error) {
+        showToast(sanitizeText('Cannot download: Invalid JSON - ' + error.message), 'error');
+      }
+    }
+    
+    function downloadSchema() {
+      const schema = document.getElementById('schemaOutput').textContent;
+      if (schema === 'Schema will appear here after generation...') {
+        showToast('No schema to download', 'error');
+        return;
+      }
+      try {
+        // Validate it's actual JSON before download
+        JSON.parse(schema);
+        downloadFile(schema, 'schema.json', 'application/json');
+      } catch (error) {
+        showToast(sanitizeText('Cannot download: Invalid schema - ' + error.message), 'error');
+      }
+    }
+    
+    function downloadFile(content, filename, type) {
+      const blob = new Blob([content], { type });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      showToast(`Downloaded ${filename}`, 'success');
+    }
+    
+    function clearJSON() {
+      if (confirm('Clear JSON input?')) {
+        document.getElementById('jsonInput').value = '';
+        updateSizeIndicator('jsonSize', 0);
+        document.getElementById('validationResultContainer').innerHTML = '';
+      }
+    }
+    
+    function clearSchema() {
+      if (confirm('Clear schema output?')) {
+        currentSchema = null;
+        const schemaOutput = document.getElementById('schemaOutput');
+        schemaOutput.textContent = 'Schema will appear here after generation...';
+        schemaOutput.classList.add('empty');
+        updateSizeIndicator('schemaSize', 0);
+      }
+    }
+    
+    function updateSizeIndicator(elementId, bytes) {
+      const element = document.getElementById(elementId);
+      const MAX_SIZE_MB = 5;
+      
+      if (bytes === 0) {
+        element.textContent = '0 bytes';
+      } else if (bytes < 1024) {
+        element.textContent = bytes + ' bytes';
+      } else if (bytes < 1024 * 1024) {
+        element.textContent = (bytes / 1024).toFixed(1) + ' KB';
+      } else {
+        const sizeMB = (bytes / (1024 * 1024)).toFixed(1);
+        element.textContent = sizeMB + ' MB';
+        
+        // Warning if approaching limit
+        if (parseFloat(sizeMB) > MAX_SIZE_MB) {
+          element.style.color = 'var(--color-error)';
+        } else if (parseFloat(sizeMB) > MAX_SIZE_MB * 0.8) {
+          element.style.color = 'var(--color-warning)';
+        } else {
+          element.style.color = 'var(--color-text-muted)';
+        }
+      }
+    }
+    
+    // Sanitize text to prevent HTML injection
+    function sanitizeText(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    // Safe JSON.stringify with circular reference detection
+    function safeStringify(obj, replacer, space) {
+      try {
+        // Use native JSON.stringify with circular reference handling
+        const seen = new WeakSet();
+        return JSON.stringify(obj, function(key, value) {
+          if (typeof value === 'object' && value !== null) {
+            if (seen.has(value)) {
+              return '[Circular Reference]';
+            }
+            seen.add(value);
+          }
+          return replacer ? replacer(key, value) : value;
+        }, space);
+      } catch (error) {
+        if (error.message && error.message.includes('circular')) {
+          return null; // Signal circular reference error
+        }
+        throw error;
+      }
+    }
+    
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+    
+    // Toggle help panel visibility
+    function toggleHelp() {
+      const panel = document.getElementById('infoPanel');
+      const button = document.querySelector('.help-toggle-btn');
+      const isCollapsed = panel.classList.contains('collapsed');
+      
+      if (isCollapsed) {
+        panel.classList.remove('collapsed');
+        panel.setAttribute('aria-hidden', 'false');
+        button.setAttribute('aria-expanded', 'true');
+        localStorage.setItem('helpPanelExpanded', 'true');
+      } else {
+        panel.classList.add('collapsed');
+        panel.setAttribute('aria-hidden', 'true');
+        button.setAttribute('aria-expanded', 'false');
+        localStorage.setItem('helpPanelExpanded', 'false');
+      }
+    }
+    
+    // ========================================
+    // DIFF CHECKER FUNCTIONS
+    // ========================================
+    function updateLineCount(textareaId, countId) {
+      const textarea = document.getElementById(textareaId);
+      const counter = document.getElementById(countId);
+      if (textarea && counter) {
+        const lines = textarea.value.split('\n').length;
+        counter.textContent = `${lines} line${lines !== 1 ? 's' : ''}`;
+      }
+    }
+    
+    function compareDiff() {
+      const original = document.getElementById('originalText').value;
+      const modified = document.getElementById('modifiedText').value;
+      const mode = document.getElementById('diffMode').value;
+       const caseSensitive = document.getElementById('caseSensitive').checked;
+      const ignoreWhitespace = document.getElementById('ignoreWhitespace').checked;
+      
+      if (!original && !modified) {
+        showToast('Please enter text in both panels', 'warning');
+        return;
+      }
+      
+      let originalLines = original.split('\n');
+      let modifiedLines = modified.split('\n');
+      
+      // Apply options
+      const originalProcessed = originalLines.map(line => {
+        let processed = line;
+        if (ignoreWhitespace) processed = processed.trim();
+        if (!caseSensitive) processed = processed.toLowerCase();
+        return processed;
+      });
+      
+      const modifiedProcessed = modifiedLines.map(line => {
+        let processed = line;
+        if (ignoreWhitespace) processed = processed.trim();
+        if (!caseSensitive) processed = processed.toLowerCase();
+        return processed;
+      });
+      
+      // Compute diff
+      const diff = computeLineDiff(originalProcessed, modifiedProcessed, originalLines, modifiedLines);
+      
+      // Display results
+      displayDiffResults(diff);
+    }
+    
+    function computeLineDiff(originalProcessed, modifiedProcessed, originalLines, modifiedLines) {
+      const lcs = longestCommonSubsequence(originalProcessed, modifiedProcessed);
+      const diff = [];
+      
+      let i = 0, j = 0, k = 0;
+      
+      while (i < originalProcessed.length || j < modifiedProcessed.length) {
+        if (k < lcs.length && originalProcessed[i] === lcs[k] && modifiedProcessed[j] === lcs[k]) {
+          diff.push({ type: 'unchanged', line: originalLines[i] });
+          i++; j++; k++;
+        } else if (i < originalProcessed.length && (k >= lcs.length || originalProcessed[i] !== lcs[k])) {
+          diff.push({ type: 'removed', line: originalLines[i] });
+          i++;
+        } else if (j < modifiedProcessed.length && (k >= lcs.length || modifiedProcessed[j] !== lcs[k])) {
+          diff.push({ type: 'added', line: modifiedLines[j] });
+          j++;
+        }
+      }
+      
+      return diff;
+    }
+    
+    function longestCommonSubsequence(arr1, arr2) {
+      const m = arr1.length, n = arr2.length;
+      const dp = Array(m + 1).fill(0).map(() => Array(n + 1).fill(0));
+      
+      for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+          if (arr1[i - 1] === arr2[j - 1]) {
+            dp[i][j] = dp[i - 1][j - 1] + 1;
+          } else {
+            dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+          }
+        }
+      }
+      
+      // Reconstruct LCS
+      const lcs = [];
+      let i = m, j = n;
+      while (i > 0 && j > 0) {
+        if (arr1[i - 1] === arr2[j - 1]) {
+          lcs.unshift(arr1[i - 1]);
+          i--; j--;
+        } else if (dp[i - 1][j] > dp[i][j - 1]) {
+          i--;
+        } else {
+          j--;
+        }
+      }
+      
+      return lcs;
+    }
+    
+    function displayDiffResults(diff) {
+      const resultsDiv = document.getElementById('diffResults');
+      const outputDiv = document.getElementById('diffOutput');
+      const statsDiv = document.getElementById('diffStats');
+      
+      // Calculate stats
+      const added = diff.filter(d => d.type === 'added').length;
+      const removed = diff.filter(d => d.type === 'removed').length;
+      const unchanged = diff.filter(d => d.type === 'unchanged').length;
+      
+      statsDiv.innerHTML = `
+        <span class="stat-item stat-added">+${added} added</span>
+        <span class="stat-item stat-removed">-${removed} removed</span>
+        <span class="stat-item">=${unchanged} unchanged</span>
+      `;
+      
+      // Render diff
+      let html = '<div class="diff-lines">';
+      diff.forEach((item) => {
+        const safeText = escapeHtml(item.line);
+        if (item.type === 'added') {
+          html += `<div class="diff-line diff-added">+ ${safeText}</div>`;
+        } else if (item.type === 'removed') {
+          html += `<div class="diff-line diff-removed">- ${safeText}</div>`;
+        } else {
+          html += `<div class="diff-line diff-unchanged">  ${safeText}</div>`;
+        }
+      });
+      html += '</div>';
+      
+      outputDiv.innerHTML = html;
+      resultsDiv.style.display = 'block';
+      showToast('Comparison complete!', 'success');
+    }
+    
+    function swapDiffTexts() {
+      const original = document.getElementById('originalText');
+      const modified = document.getElementById('modifiedText');
+      const temp = original.value;
+      original.value = modified.value;
+      modified.value = temp;
+      updateLineCount('originalText', 'originalCount');
+      updateLineCount('modifiedText', 'modifiedCount');
+    }
+    
+    function clearDiff() {
+      if (confirm('Clear all text?')) {
+        document.getElementById('originalText').value = '';
+        document.getElementById('modifiedText').value = '';
+        document.getElementById('diffResults').style.display = 'none';
+        updateLineCount('originalText', 'originalCount');
+        updateLineCount('modifiedText', 'modifiedCount');
+      }
+    }
+    
+    function copyDiffResults() {
+      const output = document.getElementById('diffOutput');
+      if (!output || output.innerHTML === '') {
+        showToast('No results to copy', 'warning');
+        return;
+      }
+      const text = output.innerText;
+      copyToClipboardText(text, 'Diff results copied!');
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    // ========================================
+    // MARKDOWN CONVERTER FUNCTIONS
+    // ========================================
+    function updateConversionLabels() {
+      const mode = document.getElementById('conversionMode').value;
+      const inputLabel = document.getElementById('inputLabel');
+      const outputLabel = document.getElementById('outputLabel');
+      const inputArea = document.getElementById('converterInput');
+      
+      if (mode === 'html-to-md') {
+        inputLabel.textContent = 'HTML Input';
+        outputLabel.textContent = 'Markdown Output';
+        inputArea.placeholder = 'Paste HTML here...';
+      } else {
+        inputLabel.textContent = 'Markdown Input';
+        outputLabel.textContent = 'HTML Output';
+        inputArea.placeholder = 'Paste Markdown here...';
+      }
+    }
+    
+    function convertFormat() {
+      const input = document.getElementById('converterInput').value;
+      const mode = document.getElementById('conversionMode').value;
+      const useGFM = document.getElementById('useGFM').checked;
+      const output = document.getElementById('converterOutput');
+      
+      if (!input.trim()) {
+        showToast('Please enter text to convert', 'warning');
+        return;
+      }
+      
+      try {
+        let result;
+        if (mode === 'html-to-md') {
+          result = htmlToMarkdown(input, useGFM);
+        } else {
+          result = markdownToHtml(input, useGFM);
+        }
+        
+        output.value = result;
+        showToast('Conversion complete!', 'success');
+      } catch (error) {
+        showToast('Conversion failed: ' + error.message, 'error');
+      }
+    }
+    
+    function htmlToMarkdown(html, useGFM) {
+      let md = html;
+      
+      // Headers
+      md = md.replace(/<h1[^>]*>(.*?)<\/h1>/gi, '# $1\n\n');
+      md = md.replace(/<h2[^>]*>(.*?)<\/h2>/gi, '## $1\n\n');
+      md = md.replace(/<h3[^>]*>(.*?)<\/h3>/gi, '### $1\n\n');
+      md = md.replace(/<h4[^>]*>(.*?)<\/h4>/gi, '#### $1\n\n');
+      md = md.replace(/<h5[^>]*>(.*?)<\/h5>/gi, '##### $1\n\n');
+      md = md.replace(/<h6[^>]*>(.*?)<\/h6>/gi, '###### $1\n\n');
+      
+      // Bold, Italic
+      md = md.replace(/<(strong|b)[^>]*>(.*?)<\/\1>/gi, '**$2**');
+      md = md.replace(/<(em|i)[^>]*>(.*?)<\/\1>/gi, '*$2*');
+      
+      // Links
+      md = md.replace(/<a[^>]+href=\"([^\"]+)\"[^>]*>(.*?)<\/a>/gi, '[$2]($1)');
+      
+      // Images
+      md = md.replace(/<img[^>]+src=\"([^\"]+)\"[^>]*alt=\"([^\"]*)\"[^>]*>/gi, '![$2]($1)');
+      
+      // Code blocks
+      md = md.replace(/<pre[^>]*><code[^>]*>(.*?)<\/code><\/pre>/gis, '```\n$1\n```\n\n');
+      md = md.replace(/<code[^>]*>(.*?)<\/code>/gi, '`$1`');
+      
+      // Lists
+      md = md.replace(/<ul[^>]*>(.*?)<\/ul>/gis, (match, content) => {
+        return content.replace(/<li[^>]*>(.*?)<\/li>/gi, '- $1\n') + '\n';
+      });
+      
+      md = md.replace(/<ol[^>]*>(.*?)<\/ol>/gis, (match, content) => {
+        let counter = 1;
+        return content.replace(/<li[^>]*>(.*?)<\/li>/gi, () => `${counter++}. $1\n`) + '\n';
+      });
+      
+      // Paragraphs
+      md = md.replace(/<p[^>]*>(.*?)<\/p>/gi, '$1\n\n');
+      
+      // Line breaks
+      md = md.replace(/<br\s*\/?>/gi, '\n');
+      
+      // Blockquotes
+      md = md.replace(/<blockquote[^>]*>(.*?)<\/blockquote>/gis, (match, content) => {
+        return content.split('\n').map(line => '> ' + line.trim()).join('\n') + '\n\n';
+      });
+      
+      // Remove remaining HTML tags
+      md = md.replace(/<[^>]+>/g, '');
+      
+      // Decode HTML entities
+      md = md.replace(/&nbsp;/g, ' ');
+      md = md.replace(/&lt;/g, '<');
+      md = md.replace(/&gt;/g, '>');
+      md = md.replace(/&amp;/g, '&');
+      md = md.replace(/&quot;/g, '\"');
+      
+      // Clean up extra newlines
+      md = md.replace(/\n{3,}/g, '\n\n');
+      
+      return md.trim();
+    }
+    
+    function markdownToHtml(md, useGFM) {
+      let html = md;
+      
+      // Escape HTML first
+      html = html.replace(/&/g, '&amp;')
+                 .replace(/</g, '&lt;')
+                 .replace(/>/g, '&gt;');
+      
+      // Code blocks (before other replacements)
+      html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+      html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+      
+      // Headers
+      html = html.replace(/^######\s+(.+)$/gm, '<h6>$1</h6>');
+      html = html.replace(/^#####\s+(.+)$/gm, '<h5>$1</h5>');
+      html = html.replace(/^####\s+(.+)$/gm, '<h4>$1</h4>');
+      html = html.replace(/^###\s+(.+)$/gm, '<h3>$1</h3>');
+      html = html.replace(/^##\s+(.+)$/gm, '<h2>$1</h2>');
+      html = html.replace(/^#\s+(.+)$/gm, '<h1>$1</h1>');
+      
+      // Bold, Italic
+      html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+      
+      // Links
+      html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+      
+      // Images
+      html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1">');
+      
+      // Unordered lists
+      const ulLines = [];
+      html.split('\n').forEach(line => {
+        if (line.match(/^[-*]\s+(.+)$/)) {
+          ulLines.push('<li>' + line.replace(/^[-*]\s+/, '') + '</li>');
+        } else if (ulLines.length > 0) {
+          html = html.replace(ulLines.join('\n'), '<ul>\n' + ulLines.join('\n') + '\n</ul>');
+          ulLines.length = 0;
+        }
+      });
+      
+      // Ordered lists
+      html = html.replace(/^\d+\.\s+(.+)$/gm, '<li>$1</li>');
+      html = html.replace(/(<li>.*?<\/li>\n?)+/gs, '<ol>$&</ol>');
+      
+      // Blockquotes
+      html = html.replace(/^>\s+(.+)$/gm, '<blockquote>$1</blockquote>');
+      
+      // Paragraphs
+      const lines = html.split('\n\n');
+      html = lines.map(para => {
+        para = para.trim();
+        if (!para) return '';
+        if (para.match(/^<[^>]+>/)) {
+          return para;
+        }
+        return '<p>' + para + '</p>';
+      }).join('\n');
+      
+      return html;
+    }
+    
+    function swapConversionDirection() {
+      const modeSelect = document.getElementById('conversionMode');
+      const currentMode = modeSelect.value;
+      modeSelect.value = currentMode === 'html-to-md' ? 'md-to-html' : 'html-to-md';
+      
+      // Swap input/output
+      const input = document.getElementById('converterInput');
+      const output = document.getElementById('converterOutput');
+      const temp = input.value;
+      input.value = output.value;
+      output.value = temp;
+      
+      updateConversionLabels();
+    }
+    
+    function clearConverter() {
+      if (confirm('Clear all text?')) {
+        document.getElementById('converterInput').value = '';
+        document.getElementById('converterOutput').value = '';
+      }
+    }
+    
+    function copyConverterOutput() {
+      const output = document.getElementById('converterOutput').value;
+      if (!output) {
+        showToast('No output to copy', 'warning');
+        return;
+      }
+      copyToClipboardText(output, 'Output copied!');
+    }
+    
+    function downloadConverterOutput() {
+      const output = document.getElementById('converterOutput').value;
+      if (!output) {
+        showToast('No output to download', 'warning');
+        return;
+      }
+      const mode = document.getElementById('conversionMode').value;
+      const ext = mode === 'html-to-md' ? 'md' : 'html';
+      const filename = `converted.${ext}`;
+      
+      downloadFile(output, filename);
+    }
+    
+    function loadMarkdownSample() {
+      const sample = `# Sample Markdown Document
+
+## Introduction
+This is a **sample** markdown document with various *formatting* options.
+
+### Features
+- Bullet lists
+- **Bold text**
+- *Italic text*
+- [Links](https://example.com)
+
+### Code Example
+\`\`\`javascript
+function hello() {
+    console.log("Hello, World!");
+}
+\`\`\`
+
+> Blockquote example
+
+1. Numbered list
+2. Second item
+3. Third item`;
+      
+      document.getElementById('converterInput').value = sample;
+      document.getElementById('conversionMode').value = 'md-to-html';
+      updateConversionLabels();
+    }
+    
+    // ========================================
+    // SIP CALCULATOR FUNCTIONS
+    // ========================================
+    function calculateSIP() {
+      const monthlyAmount = parseFloat(document.getElementById('sipAmount').value);
+      const annualRate = parseFloat(document.getElementById('sipRate').value);
+      const years = parseInt(document.getElementById('sipDuration').value);
+      
+      if (!monthlyAmount || !annualRate || !years) {
+        showToast('Please fill all fields', 'warning');
+        return;
+      }
+      
+      if (monthlyAmount < 100) {
+        showToast('Minimum investment is ₹100', 'warning');
+        return;
+      }
+      
+      const monthlyRate = annualRate / 12 / 100;
+      const months = years * 12;
+      
+      // Calculate future value using SIP formula
+      const futureValue = monthlyAmount * 
+        (((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate) * 
+        (1 + monthlyRate));
+      
+      const totalInvested = monthlyAmount * months;
+      const wealthGain = futureValue - totalInvested;
+      
+      // Display summary
+      document.getElementById('sipInvested').textContent = formatCurrency(totalInvested);
+      document.getElementById('sipGain').textContent = formatCurrency(wealthGain);
+      document.getElementById('sipFinalValue').textContent = formatCurrency(futureValue);
+      
+      // Generate year-wise breakdown
+      generateYearWiseBreakdown(monthlyAmount, monthlyRate, years);
+      
+      document.getElementById('sipResults').style.display = 'block';
+      showToast('Calculation complete!', 'success');
+    }
+    
+    function generateYearWiseBreakdown(monthlyAmount, monthlyRate, years) {
+      const tbody = document.getElementById('sipTableBody');
+      tbody.innerHTML = '';
+      
+      for (let year = 1; year <= years; year++) {
+        const monthsElapsed = year * 12;
+        const cumulativeInvestment = monthlyAmount * monthsElapsed;
+        
+        // Calculate value for this year
+        const cumulativeValue = monthlyAmount * 
+          (((Math.pow(1 + monthlyRate, monthsElapsed) - 1) / monthlyRate) * 
+          (1 + monthlyRate));
+        
+        const gain = cumulativeValue - cumulativeInvestment;
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${year}</td>
+          <td>${formatCurrency(cumulativeInvestment)}</td>
+          <td>${formatCurrency(cumulativeValue)}</td>
+          <td class="success">${formatCurrency(gain)}</td>
+        `;
+        tbody.appendChild(row);
+      }
+    }
+    
+    function formatCurrency(amount) {
+      return '₹' + amount.toLocaleString('en-IN', {
+        maximumFractionDigits: 0
+      });
+    }
+    
+    function resetSIPCalculator() {
+      document.getElementById('sipResults').style.display = 'none';
+      document.getElementById('sipAmount').value = '5000';
+      document.getElementById('sipRate').value = '12';
+      document.getElementById('sipDuration').value = '10';
+    }
+    
+    function exportSIPResults() {
+      const amount = document.getElementById('sipAmount').value;
+      const rate = document.getElementById('sipRate').value;
+      const duration = document.getElementById('sipDuration').value;
+      
+      let csv = 'SIP Calculator Results\\n\\n';
+      csv += `Monthly Investment,₹${amount}\\n`;
+      csv += `Annual Return Rate,${rate}%\\n`;
+      csv += `Investment Period,${duration} years\\n\\n`;
+      csv += 'Year,Invested,Estimated Value,Wealth Gain\\n';
+      
+      const rows = document.querySelectorAll('#sipTableBody tr');
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        csv += Array.from(cells).map(cell => cell.textContent).join(',') + '\\n';
+      });
+      
+      downloadFile(csv, 'sip-calculation.csv', 'text/csv');
+    }
+    
+    // ========================================
+    // EMI CALCULATOR FUNCTIONS
+    // ========================================
+    function calculateEMI() {
+      const principal = parseFloat(document.getElementById('loanAmount').value);
+      const annualRate = parseFloat(document.getElementById('loanRate').value);
+      const years = parseInt(document.getElementById('loanTenure').value);
+      
+      if (!principal || !annualRate || !years) {
+        showToast('Please fill all fields', 'warning');
+        return;
+      }
+      
+      if (principal < 10000) {
+        showToast('Minimum loan amount is ₹10,000', 'warning');
+        return;
+      }
+      
+      const monthlyRate = annualRate / 12 / 100;
+      const months = years * 12;
+      
+      // Calculate EMI using formula
+      const emi = principal * monthlyRate * 
+        Math.pow(1 + monthlyRate, months) / 
+        (Math.pow(1 + monthlyRate, months) - 1);
+      
+      const totalPayment = emi * months;
+      const totalInterest = totalPayment - principal;
+      
+      // Display summary
+      document.getElementById('monthlyEMI').textContent = formatCurrency(emi);
+      document.getElementById('totalInterest').textContent = formatCurrency(totalInterest);
+      document.getElementById('totalPayment').textContent = formatCurrency(totalPayment);
+      
+      // Generate amortization schedule
+      generateAmortizationSchedule(principal, monthlyRate, months, emi, years);
+      
+      document.getElementById('emiResults').style.display = 'block';
+      
+      // Show prepayment section after first calculation
+      document.getElementById('prepaymentSection').style.display = 'block';
+      
+      // Hide prepayment comparison (will show after prepayment calculation)
+      document.getElementById('prepaymentComparison').style.display = 'none';
+      
+      showToast('Calculation complete!', 'success');
+    }
+    
+    function generateAmortizationSchedule(principal, monthlyRate, months, emi, years) {
+      const tbody = document.getElementById('emiTableBody');
+      tbody.innerHTML = '';
+      
+      let balance = principal;
+      
+      for (let year = 1; year <= years; year++) {
+        let yearlyPrincipal = 0;
+        let yearlyInterest = 0;
+        
+        const startMonth = (year - 1) * 12 + 1;
+        const endMonth = year * 12;
+        
+        for (let month = startMonth; month <= endMonth && month <= months; month++) {
+          const interest = balance * monthlyRate;
+          const principalPaid = emi - interest;
+          
+          yearlyPrincipal += principalPaid;
+          yearlyInterest += interest;
+          balance -= principalPaid;
+        }
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${year}</td>
+          <td>${formatCurrency(yearlyPrincipal)}</td>
+          <td>${formatCurrency(yearlyInterest)}</td>
+          <td>${formatCurrency(Math.max(0, balance))}</td>
+        `;
+        tbody.appendChild(row);
+      }
+    }
+    
+    function resetEMICalculator() {
+      document.getElementById('emiResults').style.display = 'none';
+      document.getElementById('loanAmount').value = '5000000';
+      document.getElementById('loanRate').value = '8.5';
+      document.getElementById('loanTenure').value = '20';
+    }
+    
+    function exportEMIResults() {
+      const amount = document.getElementById('loanAmount').value;
+      const rate = document.getElementById('loanRate').value;
+      const tenure = document.getElementById('loanTenure').value;
+      
+      let csv = 'EMI Calculator Results\\n\\n';
+      csv += `Loan Amount,₹${amount}\\n`;
+      csv += `Interest Rate,${rate}%\\n`;
+      csv += `Loan Tenure,${tenure} years\\n\\n`;
+      csv += 'Year,Principal,Interest,Balance\\n';
+      
+      const rows = document.querySelectorAll('#emiTableBody tr');
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        csv += Array.from(cells).map(cell => cell.textContent).join(',') + '\\n';
+      });
+      
+      downloadFile(csv, 'emi-calculation.csv', 'text/csv');
+    }
+    
+    // ========================================
+    // EMI PREPAYMENT CALCULATOR FUNCTIONS
+    // ========================================
+    
+    /**
+     * Toggles prepayment section expand/collapse
+     */
+    function togglePrepaymentSection() {
+      const form = document.getElementById('prepaymentForm');
+      const toggle = document.getElementById('prepaymentToggle');
+      const header = document.querySelector('.section-header');
+      
+      if (form.style.display === 'none') {
+        form.style.display = 'block';
+        toggle.textContent = '▲';
+        toggle.classList.add('expanded');
+        header.setAttribute('aria-expanded', 'true');
+      } else {
+        form.style.display = 'none';
+        toggle.textContent = '▼';
+        toggle.classList.remove('expanded');
+        header.setAttribute('aria-expanded', 'false');
+      }
+    }
+    
+    /**
+     * Updates prepayment form based on prepayment type selection
+     */
+    function updatePrepaymentForm() {
+      const type = document.getElementById('prepaymentType').value;
+      const startMonthGroup = document.getElementById('startMonthGroup');
+      
+      // For monthly extra, start month is always relevant
+      // For lump sum, also relevant to choose when to make payment
+      startMonthGroup.style.display = 'block';
+    }
+    
+    /**
+     * UI handler for prepayment calculation
+     */
+    function calculateEMIWithPrepaymentUI() {
+      const principal = parseFloat(document.getElementById('loanAmount').value);
+      const annualRate = parseFloat(document.getElementById('loanRate').value);
+      const tenureYears = parseInt(document.getElementById('loanTenure').value);
+      const prepaymentAmount = parseFloat(document.getElementById('prepaymentAmount').value);
+      const startMonth = parseInt(document.getElementById('prepaymentStartMonth').value);
+      
+      // Validation
+      if (!prepaymentAmount) {
+        showToast('Please enter prepayment amount', 'warning');
+        return;
+      }
+      
+      if (prepaymentAmount < 1000) {
+        showToast('Minimum prepayment amount is ₹1,000', 'warning');
+        return;
+      }
+      
+      if (startMonth < 1 || startMonth > tenureYears * 12) {
+        showToast('Start month must be between 1 and ' + (tenureYears * 12), 'warning');
+        return;
+      }
+      
+      const prepayment = {
+        type: document.getElementById('prepaymentType').value,
+        amount: prepaymentAmount,
+        startMonth: startMonth,
+        strategy: document.querySelector('input[name=\"prepaymentStrategy\"]:checked').value
+      };
+      
+      // Calculate original EMI for comparison
+      const monthlyRate = annualRate / 12 / 100;
+      const months = tenureYears * 12;
+      const emi = principal * monthlyRate * 
+        Math.pow(1 + monthlyRate, months) / 
+        (Math.pow(1 + monthlyRate, months) - 1);
+      const originalTotalPayment = emi * months;
+      const originalTotalInterest = originalTotalPayment - principal;
+      
+      // Calculate with prepayment
+      const result = calculateEMIWithPrepayment(principal, annualRate, tenureYears, prepayment);
+      
+      // Display comparison
+      displayPrepaymentComparison({
+        original: {
+          interest: originalTotalInterest,
+          tenure: tenureYears,
+          total: originalTotalPayment
+        },
+        prepayment: result
+      });
+      
+      showToast('Prepayment impact calculated!', 'success');
+    }
+    
+    /**
+     * Calculates EMI with prepayment applied
+     * @param {number} principal - Loan amount
+     * @param {number} annualRate - Interest rate (annual %)
+     * @param {number} tenureYears - Loan tenure in years
+     * @param {Object} prepayment - Prepayment configuration
+     * @returns {Object} - Calculation results
+     */
+    function calculateEMIWithPrepayment(principal, annualRate, tenureYears, prepayment) {
+      const monthlyRate = annualRate / 12 / 100;
+      const originalMonths = tenureYears * 12;
+      
+      // Calculate original EMI
+      const originalEMI = principal * monthlyRate * 
+        Math.pow(1 + monthlyRate, originalMonths) / 
+        (Math.pow(1 + monthlyRate, originalMonths) - 1);
+      
+      let balance = principal;
+      let totalInterest = 0;
+      let totalPrepayment = 0;
+      let actualMonths = 0;
+      let newEMI = originalEMI;
+      
+      for (let month = 1; month <= originalMonths; month++) {
+        if (balance <= 0) break;
+        
+        const interest = balance * monthlyRate;
+        let principalPayment = newEMI - interest;
+        
+        // Apply prepayment
+        let prepaymentThisMonth = 0;
+        
+        if (prepayment.type === 'lump-sum' && month === prepayment.startMonth) {
+          // One-time lump sum prepayment
+          prepaymentThisMonth = Math.min(prepayment.amount, balance);
+          totalPrepayment += prepaymentThisMonth;
+          
+        } else if (prepayment.type === 'monthly-extra' && month >= prepayment.startMonth) {
+          // Monthly extra payment
+          prepaymentThisMonth = Math.min(prepayment.amount, balance);
+          totalPrepayment += prepaymentThisMonth;
+        }
+        
+        // Update balance
+        balance -= (principalPayment + prepaymentThisMonth);
+        totalInterest += interest;
+        actualMonths = month;
+        
+        // For reduce-EMI strategy, recalculate EMI after prepayment
+        if (prepaymentThisMonth > 0 && prepayment.strategy === 'reduce-emi') {
+          const remainingMonths = originalMonths - month;
+          if (remainingMonths > 0 && balance > 0) {
+            newEMI = balance * monthlyRate * 
+              Math.pow(1 + monthlyRate, remainingMonths) / 
+              (Math.pow(1 + monthlyRate, remainingMonths) - 1);
+          }
+        }
+        
+        // Prevent infinite loop
+        if (balance < 1) {
+          balance = 0;
+          break;
+        }
+      }
+      
+      const actualTenure = actualMonths / 12;
+      const totalPayment = (newEMI * actualMonths) + totalPrepayment;
+      
+      return {
+        interest: totalInterest,
+        tenure: actualTenure,
+        total: totalPayment,
+        actualMonths: actualMonths,
+        prepaymentAmount: totalPrepayment
+      };
+    }
+    
+    /**
+     * Displays prepayment comparison results
+     */
+    function displayPrepaymentComparison(data) {
+      // Update original values
+      document.getElementById('originalInterest').textContent = formatCurrency(data.original.interest);
+      document.getElementById('originalTenure').textContent = data.original.tenure.toFixed(1) + ' years';
+      document.getElementById('originalTotal').textContent = formatCurrency(data.original.total);
+      
+      // Update prepayment values
+      document.getElementById('prepaymentInterest').textContent = formatCurrency(data.prepayment.interest);
+      document.getElementById('prepaymentTenure').textContent = data.prepayment.tenure.toFixed(1) + ' years';
+      document.getElementById('prepaymentTotal').textContent = formatCurrency(data.prepayment.total);
+      
+      // Calculate and display savings
+      const interestSaved = data.original.interest - data.prepayment.interest;
+      const tenureSaved = data.original.tenure - data.prepayment.tenure;
+      const totalSaved = data.original.total - data.prepayment.total;
+      
+      document.getElementById('totalSavings').textContent = 
+        formatCurrency(totalSaved) + ' (' + 
+        tenureSaved.toFixed(1) + ' years saved)';
+      
+      // Show comparison section
+      document.getElementById('prepaymentComparison').style.display = 'block';
+      
+      // Scroll to results
+      document.getElementById('prepaymentComparison').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    
+    // ========================================
+    // UTILITY FUNCTIONS
+    // ========================================
+    function copyToClipboardText(text, message) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text)
+          .then(() => {
+            showToast(message || 'Copied to clipboard!', 'success');
+          })
+          .catch(() => {
+            copyUsingExecCommand(text, message);
+          });
+      } else {
+        copyUsingExecCommand(text, message);
+      }
+    }
+  </script>
+</body>
+</html>

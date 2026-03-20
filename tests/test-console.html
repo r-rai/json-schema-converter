@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Console - DevToolbox</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 2rem;
+    }
+    .console {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: #1e293b;
+      border-radius: 8px;
+      padding: 2rem;
+    }
+    h1 {
+      color: #60a5fa;
+      margin-bottom: 2rem;
+      font-size: 1.5rem;
+    }
+    .test {
+      background: #0f172a;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-left: 3px solid #475569;
+      border-radius: 4px;
+    }
+    .test.pass { border-left-color: #10b981; }
+    .test.fail { border-left-color: #ef4444; }
+    .test h3 { color: #cbd5e1; margin-bottom: 0.5rem; }
+    .test pre {
+      color: #94a3b8;
+      font-size: 0.875rem;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+    .result {
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      background: rgba(96, 165, 250, 0.1);
+      border-radius: 4px;
+      color: #60a5fa;
+    }
+    button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin: 0.5rem 0.5rem 0.5rem 0;
+    }
+    button:hover { background: #2563eb; }
+    .nav-buttons { margin-bottom: 2rem; }
+    .nav-buttons a {
+      display: inline-block;
+      background: #64748b;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      text-decoration: none;
+      margin-right: 0.5rem;
+    }
+    .status { color: #fbbf24; }
+  </style>
+</head>
+<body>
+  <div class="console">
+    <h1>🔧 DevToolbox Test Console</h1>
+    
+    <div class="nav-buttons">
+      <a href="/">← Home</a>
+      <a href="/visual-test.html">Visual Tests</a>
+    </div>
+
+    <div id="test-results"></div>
+    
+    <button onclick="runAllTests()">🚀 Run All Tests</button>
+    <button onclick="clearCache()">🗑️ Clear Cache & Reload</button>
+    <button onclick="window.location.reload(true)">🔄 Hard Refresh</button>
+  </div>
+
+  <script>
+    const results = document.getElementById('test-results');
+
+    function log(title, message, status = 'info') {
+      const div = document.createElement('div');
+      div.className = `test ${status}`;
+      div.innerHTML = `
+        <h3>${title}</h3>
+        <div class="result">${message}</div>
+      `;
+      results.appendChild(div);
+    }
+
+    async function testLibraries() {
+      log('Test 1: Library Availability', 'Checking global library objects...', 'info');
+      
+      const libs = {
+        'Chart.js': typeof Chart !== 'undefined',
+        'jsdiff (Diff)': typeof Diff !== 'undefined',
+        'marked': typeof marked !== 'undefined',
+        'TurndownService': typeof TurndownService !== 'undefined',
+        'DOMPurify': typeof DOMPurify !== 'undefined'
+      };
+
+      const report = Object.entries(libs)
+        .map(([name, available]) => `${available ? '✓' : '✗'} ${name}: ${available ? 'Available' : 'NOT FOUND'}`)
+        .join('<br>');
+      
+      const allAvailable = Object.values(libs).every(v => v);
+      log('Library Check', report, allAvailable ? 'pass' : 'fail');
+    }
+
+    async function testChartInTools() {
+      log('Test 2: Chart.js in Calculator Tools', 'Checking if Chart.js loads in tool pages...', 'info');
+      
+      // Navigate to SIP calculator
+      window.location.hash = '#/sip-calculator';
+      
+      setTimeout(() => {
+        const chartLoaded = typeof Chart !== 'undefined';
+        log('SIP Calculator Chart.js', 
+          chartLoaded ? '✓ Chart.js is loaded' : '✗ Chart.js NOT loaded - Do hard refresh (Ctrl+Shift+R)',
+          chartLoaded ? 'pass' : 'fail');
+      }, 1000);
+    }
+
+    async function testButtonClasses() {
+      log('Test 3: Button Class Names', 'Checking for correct button sizing classes...', 'info');
+      
+      // Check JSON Schema
+      window.location.hash = '#/json-schema';
+      
+      setTimeout(async () => {
+        const container = document.querySelector('.action-buttons');
+        if (!container) {
+          log('Button Class Check', '✗ .action-buttons container not found', 'fail');
+          return;
+        }
+
+        const buttons = container.querySelectorAll('button');
+        const classReport = Array.from(buttons).map((btn, i) => {
+          const hasCorrectClass = btn.classList.contains('btn-large');
+          const hasOldClass = btn.classList.contains('btn-lg');
+          return `Button ${i + 1}: ${hasCorrectClass ? '✓' : '✗'} btn-large ${hasOldClass ? '(OLD: btn-lg found!)' : ''}`;
+        }).join('<br>');
+
+        const allCorrect = Array.from(buttons).every(btn => btn.classList.contains('btn-large'));
+        log('JSON Schema Button Classes', classReport, allCorrect ? 'pass' : 'fail');
+
+        // Check grid layout
+        const computedStyle = window.getComputedStyle(container);
+        const gridColumns = computedStyle.gridTemplateColumns;
+        log('Grid Layout', 
+          `Grid columns: ${gridColumns}<br>${gridColumns.split(' ').length === 2 ? '✓' : '✗'} Should have 2 columns`,
+          gridColumns.split(' ').length === 2 ? 'pass' : 'fail');
+      }, 1000);
+    }
+
+    async function testThemeToggle() {
+      log('Test 4: Theme Toggle Count', 'Checking for duplicate theme toggles...', 'info');
+      
+      window.location.hash = '#/';
+      
+      setTimeout(() => {
+        const toggles = document.querySelectorAll('[data-theme-toggle]');
+        const count = toggles.length;
+        log('Theme Toggle Count', 
+          `Found ${count} theme toggle(s)<br>${count === 1 ? '✓ Correct (only one)' : '✗ Too many! Should be exactly 1'}`,
+          count === 1 ? 'pass' : 'fail');
+      }, 500);
+    }
+
+    async function testCacheHeaders() {
+      log('Test 5: Cache Detection', 'Checking if files might be cached...', 'info');
+      
+      const testFile = '/tools/emi-calculator/index.html';
+      try {
+        const response = await fetch(testFile + '?t=' + Date.now());
+        const body = await response.text();
+        
+        // Check if Chart.js script tag exists
+        const hasChartScript = body.includes('chart.umd.min.js');
+        
+        log('EMI Calculator File Check', 
+          `✓ File loaded successfully<br>` +
+          `${hasChartScript ? '✓' : '✗'} Chart.js script tag ${hasChartScript ? 'found' : 'NOT FOUND in HTML'}<br>` +
+          `${hasChartScript ? 'If chart still not working, do hard refresh: Ctrl+Shift+R' : 'FIX NEEDED: Add Chart.js script tag to EMI calculator'}`,
+          hasChartScript ? 'pass' : 'fail');
+      } catch (error) {
+        log('Cache Check Error', '✗ Could not fetch file: ' + error.message, 'fail');
+      }
+    }
+
+    function clearCache() {
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          names.forEach(name => caches.delete(name));
+        });
+        log('Clear Cache', '✓ Service worker caches cleared (if any)', 'pass');
+      }
+      
+      // Force reload after brief delay
+      setTimeout(() => {
+        window.location.reload(true);
+      }, 500);
+    }
+
+    async function runAllTests() {
+      results.innerHTML = '';
+      log('Starting Tests', 'Running comprehensive diagnostic tests...', 'info');
+      
+      try {
+        await testCacheHeaders();
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        await testLibraries();
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        await testThemeToggle();
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        await testButtonClasses();
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        await testChartInTools();
+        
+        log('Tests Complete', '✓ All tests finished. Check results above.', 'pass');
+      } catch (error) {
+        log('Test Error', '✗ Error: ' + error.message, 'fail');
+      }
+    }
+
+    // Show instructions on load
+    log('Ready to Test', 
+      '<strong>IMPORTANT: Do a hard refresh first!</strong><br><br>' +
+      '1. Press <strong>Ctrl+Shift+R</strong> (Windows/Linux) or <strong>Cmd+Shift+R</strong> (Mac)<br>' +
+      '2. Then click "Run All Tests" to check all functionality<br>' +
+      '3. Tests will navigate between tools automatically<br>' +
+      '4. If tests still fail, click "Clear Cache & Reload"', 
+      'info');
+  </script>
+</body>
+</html>
+

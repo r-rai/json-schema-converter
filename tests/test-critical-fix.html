@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Critical Fix Verification Test</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #e0e0e0;
+    }
+    .test-section {
+      background: #2a2a2a;
+      border: 2px solid #444;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .test-item {
+      padding: 10px;
+      margin: 10px 0;
+      border-left: 4px solid #666;
+      background: #333;
+    }
+    .pass {
+      border-left-color: #4caf50;
+      background: #1b3a1b;
+    }
+    .fail {
+      border-left-color: #f44336;
+      background: #3a1b1b;
+    }
+    .pending {
+      border-left-color: #ff9800;
+      background: #3a2f1b;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    h1 { color: #4caf50; }
+    h2 { color: #2196f3; }
+    code {
+      background: #1a1a1a;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+    }
+    .summary {
+      font-size: 20px;
+      font-weight: bold;
+      padding: 15px;
+      margin: 20px 0;
+      text-align: center;
+      border-radius: 8px;
+    }
+    .all-pass {
+      background: #1b3a1b;
+      color: #4caf50;
+      border: 2px solid #4caf50;
+    }
+    .has-fail {
+      background: #3a1b1b;
+      color: #f44336;
+      border: 2px solid #f44336;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔧 Critical Fix Verification Test</h1>
+  <p>Testing router fix: HTML injection before JavaScript execution</p>
+
+  <div class="test-section">
+    <h2>Test Controls</h2>
+    <button onclick="runAllTests()">🚀 Run All Tests</button>
+    <button onclick="location.reload()">🔄 Reset</button>
+    <button onclick="window.location.href='/'">← Back to Home</button>
+  </div>
+
+  <div id="summary" class="summary" style="display: none;"></div>
+
+  <div class="test-section">
+    <h2>Test Results</h2>
+    <div id="test-results"></div>
+  </div>
+
+  <script type="module">
+    const tests = [
+      {
+        name: 'Router module loads correctly',
+        test: async () => {
+          const module = await import('/shared/js/router.js');
+          return module.router && module.lazyLoadTool;
+        }
+      },
+      {
+        name: 'Router has HTML loading function',
+        test: async () => {
+          const module = await import('/shared/js/router.js');
+          const routerCode = await fetch('/shared/js/router.js').then(r => r.text());
+          return routerCode.includes('loadToolHTML') && 
+                 routerCode.includes('DOMParser') &&
+                 routerCode.includes('appContainer.innerHTML');
+        }
+      },
+      {
+        name: 'JSON Schema tool exports init function',
+        test: async () => {
+          await import('/tools/json-schema/json-schema.js');
+          return typeof window.initJsonSchema === 'function';
+        }
+      },
+      {
+        name: 'SIP Calculator tool exports init function',
+        test: async () => {
+          await import('/tools/sip-calculator/sip-calculator.js');
+          return typeof window.initSipCalculator === 'function';
+        }
+      },
+      {
+        name: 'HTML-Markdown tool exports init function',
+        test: async () => {
+          await import('/tools/html-markdown/html-markdown.js');
+          return typeof window.initHtmlMarkdown === 'function';
+        }
+      },
+      {
+        name: 'Text Diff tool exports init function',
+        test: async () => {
+          await import('/tools/text-diff/text-diff.js');
+          return typeof window.initTextDiff === 'function';
+        }
+      },
+      {
+        name: 'EMI Calculator tool exports init function',
+        test: async () => {
+          await import('/tools/emi-calculator/emi-calculator.js');
+          return typeof window.initEmiCalculator === 'function';
+        }
+      },
+      {
+        name: 'Tool HTML files exist and are accessible',
+        test: async () => {
+          const tools = ['json-schema', 'sip-calculator', 'html-markdown', 'text-diff', 'emi-calculator'];
+          const results = await Promise.all(
+            tools.map(tool => 
+              fetch(`/tools/${tool}/index.html`)
+                .then(r => r.ok)
+                .catch(() => false)
+            )
+          );
+          return results.every(r => r === true);
+        }
+      },
+      {
+        name: 'Router loads HTML before JavaScript',
+        test: async () => {
+          const routerCode = await fetch('/shared/js/router.js').then(r => r.text());
+          const htmlLoadIndex = routerCode.indexOf('loadToolHTML');
+          const scriptLoadIndex = routerCode.indexOf('loadScript');
+          // HTML loading should appear before script loading in the code
+          return htmlLoadIndex > 0 && htmlLoadIndex < scriptLoadIndex;
+        }
+      },
+      {
+        name: 'No setupThemeToggle imports in tool files',
+        test: async () => {
+          const tools = [
+            'text-diff/text-diff.js',
+            'emi-calculator/emi-calculator.js',
+            'html-markdown/html-markdown.js'
+          ];
+          const results = await Promise.all(
+            tools.map(tool =>
+              fetch(`/tools/${tool}`)
+                .then(r => r.text())
+                .then(code => !code.includes('setupThemeToggle'))
+                .catch(() => true)
+            )
+          );
+          return results.every(r => r === true);
+        }
+      },
+      {
+        name: 'EMI Calculator syntax error fixed',
+        test: async () => {
+          const code = await fetch('/tools/emi-calculator/emi-calculator.js').then(r => r.text());
+          const lines = code.split('\n');
+          // Check around line 216-218 for duplicate return statements
+          const snippet = lines.slice(210, 225).join('\n');
+          const returnCount = (snippet.match(/return\s+isValid;/g) || []).length;
+          const returnTrueCount = (snippet.match(/return\s+true;/g) || []).length;
+          // Should have only one return isValid, no return true
+          return returnCount === 1 && returnTrueCount === 0;
+        }
+      }
+    ];
+
+    window.runAllTests = async function() {
+      const resultsDiv = document.getElementById('test-results');
+      const summaryDiv = document.getElementById('summary');
+      resultsDiv.innerHTML = '<p>Running tests...</p>';
+      
+      let passed = 0;
+      let failed = 0;
+      
+      for (const testCase of tests) {
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'test-item pending';
+        resultDiv.innerHTML = `<strong>${testCase.name}</strong><br><span>Testing...</span>`;
+        resultsDiv.appendChild(resultDiv);
+        
+        try {
+          const result = await testCase.test();
+          if (result) {
+            resultDiv.className = 'test-item pass';
+            resultDiv.innerHTML = `<strong>✅ ${testCase.name}</strong><br><span style="color: #4caf50;">PASS</span>`;
+            passed++;
+          } else {
+            resultDiv.className = 'test-item fail';
+            resultDiv.innerHTML = `<strong>❌ ${testCase.name}</strong><br><span style="color: #f44336;">FAIL - Test returned false</span>`;
+            failed++;
+          }
+        } catch (error) {
+          resultDiv.className = 'test-item fail';
+          resultDiv.innerHTML = `<strong>❌ ${testCase.name}</strong><br><span style="color: #f44336;">ERROR: ${error.message}</span>`;
+          failed++;
+        }
+      }
+      
+      // Show summary
+      summaryDiv.style.display = 'block';
+      if (failed === 0) {
+        summaryDiv.className = 'summary all-pass';
+        summaryDiv.innerHTML = `🎉 ALL TESTS PASSED! (${passed}/${tests.length})`;
+      } else {
+        summaryDiv.className = 'summary has-fail';
+        summaryDiv.innerHTML = `⚠️ ${failed} TEST(S) FAILED - ${passed} passed, ${failed} failed (${tests.length} total)`;
+      }
+    };
+  </script>
+</body>
+</html>

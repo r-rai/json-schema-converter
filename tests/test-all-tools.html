@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comprehensive Test</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #1a1a1a;
+      color: #e0e0e0;
+      padding: 20px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 { color: #4a9eff; margin-bottom: 20px; }
+    .test-section {
+      background: #2a2a2a;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-left: 4px solid #4a9eff;
+    }
+    .test-section h2 {
+      color: #61dafb;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .status.success { background: #10b981; color: white; }
+    .status.error { background: #ef4444; color: white; }
+    .status.warning { background: #f59e0b; color: white; }
+    .status.pending { background: #6b7280; color: white; }
+    .result {
+      background: #1e1e1e;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+    button {
+      background: #4a9eff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+      font-weight: 600;
+    }
+    button:hover { background: #3b7fcc; }
+    #testFrame { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 Tool Testing Dashboard</h1>
+    
+    <div class="test-section">
+      <h2>1. JSON Schema Formatter <span id="status1" class="status pending">PENDING</span></h2>
+      <button onclick="testJSONSchema()">Test JSON Formatter</button>
+      <div id="result1" class="result"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>2. Text Diff Checker <span id="status2" class="status pending">PENDING</span></h2>
+      <button onclick="testTextDiff()">Test Text Diff</button>
+      <div id="result2" class="result"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>3. EMI Calculator <span id="status3" class="status pending">PENDING</span></h2>
+      <button onclick="testEMI()">Test EMI Calculator</button>
+      <div id="result3" class="result"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>📊 Library Loading Status</h2>
+      <div id="libraryStatus" class="result">
+        Checking libraries...<br>
+        window.Chart: <span id="chartStatus">checking...</span><br>
+        window.Diff: <span id="diffStatus">checking...</span>
+      </div>
+    </div>
+  </div>
+
+  <iframe id="testFrame"></iframe>
+
+  <script>
+    function updateStatus(num, status, message) {
+      const statusEl = document.getElementById(`status${num}`);
+      const resultEl = document.getElementById(`result${num}`);
+      
+      statusEl.className = `status ${status}`;
+      statusEl.textContent = status.toUpperCase();
+      resultEl.innerHTML = message;
+    }
+
+    function checkLibraries() {
+      const iframe = document.getElementById('testFrame');
+      try {
+        const win = iframe.contentWindow;
+        const chartAvailable = typeof win.Chart !== 'undefined';
+        const diffAvailable = typeof win.Diff !== 'undefined';
+        
+        document.getElementById('chartStatus').innerHTML = 
+          chartAvailable ? 
+          '<span style="color: #10b981">✓ Available</span>' : 
+          '<span style="color: #ef4444">✗ Not loaded</span>';
+        
+        document.getElementById('diffStatus').innerHTML = 
+          diffAvailable ? 
+          '<span style="color: #10b981">✓ Available</span>' : 
+          '<span style="color: #ef4444">✗ Not loaded</span>';
+        
+        return { chartAvailable, diffAvailable };
+      } catch (e) {
+        document.getElementById('libraryStatus').innerHTML = 
+          `<span style="color: #f59e0b">⚠ Cannot access iframe: ${e.message}</span>`;
+        return { chartAvailable: false, diffAvailable: false };
+      }
+    }
+
+    async function loadTool(hash) {
+      return new Promise((resolve) => {
+        const iframe = document.getElementById('testFrame');
+        iframe.onload = () => {
+          setTimeout(() => {
+            checkLibraries();
+            resolve();
+          }, 1500); // Wait for tool to initialize
+        };
+        iframe.src = `/${hash}`;
+      });
+    }
+
+    async function testJSONSchema() {
+      updateStatus(1, 'pending', 'Loading JSON Schema tool...');
+      await loadTool('#/json-schema');
+      
+      try {
+        const iframe = document.getElementById('testFrame');
+        const doc = iframe.contentDocument;
+        
+        const inputArea = doc.querySelector('#json-input');
+        const outputArea = doc.querySelector('#json-output');
+        
+        let messages = [];
+        if (inputArea && outputArea) {
+          const inputHeight = inputArea.offsetHeight;
+          const outputHeight = outputArea.offsetHeight;
+          messages.push(`✓ Input found (height: ${inputHeight}px)`);
+          messages.push(`✓ Output found (height: ${outputHeight}px)`);
+          
+          if (Math.abs(inputHeight - outputHeight) < 50) {
+            updateStatus(1, 'success', messages.join('<br>') + '<br><span style="color: #10b981">✓ Heights are equal!</span>');
+          } else {
+            updateStatus(1, 'warning', messages.join('<br>') + `<br><span style="color: #f59e0b">⚠ Height difference: ${Math.abs(inputHeight - outputHeight)}px</span>`);
+          }
+        } else {
+          updateStatus(1, 'error', '✗ Could not find input/output textareas');
+        }
+      } catch (e) {
+        updateStatus(1, 'error', `✗ Error: ${e.message}`);
+      }
+    }
+
+    async function testTextDiff() {
+      updateStatus(2, 'pending', 'Loading Text Diff tool...');
+      await loadTool('#/text-diff');
+      
+      const libs = checkLibraries();
+      if (libs.diffAvailable) {
+        updateStatus(2, 'success', '✓ window.Diff is available!<br>✓ Library loaded successfully');
+      } else {
+        updateStatus(2, 'error', '✗ window.Diff is not available<br>✗ Library failed to load');
+      }
+    }
+
+    async function testEMI() {
+      updateStatus(3, 'pending', 'Loading EMI Calculator...');
+      await loadTool('#/emi-calculator');
+      
+      const libs = checkLibraries();
+      if (libs.chartAvailable) {
+        updateStatus(3, 'success', '✓ window.Chart is available!<br>✓ Library loaded successfully');
+      } else {
+        updateStatus(3, 'error', '✗ window.Chart is not available<br>✗ Library failed to load');
+      }
+    }
+
+    // Auto-run tests on load
+    window.onload = () => {
+      setTimeout(() => {
+        console.log('Starting automated tests...');
+        testJSONSchema();
+        setTimeout(() => testTextDiff(), 3000);
+        setTimeout(() => testEMI(), 6000);
+      }, 1000);
+    };
+  </script>
+</body>
+</html>

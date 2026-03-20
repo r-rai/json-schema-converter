@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Console Test</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+    #console {
+      background: #252526;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .log {
+      margin: 5px 0;
+      padding: 5px;
+      border-left: 3px solid #4a9eff;
+    }
+    .error {
+      border-left-color: #f48771;
+    }
+    .warn {
+      border-left-color: #ffcc00;
+    }
+    #iframe-container {
+      border: 2px solid #444;
+      border-radius: 5px;
+      height: 600px;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Console Output Test</h1>
+  <div id="console"></div>
+  <div id="iframe-container">
+    <iframe id="testFrame" src="/#/text-diff"></iframe>
+  </div>
+
+  <script>
+    const consoleDiv = document.getElementById('console');
+    const originalConsole = {
+      log: console.log,
+      error: console.error,
+      warn: console.warn
+    };
+
+    function addToConsole(message, type = 'log') {
+      const div = document.createElement('div');
+      div.className = `log ${type}`;
+      div.textContent = `[${type.toUpperCase()}] ${message}`;
+      consoleDiv.appendChild(div);
+      consoleDiv.scrollTop = consoleDiv.scrollHeight;
+    }
+
+    // Override console methods
+    console.log = function(...args) {
+      addToConsole(args.join(' '), 'log');
+      originalConsole.log.apply(console, args);
+    };
+
+    console.error = function(...args) {
+      addToConsole(args.join(' '), 'error');
+      originalConsole.error.apply(console, args);
+    };
+
+    console.warn = function(...args) {
+      addToConsole(args.join(' '), 'warn');
+      originalConsole.warn.apply(console, args);
+    };
+
+    // Listen for messages from iframe
+    window.addEventListener('message', (event) => {
+      if (event.data.type === 'console') {
+        addToConsole(event.data.message, event.data.level);
+      }
+    });
+
+    // Wait for iframe to load and inject console override
+    document.getElementById('testFrame').addEventListener('load', () => {
+      addToConsole('Iframe loaded successfully');
+      
+      try {
+        const iframe = document.getElementById('testFrame');
+        const iframeWindow = iframe.contentWindow;
+        
+        // Try to access iframe console (may fail due to CORS)
+        setTimeout(() => {
+          addToConsole('Checking window.Chart: ' + (typeof iframeWindow.Chart));
+          addToConsole('Checking window.Diff: ' + (typeof iframeWindow.Diff));
+        }, 1000);
+      } catch (e) {
+        addToConsole('Cannot access iframe due to CORS: ' + e.message, 'error');
+      }
+    });
+
+    addToConsole('Test page loaded');
+  </script>
+</body>
+</html>

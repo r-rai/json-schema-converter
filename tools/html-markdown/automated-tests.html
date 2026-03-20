@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML/Markdown Converter - Automated Test Suite</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #667eea;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 1rem;
+    }
+
+    .controls {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .summary {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2rem;
+    }
+
+    .summary h2 {
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .stat-card {
+      background: #f8fafc;
+      padding: 1rem;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .stat-label {
+      color: #666;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+
+    .test-results {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .test-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      border-left: 4px solid #ccc;
+    }
+
+    .test-card.pass {
+      border-left-color: #10b981;
+    }
+
+    .test-card.fail {
+      border-left-color: #ef4444;
+    }
+
+    .test-card.running {
+      border-left-color: #f59e0b;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .test-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .test-name {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #333;
+    }
+
+    .test-status {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .status-pass {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status-fail {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .status-running {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .test-description {
+      color: #666;
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .test-details {
+      background: #f8fafc;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+    }
+
+    .test-metric {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.25rem 0;
+    }
+
+    .metric-label {
+      color: #666;
+    }
+
+    .metric-value {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .error-message {
+      color: #dc2626;
+      background: #fef2f2;
+      padding: 0.75rem;
+      border-radius: 6px;
+      margin-top: 0.5rem;
+      border-left: 3px solid #dc2626;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      transition: width 0.3s ease;
+    }
+
+    #runtime {
+      text-align: center;
+      color: #666;
+      font-size: 0.875rem;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔄 HTML/Markdown Converter - Automated Test Suite</h1>
+      <p class="subtitle">Comprehensive testing for bidirectional conversion</p>
+    </div>
+
+    <div class="controls">
+      <button class="btn-primary" onclick="runAllTests()">▶️ Run All Tests</button>
+      <button class="btn-success" onclick="runQuickTests()">⚡ Quick Test</button>
+      <button class="btn-danger" onclick="resetTests()">🔄 Reset</button>
+    </div>
+
+    <div class="summary">
+      <h2>Test Summary</h2>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress" style="width: 0%"></div>
+      </div>
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-value" id="total-tests">0</div>
+          <div class="stat-label">Total Tests</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="passed-tests" style="color: #10b981;">0</div>
+          <div class="stat-label">Passed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="failed-tests" style="color: #ef4444;">0</div>
+          <div class="stat-label">Failed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="success-rate">0%</div>
+          <div class="stat-label">Success Rate</div>
+        </div>
+      </div>
+      <div id="runtime"></div>
+    </div>
+
+    <div class="test-results" id="test-results"></div>
+  </div>
+
+  <script type="module">
+    // CDN URLs for libraries
+    const TURNDOWN_CDN = 'https://cdn.jsdelivr.net/npm/turndown@7.1.2/dist/turndown.min.js';
+    const MARKED_CDN = 'https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js';
+    const DOMPURIFY_CDN = 'https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js';
+
+    let librariesLoaded = {
+      turndown: false,
+      marked: false,
+      dompurify: false
+    };
+
+    // Load library dynamically
+    function loadLibrary(name, url) {
+      return new Promise((resolve, reject) => {
+        if (librariesLoaded[name]) {
+          resolve();
+          return;
+        }
+        const script = document.createElement('script');
+        script.src = url;
+        script.onload = () => {
+          librariesLoaded[name] = true;
+          resolve();
+        };
+        script.onerror = () => reject(new Error(`Failed to load ${name}`));
+        document.head.appendChild(script);
+      });
+    }
+
+    // Test suite
+    const tests = [
+      {
+        id: 'html-to-md-basic',
+        name: 'HTML to Markdown - Basic Elements',
+        description: 'Convert basic HTML elements to Markdown',
+        type: 'html-to-md',
+        input: '<h1>Heading 1</h1><p>Paragraph with <strong>bold</strong> and <em>italic</em> text.</p>',
+        expectedContains: ['# Heading 1', '**bold**', '*italic*'],
+        timeout: 100
+      },
+      {
+        id: 'html-to-md-lists',
+        name: 'HTML to Markdown - Lists',
+        description: 'Convert HTML lists to Markdown',
+        type: 'html-to-md',
+        input: '<ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>',
+        expectedContains: ['- Item 1', '- Item 2', '- Item 3'],
+        timeout: 100
+      },
+      {
+        id: 'html-to-md-code',
+        name: 'HTML to Markdown - Code Blocks',
+        description: 'Convert HTML code blocks to Markdown',
+        type: 'html-to-md',
+        input: '<pre><code>const x = 10;</code></pre>',
+        expectedContains: ['```', 'const x = 10;'],
+        timeout: 100
+      },
+      {
+        id: 'html-to-md-links',
+        name: 'HTML to Markdown - Links',
+        description: 'Convert HTML links to Markdown',
+        type: 'html-to-md',
+        input: '<a href="https://example.com">Example Link</a>',
+        expectedContains: ['[Example Link](https://example.com)'],
+        timeout: 100
+      },
+      {
+        id: 'html-to-md-images',
+        name: 'HTML to Markdown - Images',
+        description: 'Convert HTML images to Markdown',
+        type: 'html-to-md',
+        input: '<img src="image.jpg" alt="Test Image">',
+        expectedContains: ['![Test Image](image.jpg)'],
+        timeout: 100
+      },
+      {
+        id: 'md-to-html-basic',
+        name: 'Markdown to HTML - Basic Elements',
+        description: 'Convert basic Markdown to HTML',
+        type: 'md-to-html',
+        input: '# Heading 1\n\nParagraph with **bold** and *italic* text.',
+        expectedContains: ['<h1>Heading 1</h1>', '<strong>bold</strong>', '<em>italic</em>'],
+        timeout: 100
+      },
+      {
+        id: 'md-to-html-lists',
+        name: 'Markdown to HTML - Lists',
+        description: 'Convert Markdown lists to HTML',
+        type: 'md-to-html',
+        input: '- Item 1\n- Item 2\n- Item 3',
+        expectedContains: ['<ul>', '<li>Item 1</li>', '<li>Item 2</li>', '<li>Item 3</li>', '</ul>'],
+        timeout: 100
+      },
+      {
+        id: 'md-to-html-code',
+        name: 'Markdown to HTML - Code Blocks',
+        description: 'Convert Markdown code blocks to HTML',
+        type: 'md-to-html',
+        input: '```javascript\nconst x = 10;\n```',
+        expectedContains: ['<pre>', '<code', 'const x = 10;', '</code>', '</pre>'],
+        timeout: 100
+      },
+      {
+        id: 'md-to-html-links',
+        name: 'Markdown to HTML - Links',
+        description: 'Convert Markdown links to HTML',
+        type: 'md-to-html',
+        input: '[Example Link](https://example.com)',
+        expectedContains: ['<a href="https://example.com">Example Link</a>'],
+        timeout: 100
+      },
+      {
+        id: 'md-to-html-images',
+        name: 'Markdown to HTML - Images',
+        description: 'Convert Markdown images to HTML',
+        type: 'md-to-html',
+        input: '![Test Image](image.jpg)',
+        expectedContains: ['<img', 'src="image.jpg"', 'alt="Test Image"'],
+        timeout: 100
+      },
+      {
+        id: 'gfm-strikethrough',
+        name: 'GFM - Strikethrough',
+        description: 'Test GitHub Flavored Markdown strikethrough',
+        type: 'md-to-html',
+        input: '~~strikethrough text~~',
+        expectedContains: ['<del>strikethrough text</del>'],
+        timeout: 100
+      },
+      {
+        id: 'gfm-tables',
+        name: 'GFM - Tables',
+        description: 'Test GitHub Flavored Markdown tables',
+        type: 'md-to-html',
+        input: '| Header 1 | Header 2 |\n|----------|----------|\n| Cell 1   | Cell 2   |',
+        expectedContains: ['<table>', '<thead>', '<tbody>', '<th>Header 1</th>', '<td>Cell 1</td>'],
+        timeout: 150
+      },
+      {
+        id: 'xss-script-tag',
+        name: 'Security - XSS Script Tag',
+        description: 'Ensure script tags are sanitized',
+        type: 'md-to-html',
+        input: '&lt;script&gt;alert("XSS")&lt;/script&gt;',
+        expectedNotContains: ['script', 'alert'],
+        timeout: 100
+      },
+      {
+        id: 'xss-onerror',
+        name: 'Security - XSS onerror Attribute',
+        description: 'Ensure dangerous attributes are sanitized',
+        type: 'md-to-html',
+        input: '&lt;img src="x" onerror="alert(\'XSS\')"&gt;',
+        expectedNotContains: ['onerror'],
+        timeout: 100
+      },
+      {
+        id: 'large-document',
+        name: 'Performance - Large Document',
+        description: 'Test conversion of large documents',
+        type: 'md-to-html',
+        input: '# Heading\n\n' + 'Lorem ipsum dolor sit amet. '.repeat(500),
+        expectedContains: ['<h1>Heading</h1>'],
+        timeout: 200
+      }
+    ];
+
+    let testResults = [];
+    let startTime;
+
+    // Display test card
+    function displayTestCard(test, status = 'running', result = null) {
+      const container = document.getElementById('test-results');
+      let card = document.getElementById(`test-${test.id}`);
+      
+      if (!card) {
+        card = document.createElement('div');
+        card.id = `test-${test.id}`;
+        card.className = 'test-card';
+        container.appendChild(card);
+      }
+
+      card.className = `test-card ${status}`;
+      
+      let html = `
+        <div class="test-header">
+          <div class="test-name">${test.name}</div>
+          <span class="test-status status-${status}">
+            ${status === 'pass' ? '✓ PASS' : status === 'fail' ? '✗ FAIL' : '⏳ RUNNING'}
+          </span>
+        </div>
+        <div class="test-description">${test.description}</div>
+      `;
+
+      if (result) {
+        html += `
+          <div class="test-details">
+            <div class="test-metric">
+              <span class="metric-label">Execution Time:</span>
+              <span class="metric-value">${result.duration}ms</span>
+            </div>
+            <div class="test-metric">
+              <span class="metric-label">Input Length:</span>
+              <span class="metric-value">${result.inputLength} chars</span>
+            </div>
+            <div class="test-metric">
+              <span class="metric-label">Output Length:</span>
+              <span class="metric-value">${result.outputLength} chars</span>
+            </div>
+          </div>
+        `;
+
+        if (result.error) {
+          html += `<div class="error-message"><strong>Error:</strong> ${result.error}</div>`;
+        }
+      }
+
+      card.innerHTML = html;
+    }
+
+    // Run single test
+    async function runTest(test) {
+      displayTestCard(test, 'running');
+      
+      const startTime = performance.now();
+      
+      try {
+        let output;
+        
+        if (test.type === 'html-to-md') {
+          // Load Turndown
+          await loadLibrary('turndown', TURNDOWN_CDN);
+          
+          const turndownService = new TurndownService({
+            headingStyle: 'atx',
+            hr: '---',
+            bulletListMarker: '-',
+            codeBlockStyle: 'fenced',
+            fence: '```',
+            emDelimiter: '*',
+            strongDelimiter: '**'
+          });
+          
+          output = turndownService.turndown(test.input);
+        } else {
+          // Load Marked and DOMPurify
+          await loadLibrary('marked', MARKED_CDN);
+          await loadLibrary('dompurify', DOMPURIFY_CDN);
+          
+          marked.setOptions({
+            gfm: true,
+            breaks: true,
+            pedantic: false,
+            smartLists: true,
+            smartypants: true
+          });
+          
+          output = marked.parse(test.input);
+          
+          // Sanitize
+          output = DOMPurify.sanitize(output, {
+            ALLOWED_TAGS: [
+              'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+              'p', 'br', 'hr',
+              'strong', 'em', 'u', 's', 'del',
+              'a', 'img',
+              'ul', 'ol', 'li',
+              'blockquote', 'code', 'pre',
+              'table', 'thead', 'tbody', 'tr', 'th', 'td',
+              'div', 'span'
+            ],
+            ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'id']
+          });
+        }
+        
+        const duration = Math.round(performance.now() - startTime);
+        
+        // Validate output
+        let passed = true;
+        let error = null;
+        
+        if (test.expectedContains) {
+          for (const expected of test.expectedContains) {
+            if (!output.includes(expected)) {
+              passed = false;
+              error = `Expected output to contain: "${expected}"`;
+              break;
+            }
+          }
+        }
+        
+        if (test.expectedNotContains) {
+          for (const notExpected of test.expectedNotContains) {
+            if (output.includes(notExpected)) {
+              passed = false;
+              error = `Expected output NOT to contain: "${notExpected}"`;
+              break;
+            }
+          }
+        }
+        
+        if (duration > test.timeout) {
+          passed = false;
+          error = `Test exceeded timeout: ${duration}ms > ${test.timeout}ms`;
+        }
+        
+        const result = {
+          passed,
+          duration,
+          inputLength: test.input.length,
+          outputLength: output.length,
+          error
+        };
+        
+        displayTestCard(test, passed ? 'pass' : 'fail', result);
+        return result;
+        
+      } catch (error) {
+        const duration = Math.round(performance.now() - startTime);
+        const result = {
+          passed: false,
+          duration,
+          inputLength: test.input.length,
+          outputLength: 0,
+          error: error.message
+        };
+        
+        displayTestCard(test, 'fail', result);
+        return result;
+      }
+    }
+
+    // Update summary
+    function updateSummary() {
+      const total = testResults.length;
+      const passed = testResults.filter(r => r.passed).length;
+      const failed = total - passed;
+      const successRate = total > 0 ? Math.round((passed / total) * 100) : 0;
+      const progress = total > 0 ? (total / tests.length) * 100 : 0;
+      
+      document.getElementById('total-tests').textContent = total;
+      document.getElementById('passed-tests').textContent = passed;
+      document.getElementById('failed-tests').textContent = failed;
+      document.getElementById('success-rate').textContent = successRate + '%';
+      document.getElementById('progress').style.width = progress + '%';
+      
+      if (total === tests.length) {
+        const totalTime = Math.round(performance.now() - startTime);
+        document.getElementById('runtime').textContent = `Total runtime: ${totalTime}ms`;
+      }
+    }
+
+    // Run all tests
+    window.runAllTests = async function() {
+      testResults = [];
+      startTime = performance.now();
+      document.getElementById('test-results').innerHTML = '';
+      
+      for (const test of tests) {
+        const result = await runTest(test);
+        testResults.push(result);
+        updateSummary();
+      }
+    };
+
+    // Run quick tests (first 5)
+    window.runQuickTests = async function() {
+      testResults = [];
+      startTime = performance.now();
+      document.getElementById('test-results').innerHTML = '';
+      
+      for (const test of tests.slice(0, 5)) {
+        const result = await runTest(test);
+        testResults.push(result);
+        updateSummary();
+      }
+    };
+
+    // Reset tests
+    window.resetTests = function() {
+      testResults = [];
+      document.getElementById('test-results').innerHTML = '';
+      document.getElementById('total-tests').textContent = '0';
+      document.getElementById('passed-tests').textContent = '0';
+      document.getElementById('failed-tests').textContent = '0';
+      document.getElementById('success-rate').textContent = '0%';
+      document.getElementById('progress').style.width = '0%';
+      document.getElementById('runtime').textContent = '';
+    };
+  </script>
+</body>
+</html>

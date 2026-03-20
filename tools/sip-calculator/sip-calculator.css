@@ -1,0 +1,550 @@
+/**
+ * SIP Calculator Tool Styles
+ * Tool-specific styling for SIP calculator
+ * 
+ * @file tools/sip-calculator/sip-calculator.css
+ */
+
+/* Container */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: var(--spacing-xl) var(--spacing-lg);
+}
+
+/* Header */
+.tool-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.header-content h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.header-content .text-secondary {
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.theme-toggle {
+  font-size: 1.5rem;
+  padding: var(--spacing-sm);
+}
+
+/* Main Layout */
+.tool-main {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+}
+
+/* Calculator Section */
+.calculator-section,
+.results-section {
+  background-color: var(--bg-primary);
+}
+
+.calculator-section h2,
+.results-section h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.results-section h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+/* Form Styles */
+.sip-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.form-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.required {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.optional {
+  color: var(--text-tertiary);
+  font-weight: 400;
+  font-size: 0.85rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.form-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.form-help {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+
+.form-actions .btn {
+  flex: 1;
+}
+
+.btn-large {
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: 1rem;
+}
+
+.form-errors {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--error-bg);
+  color: var(--error-text);
+  border: 1px solid var(--error-border);
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.form-errors:empty {
+  display: none;
+}
+
+/* Results Section */
+.results-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.results-section.hidden {
+  display: none;
+}
+
+/* Summary Cards */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.summary-card {
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--spacing-sm);
+}
+
+.card-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+  font-family: var(--font-mono);
+}
+
+.card-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+}
+
+/* Card Color Variants */
+.card-primary .card-value {
+  color: var(--primary-color);
+}
+
+.card-success .card-value {
+  color: #22c55e;
+}
+
+.card-accent .card-value {
+  color: #a855f7;
+}
+
+.card-info .card-value {
+  color: #3b82f6;
+}
+
+/* Export Actions */
+.export-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+/* Table Styles */
+.breakdown-section {
+  margin-top: var(--spacing-lg);
+}
+
+.table-container {
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+}
+
+.breakdown-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.breakdown-table thead {
+  background-color: var(--bg-tertiary);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.breakdown-table th {
+  padding: var(--spacing-sm) var(--spacing-md);
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.breakdown-table th:first-child {
+  text-align: center;
+}
+
+.breakdown-table th:not(:first-child) {
+  text-align: right;
+}
+
+.breakdown-table td {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+.breakdown-table td:first-child {
+  text-align: center;
+  font-weight: 600;
+}
+
+.breakdown-table td:not(:first-child) {
+  text-align: right;
+}
+
+.breakdown-table tbody tr:hover {
+  background-color: var(--bg-secondary);
+}
+
+.breakdown-table tbody tr:last-child {
+  font-weight: 700;
+  background-color: var(--bg-tertiary);
+}
+
+.breakdown-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Chart Section */
+.chart-section {
+  margin-top: var(--spacing-lg);
+}
+
+.chart-container {
+  position: relative;
+  height: 400px;
+  padding: var(--spacing-md);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+}
+
+.chart-container canvas {
+  max-height: 100%;
+}
+
+/* Screen Reader Only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Footer */
+.tool-footer {
+  text-align: center;
+  padding: var(--spacing-lg) 0;
+  border-top: 1px solid var(--border-color);
+}
+
+.tool-footer a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.tool-footer a:hover {
+  text-decoration: underline;
+}
+
+.disclaimer {
+  margin-top: var(--spacing-sm);
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+/* Button Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: var(--border-radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.btn-icon {
+  font-size: 1rem;
+}
+
+.btn-text {
+  font-size: 0.9rem;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.btn-secondary {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--bg-tertiary);
+  border-color: var(--text-tertiary);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border-color: transparent;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* Responsive Design */
+
+/* Large Tablet */
+@media (max-width: 1200px) {
+  .tool-main {
+    grid-template-columns: 350px 1fr;
+  }
+  
+  .summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .tool-main {
+    grid-template-columns: 1fr;
+  }
+  
+  .calculator-section {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .chart-container {
+    height: 350px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .container {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+  
+  .tool-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+  }
+  
+  .theme-toggle {
+    align-self: flex-end;
+  }
+  
+  .header-content h1 {
+    font-size: 1.5rem;
+  }
+  
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .form-actions .btn {
+    width: 100%;
+  }
+  
+  .export-actions {
+    flex-direction: column;
+  }
+  
+  .export-actions .btn {
+    width: 100%;
+  }
+  
+  .chart-container {
+    height: 300px;
+    padding: var(--spacing-sm);
+  }
+  
+  .breakdown-table {
+    font-size: 0.8rem;
+  }
+  
+  .breakdown-table th,
+  .breakdown-table td {
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+  
+  .card-value {
+    font-size: 1.5rem;
+  }
+}
+
+/* Dark Theme Specific Adjustments */
+[data-theme="dark"] .summary-card {
+  background-color: var(--bg-primary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .breakdown-table thead {
+  background-color: var(--bg-secondary);
+}
+
+[data-theme="dark"] .chart-container {
+  background-color: var(--bg-primary);
+}
+
+/* High Contrast Focus Indicators */
+@media (prefers-contrast: high) {
+  .btn:focus,
+  .form-input:focus {
+    outline-width: 3px;
+    outline-style: solid;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .form-input,
+  .summary-card {
+    transition: none;
+  }
+}

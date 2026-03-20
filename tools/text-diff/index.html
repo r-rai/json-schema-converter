@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Text Difference Checker - Compare text and code with line-by-line diff highlighting">
+  <title>Text Diff Checker - DevToolbox</title>
+  
+  <!-- Shared Styles -->
+  <link rel="stylesheet" href="/shared/css/variables.css">
+  <link rel="stylesheet" href="/shared/css/reset.css">
+  <link rel="stylesheet" href="/shared/css/components.css">
+  <link rel="stylesheet" href="/shared/css/themes.css">
+  <link rel="stylesheet" href="/shared/css/utilities.css">
+  <link rel="stylesheet" href="/shared/css/responsive.css">
+  
+  <!-- Tool-Specific Styles -->
+  <link rel="stylesheet" href="text-diff.css">
+  <link rel="stylesheet" href="/shared/css/tool-styles.css">
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <header class="tool-header">
+        <div class="header-content">
+          <h1>📝 Text Diff Checker</h1>
+          <p class="text-secondary">Compare text and code with line-by-line diff highlighting</p>
+        </div>
+        <button data-theme-toggle class="btn btn-ghost theme-toggle" aria-label="Toggle theme">
+          <span class="theme-icon">🌙</span>
+        </button>
+      </header>
+      
+      <main class="tool-main">
+        <!-- Options and Controls -->
+        <section class="controls-section">
+          <div class="controls-group">
+            <div class="form-group checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="ignore-whitespace">
+                <span>Ignore Whitespace</span>
+              </label>
+            </div>
+            
+            <div class="form-group checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="ignore-case">
+                <span>Ignore Case</span>
+              </label>
+            </div>
+            
+            <div class="form-group checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="char-level-diff">
+                <span>Character-Level Diff</span>
+              </label>
+            </div>
+            
+            <div class="button-group">
+              <button id="compare-btn" class="btn btn-primary" aria-label="Compare original and modified text">
+                <span>Compare</span>
+              </button>
+              
+              <button id="clear-btn" class="btn btn-secondary" aria-label="Clear all text inputs">
+                <span>Clear</span>
+              </button>
+              
+              <button id="sample-btn" class="btn btn-ghost" aria-label="Load sample text for demonstration">
+                <span>Load Sample</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Input Areas -->
+        <section class="editor-section">
+          <div class="editor-container">
+            <div class="editor-panel">
+              <div class="editor-header">
+                <h3>Original Text</h3>
+                <span class="char-count" id="original-count">0 characters</span>
+              </div>
+              <textarea 
+                id="original-text" 
+                class="diff-textarea"
+                placeholder="Paste or type original text here..."
+                spellcheck="false"
+                aria-label="Original text input"
+                aria-describedby="original-count"
+              ></textarea>
+            </div>
+            
+            <div class="editor-panel">
+              <div class="editor-header">
+                <h3>Modified Text</h3>
+                <span class="char-count" id="modified-count">0 characters</span>
+              </div>
+              <textarea 
+                id="modified-text" 
+                class="diff-textarea"
+                placeholder="Paste or type modified text here..."
+                spellcheck="false"
+                aria-label="Modified text input"
+                aria-describedby="modified-count"
+              ></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="results-section" class="results-section hidden" role="region" aria-label="Text comparison results">
+          <!-- Statistics -->
+          <div class="stats-container" role="status" aria-live="polite">
+            <h3>Comparison Statistics</h3>
+            <div class="stats-grid">
+              <div class="stat-card stat-added">
+                <div class="stat-value" id="stat-added">0</div>
+                <div class="stat-label">Lines Added</div>
+              </div>
+              
+              <div class="stat-card stat-removed">
+                <div class="stat-value" id="stat-removed">0</div>
+                <div class="stat-label">Lines Removed</div>
+              </div>
+              
+              <div class="stat-card stat-modified">
+                <div class="stat-value" id="stat-modified">0</div>
+                <div class="stat-label">Lines Modified</div>
+              </div>
+              
+              <div class="stat-card">
+                <div class="stat-value" id="stat-unchanged">0</div>
+                <div class="stat-label">Lines Unchanged</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- View Controls -->
+          <div class="view-controls">
+            <h3>Diff View</h3>
+            <div class="view-mode-switcher" role="group" aria-label="Diff view mode selection">
+              <button id="side-by-side-btn" class="view-btn active" aria-label="Display differences side by side" aria-pressed="true">
+                Side-by-Side
+              </button>
+              <button id="unified-btn" class="view-btn" aria-label="Display differences in unified view" aria-pressed="false">
+                Unified
+              </button>
+            </div>
+            
+            <div class="button-group">
+              <button id="copy-diff-btn" class="btn btn-secondary" aria-label="Copy diff results to clipboard">
+                <span>📋 Copy Diff</span>
+              </button>
+              
+              <button id="download-html-btn" class="btn btn-secondary" aria-label="Download diff as HTML file">
+                <span>⬇️ Download HTML</span>
+              </button>
+              
+              <button id="download-text-btn" class="btn btn-secondary" aria-label="Download diff as text file">
+                <span>⬇️ Download Text</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Diff Output -->
+          <div id="diff-output" class="diff-output">
+            <!-- Diff will be rendered here -->
+          </div>
+        </section>
+      </main>
+
+      <footer class="tool-footer">
+        <div class="footer-content">
+          <p>&copy; 2026 DevToolbox. All tools run locally in your browser.</p>
+          <a href="/" class="btn btn-ghost btn-sm">🏠 Back to Home</a>
+        </div>
+      </footer>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON Schema Tool - Quick Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      border-bottom: 3px solid #3B82F6;
+      padding-bottom: 10px;
+    }
+    h2 {
+      color: #3B82F6;
+      font-size: 1.3em;
+    }
+    .test-case {
+      background: #f8f9fa;
+      border-left: 4px solid #3B82F6;
+      padding: 15px;
+      margin: 10px 0;
+    }
+    .test-case h3 {
+      margin-top: 0;
+      color: #495057;
+    }
+    pre {
+      background: #e9ecef;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    code {
+      font-family: 'Courier New', Courier, monospace;
+      color: #e83e8c;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #3B82F6;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      margin: 10px 10px 10px 0;
+      transition: background 0.2s;
+    }
+    .btn:hover {
+      background: #2563EB;
+    }
+    .btn-success {
+      background: #22C55E;
+    }
+    .btn-success:hover {
+      background: #16A34A;
+    }
+    .checklist {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    .checklist li {
+      padding: 8px;
+      margin: 5px 0;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+    .checklist li:before {
+      content: "☐ ";
+      color: #6c757d;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.85em;
+      font-weight: 600;
+    }
+    .status.complete {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .status.pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 JSON Schema Tool - Quick Test Suite</h1>
+  
+  <div class="test-card">
+    <h2>✅ Implementation Status</h2>
+    <p><span class="status complete">COMPLETE</span> All files created and ready for testing</p>
+    <ul>
+      <li>✅ index.html (118 lines)</li>
+      <li>✅ json-schema.js (351 lines)</li>
+      <li>✅ json-schema.css (211 lines)</li>
+      <li>✅ Enhanced shared utilities</li>
+      <li>✅ Zero compilation errors</li>
+    </ul>
+    <a href="/tools/json-schema/" class="btn btn-success">🚀 Open JSON Schema Tool</a>
+    <a href="/tools/json-schema/TEST_CASES.md" class="btn">📋 View Test Cases</a>
+    <a href="/tools/json-schema/IMPLEMENTATION_REPORT.md" class="btn">📊 Implementation Report</a>
+  </div>
+
+  <div class="test-card">
+    <h2>🧪 Quick Test Cases</h2>
+    
+    <div class="test-case">
+      <h3>Test 1: Valid JSON Validation</h3>
+      <p>Copy and paste this JSON into the tool:</p>
+      <pre><code>{
+  "name": "John Doe",
+  "age": 30,
+  "email": "john@example.com",
+  "skills": ["JavaScript", "Python", "React"]
+}</code></pre>
+      <p><strong>Action:</strong> Click "✓ Validate JSON"</p>
+      <p><strong>Expected:</strong> ✅ Success message + formatted output</p>
+    </div>
+
+    <div class="test-case">
+      <h3>Test 2: Minify JSON</h3>
+      <p>Use the validated JSON from Test 1</p>
+      <p><strong>Action:</strong> Click "🗜️ Minify"</p>
+      <p><strong>Expected:</strong> ✅ All whitespace removed + size reduction shown (e.g., "-45 bytes (52%)")</p>
+    </div>
+
+    <div class="test-case">
+      <h3>Test 3: Beautify with Different Indentations</h3>
+      <p>Copy this minified JSON:</p>
+      <pre><code>{"user":{"id":123,"name":"Alice","active":true,"roles":["admin","user"]}}</code></pre>
+      <p><strong>Actions:</strong></p>
+      <ol>
+        <li>Select "2 spaces" → Click "✨ Beautify"</li>
+        <li>Change to "4 spaces" (should auto-reflow)</li>
+        <li>Change to "Tab" (should auto-reflow)</li>
+      </ol>
+      <p><strong>Expected:</strong> ✅ Each indentation style applied correctly</p>
+    </div>
+
+    <div class="test-case">
+      <h3>Test 4: Invalid JSON Error</h3>
+      <p>Try these invalid inputs:</p>
+      <pre><code>// Missing closing brace
+{"name": "John"
+
+// Trailing comma
+{"name": "John",}
+
+// Single quotes (invalid)
+{'name': 'John'}
+
+// Unquoted keys
+{name: "John"}</code></pre>
+      <p><strong>Expected:</strong> ✅ Clear error messages with position info</p>
+    </div>
+
+    <div class="test-case">
+      <h3>Test 5: Copy & Download</h3>
+      <p><strong>Actions:</strong></p>
+      <ol>
+        <li>Beautify any JSON</li>
+        <li>Click "📋 Copy" → Check notification appears</li>
+        <li>Paste elsewhere to verify copy worked</li>
+        <li>Click "💾 Download" → Check file downloads</li>
+      </ol>
+      <p><strong>Expected:</strong> ✅ Both operations work smoothly</p>
+    </div>
+
+    <div class="test-case">
+      <h3>Test 6: Paste Button</h3>
+      <p><strong>Actions:</strong></p>
+      <ol>
+        <li>Copy valid JSON to clipboard</li>
+        <li>Click "📋 Paste" button in tool</li>
+      </ol>
+      <p><strong>Expected:</strong> ✅ JSON pasted + auto-validates after 100ms</p>
+    </div>
+
+    <div class="test-case">
+      <h3>Test 7: Persistence</h3>
+      <p><strong>Actions:</strong></p>
+      <ol>
+        <li>Enter JSON and select "4 spaces"</li>
+        <li>Refresh the page (F5)</li>
+      </ol>
+      <p><strong>Expected:</strong> ✅ JSON and indentation preference restored</p>
+    </div>
+
+    <div class="test-case">
+      <h3>Test 8: Large JSON Performance</h3>
+      <p>Open browser console and run:</p>
+      <pre><code>// Generate 1MB JSON
+const large = {};
+for (let i = 0; i < 10000; i++) {
+  large[`key${i}`] = `value${i}_${Math.random()}`;
+}
+const json1MB = JSON.stringify(large);
+console.log(`Size: ${(json1MB.length/1024).toFixed(1)}KB`);
+
+// Copy to clipboard
+navigator.clipboard.writeText(json1MB);
+console.log('Copied! Now paste in tool and minify');</code></pre>
+      <p><strong>Expected:</strong> ⚡ Operations complete in < 200ms</p>
+    </div>
+  </div>
+
+  <div class="test-card">
+    <h2>⌨️ Keyboard Navigation Test</h2>
+    <p>Press <code>Tab</code> key repeatedly from page load:</p>
+    <ul class="checklist">
+      <li>Tab to "Clear" button</li>
+      <li>Tab to "Paste" button</li>
+      <li>Tab to input textarea</li>
+      <li>Tab to "Validate" button</li>
+      <li>Tab to "Minify" button</li>
+      <li>Tab to "Beautify" button</li>
+      <li>Tab to indentation dropdown (use arrow keys)</li>
+      <li>Tab to "Copy" button (when enabled)</li>
+      <li>Tab to "Download" button (when enabled)</li>
+    </ul>
+    <p><strong>Expected:</strong> ✅ All elements reachable, focus indicators visible</p>
+  </div>
+
+  <div class="test-card">
+    <h2>🎨 Theme Toggle Test</h2>
+    <p><strong>Action:</strong> Click the 🌙 button in tool header</p>
+    <p><strong>Expected:</strong> ✅ Dark/light theme toggles smoothly</p>
+  </div>
+
+  <div class="test-card">
+    <h2>📱 Responsive Test</h2>
+    <p>Use browser DevTools to test these viewports:</p>
+    <ul class="checklist">
+      <li>Desktop (1920x1080) - Two-column layout</li>
+      <li>Tablet (768x1024) - Two-column layout</li>
+      <li>Mobile (375x667) - Single-column, stacked layout</li>
+    </ul>
+    <p><strong>Expected:</strong> ✅ Responsive layout adapts properly</p>
+  </div>
+
+  <div class="test-card">
+    <h2>✅ Acceptance Criteria Checklist</h2>
+    <h3>Minify (AC-101 to AC-106)</h3>
+    <ul class="checklist">
+      <li>AC-101: Minify removes all whitespace</li>
+      <li>AC-102: Minify preserves valid JSON</li>
+      <li>AC-103: Character count reduction displayed</li>
+      <li>AC-104: Minified output copyable and downloadable</li>
+      <li>AC-105: Invalid JSON shows error</li>
+      <li>AC-106: Minify button keyboard accessible</li>
+    </ul>
+
+    <h3>Beautify (AC-107 to AC-113)</h3>
+    <ul class="checklist">
+      <li>AC-107: Beautify formats with proper indentation</li>
+      <li>AC-108: 2 spaces option works</li>
+      <li>AC-109: 4 spaces option works</li>
+      <li>AC-110: Tab option works</li>
+      <li>AC-111: Invalid JSON shows error</li>
+      <li>AC-112: Indentation preference saved</li>
+      <li>AC-113: Preference persists across sessions</li>
+    </ul>
+
+    <p><strong>Status:</strong> <span class="status pending">PENDING MANUAL TESTING</span></p>
+  </div>
+
+  <div class="test-card">
+    <h2>🐛 Bug Reporting</h2>
+    <p>If you find any issues during testing:</p>
+    <ol>
+      <li>Note the exact steps to reproduce</li>
+      <li>Check browser console for errors (F12)</li>
+      <li>Record expected vs actual behavior</li>
+      <li>Note browser and version</li>
+      <li>Take screenshots if applicable</li>
+    </ol>
+  </div>
+
+  <div class="test-card">
+    <h2>📊 Performance Benchmark</h2>
+    <p>Run this in browser console after opening the tool:</p>
+    <pre><code>// Performance test function
+async function testPerformance() {
+  const sizes = [1000, 10000, 50000];
+  const labels = ['100KB', '1MB', '5MB'];
+  
+  for (let i = 0; i < sizes.length; i++) {
+    const obj = {};
+    for (let j = 0; j < sizes[i]; j++) {
+      obj[`key${j}`] = `value${j}_${Math.random()}`;
+    }
+    const json = JSON.stringify(obj);
+    
+    console.log(`\n--- Testing ${labels[i]} (${(json.length/1024).toFixed(1)}KB) ---`);
+    
+    // Test Parse
+    const start = performance.now();
+    const parsed = JSON.parse(json);
+    const parseTime = performance.now() - start;
+    
+    // Test Stringify
+    const start2 = performance.now();
+    const stringified = JSON.stringify(parsed);
+    const stringifyTime = performance.now() - start2;
+    
+    console.log(`Parse time: ${parseTime.toFixed(2)}ms`);
+    console.log(`Stringify time: ${stringifyTime.toFixed(2)}ms`);
+    console.log(`Total: ${(parseTime + stringifyTime).toFixed(2)}ms`);
+  }
+}
+
+testPerformance();</code></pre>
+    <p><strong>Target Benchmarks:</strong></p>
+    <ul>
+      <li>100KB: < 100ms</li>
+      <li>1MB: < 200ms</li>
+      <li>5MB: < 300ms</li>
+    </ul>
+  </div>
+
+  <div class="test-card">
+    <h2>🎯 Next Steps</h2>
+    <ol>
+      <li><strong>Manual Testing:</strong> Complete all test cases above</li>
+      <li><strong>Performance:</strong> Run benchmark tests</li>
+      <li><strong>Accessibility:</strong> Test with screen reader (NVDA/VoiceOver)</li>
+      <li><strong>Cross-Browser:</strong> Test in Chrome, Firefox, Safari, Edge</li>
+      <li><strong>Sign Off:</strong> Validate all acceptance criteria met</li>
+      <li><strong>Deploy:</strong> Move to production if all tests pass</li>
+    </ol>
+  </div>
+
+  <footer style="text-align: center; margin-top: 40px; padding: 20px; color: #6c757d;">
+    <p>JSON Schema Tool - Feature 1 Implementation</p>
+    <p>Status: <span class="status complete">IMPLEMENTATION COMPLETE</span> | Testing: <span class="status pending">PENDING</span></p>
+    <p>March 19, 2026</p>
+  </footer>
+</body>
+</html>

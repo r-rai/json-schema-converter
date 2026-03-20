@@ -1,0 +1,108 @@
+/**
+ * Theme System - Light Theme Overrides
+ * CSS custom property overrides for light theme
+ * 
+ * @file shared/css/themes.css
+ * 
+ * Dark theme is default (defined in variables.css)
+ * Light theme overrides specific variables when [data-theme="light"] is set on <html>
+ */
+
+/* ========================================
+   LIGHT THEME
+   ======================================== */
+
+[data-theme="light"] {
+  /* Background Colors */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f8fafc;      /* Light gray */
+  --color-bg-tertiary: #e2e8f0;       /* Slightly darker gray */
+  
+  /* Text Colors */
+  --color-text-primary: #0f172a;      /* Dark blue-gray */
+  --color-text-secondary: #475569;    /* Medium gray */
+  --color-text-muted: #64748b;        /* Light gray */
+  
+  /* Brand & Accent Colors */
+  --color-accent: #0284c7;            /* Darker sky blue for better contrast */
+  --color-accent-hover: #0369a1;      /* Even darker on hover */
+  --color-accent-light: rgba(2, 132, 199, 0.1);
+  
+  /* Semantic Colors - slightly adjusted for light backgrounds */
+  --color-success: #16a34a;           /* Darker green */
+  --color-success-bg: rgba(22, 163, 74, 0.1);
+  --color-error: #dc2626;             /* Darker red */
+  --color-error-bg: rgba(220, 38, 38, 0.1);
+  --color-warning: #ea580c;           /* Darker orange */
+  --color-warning-bg: rgba(234, 88, 12, 0.1);
+  --color-info: #2563eb;              /* Darker blue */
+  --color-info-bg: rgba(37, 99, 235, 0.1);
+  
+  /* Border Colors */
+  --color-border: #cbd5e1;            /* Light border */
+  --color-border-light: #e2e8f0;      /* Even lighter border */
+  
+  /* Shadows - lighter for light theme */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+  --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.18);
+  --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* ========================================
+   THEME-SPECIFIC ADJUSTMENTS
+   ======================================== */
+
+/* Code blocks in light theme */
+[data-theme="light"] pre {
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+}
+
+[data-theme="light"] code {
+  background-color: var(--color-bg-tertiary);
+}
+
+/* Input focus in light theme - subtler glow */
+[data-theme="light"] input:focus,
+[data-theme="light"] select:focus,
+[data-theme="light"] textarea:focus {
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+}
+
+/* Scrollbar in light theme */
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* Selection in light theme */
+[data-theme="light"] ::selection {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+/* ========================================
+   THEME TRANSITION (Optional)
+   Smooth transition when switching themes
+   ======================================== */
+
+html[data-theme-transition] {
+  transition: background-color var(--duration-slow) var(--easing),
+              color var(--duration-slow) var(--easing);
+}
+
+html[data-theme-transition] * {
+  transition: background-color var(--duration-slow) var(--easing),
+              color var(--duration-slow) var(--easing),
+              border-color var(--duration-slow) var(--easing);
+}

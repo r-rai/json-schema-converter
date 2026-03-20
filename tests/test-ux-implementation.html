@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visual Test - DevTools Suite</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: #f5f5f5;
+    }
+    h1 { color: #0284c7; }
+    .test-section {
+      background: white;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-list { list-style: none; padding: 0; }
+    .test-list li {
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #eee;
+    }
+    .test-list li:last-child { border: none; }
+    input[type="checkbox"] {
+      margin-right: 0.5rem;
+      transform: scale(1.2);
+    }
+    .status {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    .status.complete { background: #d1fae5; color: #065f46; }
+    .status.pending { background: #fef3c7; color: #92400e; }
+    .btn {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background: #0284c7;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: 500;
+      margin: 0.5rem 0.5rem 0.5rem 0;
+    }
+    .btn:hover { background: #0369a1; }
+    .code {
+      background: #f3f4f6;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 DevTools Suite - Visual Testing Guide</h1>
+  
+  <p><strong>Implementation Status:</strong> <span class="status complete">✅ COMPLETE</span></p>
+  
+  <div class="test-section">
+    <h2>Quick Start</h2>
+    <ol>
+      <li>Open <span class="code">index.html</span> in your browser</li>
+      <li>Follow the tests below in order</li>
+      <li>Check off each item as you verify it works</li>
+      <li>Note any issues found</li>
+    </ol>
+    <a href="../index.html" class="btn" target="_blank">🚀 Open DevTools Suite</a>
+    <a href="javascript:window.location.reload()" class="btn" style="background:#6b7280">🔄 Refresh This Page</a>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 1: Header & Navigation (2 min)</h2>
+    <ul class="test-list">
+      <li><input type="checkbox" id="t1-1"><label for="t1-1">Header appears at top and is sticky on scroll</label></li>
+      <li><input type="checkbox" id="t1-2"><label for="t1-2">Home button (🏠) is visible and clickable</label></li>
+      <li><input type="checkbox" id="t1-3"><label for="t1-3">"Dev Tools" title appears (desktop only)</label></li>
+      <li><input type="checkbox" id="t1-4"><label for="t1-4">Breadcrumb shows "Tools Dashboard" on home page</label></li>
+      <li><input type="checkbox" id="t1-5"><label for="t1-5">Search button (🔍) appears and shows alert</label></li>
+      <li><input type="checkbox" id="t1-6"><label for="t1-6">Theme toggle (☀️/🌙) is visible</label></li>
+      <li><input type="checkbox" id="t1-7"><label for="t1-7">Header has accent-colored bottom border</label></li>
+    </ul>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 2: Theme Toggle (1 min)</h2>
+    <ul class="test-list">
+      <li><input type="checkbox" id="t2-1"><label for="t2-1">Click theme button - background changes to light</label></li>
+      <li><input type="checkbox" id="t2-2"><label for="t2-2">Icon changes from ☀️ to 🌙</label></li>
+      <li><input type="checkbox" id="t2-3"><label for="t2-3">All colors transition smoothly (~200ms)</label></li>
+      <li><input type="checkbox" id="t2-4"><label for="t2-4">Reload page - theme persists</label></li>
+      <li><input type="checkbox" id="t2-5"><label for="t2-5">Switch back to dark mode works</label></li>
+    </ul>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 3: Home Page Layout (2 min)</h2>
+    <ul class="test-list">
+      <li><input type="checkbox" id="t3-1"><label for="t3-1">"Developer Tools" heading displays</label></li>
+      <li><input type="checkbox" id="t3-2"><label for="t3-2">Description text appears below heading</label></li>
+      <li><input type="checkbox" id="t3-3"><label for="t3-3">6 tool cards display in grid</label></li>
+      <li><input type="checkbox" id="t3-4"><label for="t3-4">Cards have equal height (280px)</label></li>
+      <li><input type="checkbox" id="t3-5"><label for="t3-5">Each card has icon, title, description, button</label></li>
+      <li><input type="checkbox" id="t3-6"><label for="t3-6">JSON card says "Launch Tool" (active)</label></li>
+      <li><input type="checkbox" id="t3-7"><label for="t3-7">Other cards say "Coming Soon" (disabled)</label></li>
+    </ul>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 4: Tool Card Interactions (2 min)</h2>
+    <ul class="test-list">
+      <li><input type="checkbox" id="t4-1"><label for="t4-1">Hover JSON card - lifts up, border turns cyan, shadow appears</label></li>
+      <li><input type="checkbox" id="t4-2"><label for="t4-2">Click JSON card - navigates away from home page</label></li>
+      <li><input type="checkbox" id="t4-3"><label for="t4-3">URL changes to #json</label></li>
+      <li><input type="checkbox" id="t4-4"><label for="t4-4">Breadcrumb updates to "Home / JSON Schema Generator"</label></li>
+      <li><input type="checkbox" id="t4-5"><label for="t4-5">Recent apps bar appears below header</label></li>
+      <li><input type="checkbox" id="t4-6"><label for="t4-6">JSON tool chip shows in recent bar with "📋 JSON Tool"</label></li>
+      <li><input type="checkbox" id="t4-7"><label for="t4-7">Hover "Coming Soon" cards - no lift effect, disabled cursor</label></li>
+    </ul>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 5: Recent Apps Functionality (3 min)</h2>
+    <ul class="test-list">
+      <li><input type="checkbox" id="t5-1"><label for="t5-1">Recent apps bar only appears after launching a tool</label></li>
+      <li><input type="checkbox" id="t5-2"><label for="t5-2">Active tool highlighted in recent bar (cyan background)</label></li>
+      <li><input type="checkbox" id="t5-3"><label for="t5-3">Click home button - recent bar still visible</label></li>
+      <li><input type="checkbox" id="t5-4"><label for="t5-4">Launch JSON tool 3 times - appears once in recent bar</label></li>
+      <li><input type="checkbox" id="t5-5"><label for="t5-5">Hover recent chip - border turns cyan, lifts slightly</label></li>
+      <li><input type="checkbox" id="t5-6"><label for="t5-6">Click "Clear" button - confirmation dialog appears</label></li>
+      <li><input type="checkbox" id="t5-7"><label for="t5-7">Confirm clear - recent bar disappears immediately</label></li>
+      <li><input type="checkbox" id="t5-8"><label for="t5-8">Reload page - recent apps persists (if not cleared)</label></li>
+    </ul>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 6: Responsive Design (3 min)</h2>
+    <p><strong>Desktop (1200px+):</strong></p>
+    <ul class="test-list">
+      <li><input type="checkbox" id="t6-1"><label for="t6-1">Tool cards display in 3 columns</label></li>
+      <li><input type="checkbox" id="t6-2"><label for="t6-2">"Dev Tools" title visible in header</label></li>
+      <li><input type="checkbox" id="t6-3"><label for="t6-3">All header buttons properly spaced</label></li>
+    </ul>
+    
+    <p><strong>Tablet (600-899px):</strong></p>
+    <ul class="test-list">
+      <li><input type="checkbox" id="t6-4"><label for="t6-4">Tool cards display in 2 columns</label></li>
+      <li><input type="checkbox" id="t6-5"><label for="t6-5">Header adapts, elements still visible</label></li>
+    </ul>
+    
+    <p><strong>Mobile (<600px):</strong></p>
+    <ul class="test-list">
+      <li><input type="checkbox" id="t6-6"><label for="t6-6">Tool cards stack in 1 column</label></li>
+      <li><input type="checkbox" id="t6-7"><label for="t6-7">"Dev Tools" title hidden</label></li>
+      <li><input type="checkbox" id="t6-8"><label for="t6-8">All touch targets minimum 40x40px</label></li>
+      <li><input type="checkbox" id="t6-9"><label for="t6-9">Recent apps scroll horizontally</label></li>
+    </ul>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 7: Keyboard Navigation (2 min)</h2>
+    <ul class="test-list">
+      <li><input type="checkbox" id="t7-1"><label for="t7-1">Press Tab - focus moves to home button</label></li>
+      <li><input type="checkbox" id="t7-2"><label for="t7-2">Tab again - focus moves to search button</label></li>
+      <li><input type="checkbox" id="t7-3"><label for="t7-3">Tab again - focus moves to theme toggle</label></li>
+      <li><input type="checkbox" id="t7-4"><label for="t7-4">Tab to recent chips (if visible)</label></li>
+      <li><input type="checkbox" id="t7-5"><label for="t7-5">Tab to tool cards - focus visible on each</label></li>
+      <li><input type="checkbox" id="t7-6"><label for="t7-6">All focused elements have 2px cyan outline</label></li>
+      <li><input type="checkbox" id="t7-7"><label for="t7-7">Press Ctrl+K - search alert appears</label></li>
+      <li><input type="checkbox" id="t7-8"><label for="t7-8">Press Enter on focused card - navigates to tool</label></li>
+    </ul>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 8: Browser Navigation (1 min)</h2>
+    <ul class="test-list">
+      <li><input type="checkbox" id="t8-1"><label for="t8-1">Click JSON card - URL shows #json</label></li>
+      <li><input type="checkbox" id="t8-2"><label for="t8-2">Press browser back - returns to home page</label></li>
+      <li><input type="checkbox" id="t8-3"><label for="t8-3">Breadcrumb updates back to "Tools Dashboard"</label></li>
+      <li><input type="checkbox" id="t8-4"><label for="t8-4">Press browser forward - goes back to JSON tool</label></li>
+      <li><input type="checkbox" id="t8-5"><label for="t8-5">Direct URL navigation (type #json) works</label></li>
+      <li><input type="checkbox" id="t8-6"><label for="t8-6">Home button works from any page</label></li>
+    </ul>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 9: Console & Performance (1 min)</h2>
+    <ul class="test-list">
+      <li><input type="checkbox" id="t9-1"><label for="t9-1">Open DevTools Console - no errors appear</label></li>
+      <li><input type="checkbox" id="t9-2"><label for="t9-2">"DevTools Suite initialized" message appears</label></li>
+      <li><input type="checkbox" id="t9-3"><label for="t9-3">Navigation is instant (no delays)</label></li>
+      <li><input type="checkbox" id="t9-4"><label for="t9-4">Theme toggle is smooth (~200ms)</label></li>
+      <li><input type="checkbox" id="t9-5"><label for="t9-5">No layout shift when loading</label></li>
+      <li><input type="checkbox" id="t9-6"><label for="t9-6">Hover effects are smooth (~150ms)</label></li>
+    </ul>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 10: Edge Cases (2 min)</h2>
+    <ul class="test-list">
+      <li><input type="checkbox" id="t10-1"><label for="t10-1">Visit invalid hash (#nonexistent) - stays on home page</label></li>
+      <li><input type="checkbox" id="t10-2"><label for="t10-2">Try localStorage in incognito - graceful fallback</label></li>
+      <li><input type="checkbox" id="t10-3"><label for="t10-3">Launch same tool 10 times - max 5 in recent (LIFO)</label></li>
+      <li><input type="checkbox" id="t10-4"><label for="t10-4">Resize window rapidly - layout adapts smoothly</label></li>
+      <li><input type="checkbox" id="t10-5"><label for="t10-5">Click disabled "Coming Soon" cards - does nothing</label></li>
+      <li><input type="checkbox" id="t10-6"><label for="t10-6">Open on slow connection - still instant (inline)</label></li>
+    </ul>
+  </div>
+
+  <div class="test-section" style="background:#d1fae5;">
+    <h2>✅ Success Criteria</h2>
+    <p>Implementation is successful if:</p>
+    <ul>
+      <li>✅ All functional tests pass (no JavaScript errors)</li>
+      <li>✅ Visual design matches specifications</li>
+      <li>✅ Responsive on all breakpoints (3/2/1 columns)</li>
+      <li>✅ Keyboard navigation works fully</li>
+      <li>✅ Theme toggle persists across reloads</li>
+      <li>✅ Recent apps tracking works correctly</li>
+      <li>✅ Navigation (home ↔ tool) is smooth</li>
+      <li>✅ No console errors or warnings</li>
+    </ul>
+  </div>
+
+  <div class="test-section">
+    <h2>📊 Test Results</h2>
+    <p><strong>Date:</strong> <span id="testDate"></span></p>
+    <p><strong>Browser:</strong> <span id="browser"></span></p>
+    <p><strong>Tests Passed:</strong> <span id="passedCount">0</span> / <span id="totalCount">0</span></p>
+    <button onclick="calculateResults()" class="btn">Calculate Results</button>
+    <button onclick="printReport()" class="btn" style="background:#059669">🖨️ Print Report</button>
+  </div>
+
+  <script>
+    // Set test date
+    document.getElementById('testDate').textContent = new Date().toLocaleDateString();
+    
+    // Detect browser
+    const userAgent = navigator.userAgent;
+    let browserName = 'Unknown';
+    if (userAgent.includes('Chrome')) browserName = 'Chrome';
+    else if (userAgent.includes('Firefox')) browserName = 'Firefox';
+    else if (userAgent.includes('Safari')) browserName = 'Safari';
+    else if (userAgent.includes('Edge')) browserName = 'Edge';
+    document.getElementById('browser').textContent = browserName;
+    
+    // Calculate results
+    function calculateResults() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      const total = checkboxes.length;
+      const passed = Array.from(checkboxes).filter(cb => cb.checked).length;
+      
+      document.getElementById('totalCount').textContent = total;
+      document.getElementById('passedCount').textContent = passed;
+      
+      const percentage = Math.round((passed / total) * 100);
+      alert(`Test Results:\n✅ Passed: ${passed}/${total} (${percentage}%)\n\n${percentage >= 90 ? '🎉 Excellent! Implementation is ready.' : percentage >= 75 ? '⚠️ Good, but review failed tests.' : '❌ Multiple issues found. Review and retest.'}`);
+    }
+    
+    // Print report
+    function printReport() {
+      window.print();
+    }
+    
+    // Auto-save checkbox state
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      const saved = localStorage.getItem('test-' + cb.id);
+      if (saved === 'true') cb.checked = true;
+      
+      cb.addEventListener('change', () => {
+        localStorage.setItem('test-' + cb.id, cb.checked);
+      });
+    });
+  </script>
+</body>
+</html>

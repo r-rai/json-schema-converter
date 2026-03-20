@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON Schema Tool - Automated Tests</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+    }
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      border-left: 4px solid #3b82f6;
+    }
+    .test-case {
+      margin: 15px 0;
+      padding: 15px;
+      background: #f9fafb;
+      border-radius: 4px;
+    }
+    .test-result {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .pass {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .fail {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .test-output {
+      font-family: 'Courier New', monospace;
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 10px;
+      overflow-x: auto;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .summary {
+      background: #3b82f6;
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    .summary-item {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 10px;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .summary-item .value {
+      font-size: 2em;
+      font-weight: bold;
+      display: block;
+    }
+    .summary-item .label {
+      font-size: 0.9em;
+      opacity: 0.9;
+    }
+    button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+    button:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+    .bug-report {
+      background: #fee2e2;
+      border-left: 4px solid #dc2626;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    .bug-report h4 {
+      color: #991b1b;
+      margin-top: 0;
+    }
+    .note {
+      background: #dbeafe;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 JSON Schema Enhancement - Automated Test Suite</h1>
+  
+  <div class="note">
+    <strong>Note:</strong> This test suite will open the JSON Schema tool in an iframe and programmatically test all functionality.
+    Tests are executed automatically when you click "Run Tests" button.
+  </div>
+
+  <button id="runTests" onclick="runAllTests()">▶️ Run All Tests</button>
+  <button id="copyReport" onclick="copyReport()" disabled>📋 Copy Test Report</button>
+
+  <div class="summary" id="summary" style="display: none;">
+    <h2>Test Summary</h2>
+    <div class="summary-grid">
+      <div class="summary-item">
+        <span class="value" id="totalTests">0</span>
+        <span class="label">Total Tests</span>
+      </div>
+      <div class="summary-item">
+        <span class="value" id="passedTests">0</span>
+        <span class="label">Passed</span>
+      </div>
+      <div class="summary-item">
+        <span class="value" id="failedTests">0</span>
+        <span class="label">Failed</span>
+      </div>
+      <div class="summary-item">
+        <span class="value" id="successRate">0%</span>
+        <span class="label">Success Rate</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="testResults"></div>
+
+  <iframe id="toolFrame" src="/tools/json-schema/" style="display: none;" width="100%" height="600"></iframe>
+
+  <script>
+    let testResults = [];
+    let bugsFound = [];
+
+    function log(message, type = 'info') {
+      console.log(`[${type.toUpperCase()}] ${message}`);
+    }
+
+    function addTestResult(category, testName, passed, expected, actual, notes = '') {
+      testResults.push({
+        category,
+        testName,
+        passed,
+        expected,
+        actual,
+        notes,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    function addBug(title, severity, category, steps, expected, actual, impact, fix) {
+      bugsFound.push({
+        id: bugsFound.length + 1,
+        title,
+        severity,
+        category,
+        steps,
+        expected,
+        actual,
+        impact,
+        fix,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    async function runAllTests() {
+      document.getElementById('runTests').disabled = true;
+      document.getElementById('testResults').innerHTML = '<p>🔄 Running tests...</p>';
+      
+      testResults = [];
+      bugsFound = [];
+
+      try {
+        // Wait for iframe to load
+        const frame = document.getElementById('toolFrame');
+        await new Promise(resolve => {
+          if (frame.contentWindow.document.readyState === 'complete') {
+            resolve();
+          } else {
+            frame.onload = resolve;
+          }
+        });
+
+        await sleep(1000); // Give time for JS to initialize
+
+        const doc = frame.contentDocument || frame.contentWindow.document;
+        
+        // Run test categories
+        await testValidation(doc);
+        await testMinify(doc);
+        await testBeautify(doc);
+        await testInvalidJSON(doc);
+        await testCopyPaste(doc);
+        await testClearInput(doc);
+        await testPersistence(doc);
+        await testDynamicIndentation(doc);
+        await testSpecialCharacters(doc);
+        await testEdgeCases(doc);
+        await testAccessibility(doc);
+        await testPerformance(doc);
+
+        // Display results
+        displayResults();
+        
+      } catch (error) {
+        log('Test execution failed: ' + error.message, 'error');
+        document.getElementById('testResults').innerHTML = `
+          <div class="bug-report">
+            <h4>❌ Test Suite Execution Failed</h4>
+            <p><strong>Error:</strong> ${error.message}</p>
+            <p><strong>Stack:</strong> ${error.stack}</p>
+          </div>
+        `;
+      }
+
+      document.getElementById('runTests').disabled = false;
+      document.getElementById('copyReport').disabled = false;
+    }
+
+    async function testValidation(doc) {
+      const section = createSection('Test 1: JSON Validation');
+      
+      try {
+        // Test 1a: Valid JSON
+        const input = doc.getElementById('json-input');
+        const output = doc.getElementById('json-output');
+        const validateBtn = doc.getElementById('validate-btn');
+        const statusMsg = doc.getElementById('status-message');
+
+        const validJSON = '{"name": "John", "age": 30, "city": "New York"}';
+        input.value = validJSON;
+        input.dispatchEvent(new Event('input'));
+        await sleep(500);
+
+        validateBtn.click();
+        await sleep(300);
+
+        const hasOutput = output.value.length > 0;
+        const statusText = statusMsg.textContent;
+        const isSuccess = statusText.includes('Valid') || statusText.includes('✓');
+        
+        addTestCase(section, 'Validate Valid JSON', hasOutput && isSuccess, 
+          'Output displayed with success message',
+          `Output: ${hasOutput}, Status: "${statusText}"`,
+          hasOutput && isSuccess ? '' : 'Validation did not work as expected'
+        );
+
+        if (!hasOutput || !isSuccess) {
+          addBug(
+            'Validation not working properly',
+            'Critical',
+            'Functional',
+            ['Enter valid JSON', 'Click Validate'],
+            'Output should show formatted JSON with success message',
+            `Output present: ${hasOutput}, Status: "${statusText}"`,
+            'Users cannot validate JSON - core feature broken',
+            'Check validateJSON function and success message logic'
+          );
+        }
+
+      } catch (error) {
+        addTestCase(section, 'Validation Tests', false, 'Tests to complete', 'Error: ' + error.message, error.stack);
+      }
+    }
+
+    async function testMinify(doc) {
+      const section = createSection('Test 2-3: JSON Minification');
+      
+      try {
+        const input = doc.getElementById('json-input');
+        const output = doc.getElementById('json-output');
+        const minifyBtn = doc.getElementById('minify-btn');
+        const reduction = doc.getElementById('output-reduction');
+
+        const beautifiedJSON = `{
+  "name": "Alice",
+  "age": 25,
+  "skills": ["JavaScript", "Python", "React"]
+}`;
+        
+        const inputLength = beautifiedJSON.length;
+        input.value = beautifiedJSON;
+        input.dispatchEvent(new Event('input'));
+        await sleep(300);
+
+        minifyBtn.click();
+        await sleep(300);
+
+        const minified = output.value;
+        const hasNoWhitespace = !/\s{2,}|\n/.test(minified);
+        const isValid = minified.length > 0 && minified.length < inputLength;
+        const hasReduction = reduction.textContent.includes('-') || reduction.textContent.includes('bytes');
+
+        addTestCase(section, 'Minify removes whitespace', hasNoWhitespace && isValid,
+          'All whitespace removed, valid output',
+          `Whitespace removed: ${hasNoWhitespace}, Valid: ${isValid}, Output length: ${minified.length}`,
+          ''
+        );
+
+        addTestCase(section, 'Size reduction displayed', hasReduction,
+          'Shows bytes saved and percentage',
+          `Reduction text: "${reduction.textContent}"`,
+          ''
+        );
+
+        // Verify JSON is still valid
+        try {
+          JSON.parse(minified);
+          addTestCase(section, 'Minified JSON is valid', true,
+            'Minified output parses successfully',
+            'Valid JSON',
+            ''
+          );
+        } catch (e) {
+          addTestCase(section, 'Minified JSON is valid', false,
+            'Minified output parses successfully',
+            'Parse error: ' + e.message,
+            'Critical - minification broke JSON structure'
+          );
+          addBug(
+            'Minification produces invalid JSON',
+            'Critical',
+            'Functional',
+            ['Enter valid JSON', 'Click Minify'],
+            'Valid minified JSON',
+            'JSON parsing fails after minification',
+            'Data corruption - users cannot use minified output',
+            'Review JSON.stringify implementation'
+          );
+        }
+
+      } catch (error) {
+        addTestCase(section, 'Minify Tests', false, 'Tests to complete', 'Error: ' + error.message, error.stack);
+      }
+    }
+
+    async function testBeautify(doc) {
+      const section = createSection('Test 4-6: JSON Beautification');
+      
+      try {
+        const input = doc.getElementById('json-input');
+        const output = doc.getElementById('json-output');
+        const beautifyBtn = doc.getElementById('beautify-btn');
+        const indentSelect = doc.getElementById('indent-select');
+
+        const minifiedJSON = '{"name":"Bob","age":28,"active":true}';
+
+        // Test 2 spaces
+        input.value = minifiedJSON;
+        input.dispatchEvent(new Event('input'));
+        await sleep(300);
+
+        indentSelect.value = '2';
+        indentSelect.dispatchEvent(new Event('change'));
+        await sleep(200);
+
+        beautifyBtn.click();
+        await sleep(300);
+
+        const output2Space = output.value;
+        const has2SpaceIndent = output2Space.includes('  "name"') || output2Space.match(/\n  \S/);
+        
+        addTestCase(section, 'Beautify with 2 spaces', has2SpaceIndent,
+          'Properly formatted with 2-space indentation',
+          `Has 2-space indent: ${has2SpaceIndent}`,
+          ''
+        );
+
+        // Test 4 spaces
+        input.value = minifiedJSON;
+        indentSelect.value = '4';
+        indentSelect.dispatchEvent(new Event('change'));
+        await sleep(200);
+        
+        beautifyBtn.click();
+        await sleep(300);
+
+        const output4Space = output.value;
+        const has4SpaceIndent = output4Space.includes('    "name"') || output4Space.match(/\n    \S/);
+
+        addTestCase(section, 'Beautify with 4 spaces', has4SpaceIndent,
+          'Properly formatted with 4-space indentation',
+          `Has 4-space indent: ${has4SpaceIndent}`,
+          ''
+        );
+
+        // Test Tab
+        input.value = minifiedJSON;
+        indentSelect.value = '\t';
+        indentSelect.dispatchEvent(new Event('change'));
+        await sleep(200);
+        
+        beautifyBtn.click();
+        await sleep(300);
+
+        const outputTab = output.value;
+        const hasTabIndent = outputTab.includes('\t');
+
+        addTestCase(section, 'Beautify with Tab', hasTabIndent,
+          'Properly formatted with tab indentation',
+          `Has tab indent: ${hasTabIndent}`,
+          ''
+        );
+
+      } catch (error) {
+        addTestCase(section, 'Beautify Tests', false, 'Tests to complete', 'Error: ' + error.message, error.stack);
+      }
+    }
+
+    async function testInvalidJSON(doc) {
+      const section = createSection('Test 7: Invalid JSON Handling');
+      
+      try {
+        const input = doc.getElementById('json-input');
+        const output = doc.getElementById('json-output');
+        const validateBtn = doc.getElementById('validate-btn');
+        const statusMsg = doc.getElementById('status-message');
+
+        const invalidCases = [
+          { name: 'Missing closing brace', json: '{"name": "John"' },
+          { name: 'Trailing comma', json: '{"name": "John",}' },
+          { name: 'Unquoted keys', json: '{name: "John"}' },
+          { name: 'Single quotes', json: "{'name': 'John'}" }
+        ];
+
+        for (const testCase of invalidCases) {
+          input.value = testCase.json;
+          input.dispatchEvent(new Event('input'));
+          await sleep(200);
+
+          validateBtn.click();
+          await sleep(300);
+
+          const hasErrorMessage = statusMsg.textContent.toLowerCase().includes('error') || 
+                                 statusMsg.textContent.toLowerCase().includes('invalid');
+          const outputEmpty = output.value.length === 0;
+
+          addTestCase(section, `Invalid JSON: ${testCase.name}`, hasErrorMessage && outputEmpty,
+            'Error message shown, output empty',
+            `Error shown: ${hasErrorMessage}, Output empty: ${outputEmpty}, Message: "${statusMsg.textContent}"`,
+            ''
+          );
+
+          if (!hasErrorMessage) {
+            addBug(
+              `No error message for invalid JSON: ${testCase.name}`,
+              'Medium',
+              'Functional',
+              ['Enter invalid JSON: ' + testCase.json, 'Click Validate'],
+              'Error message displayed',
+              'No error message shown',
+              'Users may not realize their JSON is invalid',
+              'Ensure validateJSON catches all invalid cases'
+            );
+          }
+        }
+
+      } catch (error) {
+        addTestCase(section, 'Invalid JSON Tests', false, 'Tests to complete', 'Error: ' + error.message, error.stack);
+      }
+    }
+
+    async function testCopyPaste(doc) {
+      const section = createSection('Test 8-9: Copy & Paste');
+      
+      try {
+        const copyBtn = doc.getElementById('copy-output-btn');
+        const pasteBtn = doc.getElementById('paste-btn');
+        const input = doc.getElementById('json-input');
+        const output = doc.getElementById('json-output');
+
+        // Setup output first
+        input.value = '{"test": "data"}';
+        input.dispatchEvent(new Event('input'));
+        await sleep(200);
+        doc.getElementById('validate-btn').click();
+        await sleep(300);
+
+        // Test copy button (can't actually test clipboard without user gesture)
+        const copyDisabledBefore = copyBtn.disabled;
+        const copyExists = copyBtn !== null;
+
+        addTestCase(section, 'Copy button exists and enabled', copyExists && !copyDisabledBefore,
+          'Copy button present and enabled after output',
+          `Exists: ${copyExists}, Disabled: ${copyDisabledBefore}`,
+          'Note: Actual clipboard copying requires user gesture and cannot be fully automated'
+        );
+
+        // Test paste button
+        const pasteExists = pasteBtn !== null;
+        const pasteDisabled = pasteBtn.disabled;
+
+        addTestCase(section, 'Paste button exists', pasteExists,
+          'Paste button present',
+          `Exists: ${pasteExists}`,
+          'Note: Actual clipboard reading requires user gesture and cannot be fully automated'
+        );
+
+      } catch (error) {
+        addTestCase(section, 'Copy/Paste Tests', false, 'Tests to complete', 'Error: ' + error.message, error.stack);
+      }
+    }
+
+    async function testClearInput(doc) {
+      const section = createSection('Test 10: Clear Input');
+      
+      try {
+        const input = doc.getElementById('json-input');
+        const output = doc.getElementById('json-output');
+        const clearBtn = doc.getElementById('clear-input-btn');
+        const inputCharCount = doc.getElementById('input-char-count');
+
+        // Add content
+        input.value = '{"test": "data"}';
+        input.dispatchEvent(new Event('input'));
+        await sleep(200);
+        doc.getElementById('validate-btn').click();
+        await sleep(300);
+
+        // Clear
+        clearBtn.click();
+        await sleep(200);
+
+        const inputCleared = input.value === '';
+        const outputCleared = output.value === '';
+        const statsReset = inputCharCount.textContent === '0 characters';
+
+        addTestCase(section, 'Clear input function', inputCleared && outputCleared && statsReset,
+          'Input, output, and stats all cleared',
+          `Input cleared: ${inputCleared}, Output cleared: ${outputCleared}, Stats reset: ${statsReset}`,
+          ''
+        );
+
+      } catch (error) {
+        addTestCase(section, 'Clear Tests', false, 'Tests to complete', 'Error: ' + error.message, error.stack);
+      }
+    }
+
+    async function testPersistence(doc) {
+      const section = createSection('Test 11: Persistence');
+      
+      try {
+        const indentSelect = doc.getElementById('indent-select');
+
+        // Change to 4 spaces
+        indentSelect.value = '4';
+        indentSelect.dispatchEvent(new Event('change'));
+        await sleep(200);
+
+        // Check localStorage
+        const savedPref = localStorage.getItem('jsonIndentPreference');
+        const isPersisted = savedPref === '4';
+
+        addTestCase(section, 'Indentation preference saved', isPersisted,
+          'Preference saved to localStorage',
+          `Saved value: "${savedPref}"`,
+          ''
+        );
+
+      } catch (error) {
+        addTestCase(section, 'Persistence Tests', false, 'Tests to complete', 'Error: ' + error.message, error.stack);
+      }
+    }
+
+    async function testDynamicIndentation(doc) {
+      const section = createSection('Test 12: Dynamic Indentation Change');
+      
+      try {
+        const input = doc.getElementById('json-input');
+        const output = doc.getElementById('json-output');
+        const beautifyBtn = doc.getElementById('beautify-btn');
+        const indentSelect = doc.getElementById('indent-select');
+
+        // Beautify with 2 spaces
+        input.value = '{"name":"test"}';
+        input.dispatchEvent(new Event('input'));
+        await sleep(200);
+
+        indentSelect.value = '2';
+        beautifyBtn.click();
+        await sleep(300);
+
+        const output2 = output.value;
+
+        // Change to 4 spaces
+        indentSelect.value = '4';
+        indentSelect.dispatchEvent(new Event('change'));
+        await sleep(300);
+
+        const output4 = output.value;
+        const outputChanged = output4 !== output2;
+        const has4Spaces = output4.includes('    ');
+
+        addTestCase(section, 'Dynamic indentation reflow', outputChanged && has4Spaces,
+          'Output automatically reformats when indentation changed',
+          `Output changed: ${outputChanged}, Has 4 spaces: ${has4Spaces}`,
+          ''
+        );
+
+      } catch (error) {
+        addTestCase(section, 'Dynamic Indentation Tests', false, 'Tests to complete', 'Error: ' + error.message, error.stack);
+      }
+    }
+
+    async function testSpecialCharacters(doc) {
+      const section = createSection('Test 13: Special Characters');
+      
+      try {
+        const input = doc.getElementById('json-input');
+        const output = doc.getElementById('json-output');
+        const validateBtn = doc.getElementById('validate-btn');
+
+        const specialJSON = '{"emoji": "👋🌍", "unicode": "\\u0048", "escape": "line\\nbreak"}';
+        input.value = specialJSON;
+        input.dispatchEvent(new Event('input'));
+        await sleep(200);
+
+        validateBtn.click();
+        await sleep(300);
+
+        const outputValue = output.value;
+        const hasOutput = outputValue.length > 0;
+        
+        try {
+          const parsed = JSON.parse(outputValue);
+          const hasEmoji = JSON.stringify(parsed).includes('👋') || JSON.stringify(parsed).includes('\\ud83d');
+          
+          addTestCase(section, 'Special characters preserved', hasOutput && hasEmoji,
+            'Unicode and special characters handled correctly',
+            `Has output: ${hasOutput}`,
+            ''
+          );
+        } catch (e) {
+          addTestCase(section, 'Special characters preserved', false,
+            'Unicode and special characters handled correctly',
+            'Parse error: ' + e.message,
+            'Output JSON is invalid'
+          );
+        }
+
+      } catch (error) {
+        addTestCase(section, 'Special Characters Tests', false, 'Tests to complete', 'Error: ' + error.message, error.stack);
+      }
+    }
+
+    async function testEdgeCases(doc) {
+      const section = createSection('Test 14: Edge Cases');
+      
+      try {
+        const input = doc.getElementById('json-input');
+        const validateBtn = doc.getElementById('validate-btn');
+        const minifyBtn = doc.getElementById('minify-btn');
+        const statusMsg = doc.getElementById('status-message');
+
+        // Empty input
+        input.value = '';
+        input.dispatchEvent(new Event('input'));
+        await sleep(200);
+
+        validateBtn.click();
+        await sleep(300);
+
+        const hasErrorForEmpty = statusMsg.textContent.toLowerCase().includes('enter') ||
+                                 statusMsg.textContent.toLowerCase().includes('empty');
+
+        addTestCase(section, 'Empty input handling', hasErrorForEmpty,
+          'Error message shown for empty input',
+          `Message: "${statusMsg.textContent}"`,
+          ''
+        );
+
+        // Very large JSON
+        const largeObject = {};
+        for (let i = 0; i < 1000; i++) {
+          largeObject[`key${i}`] = `value${i}`;
+        }
+        const largeJSON = JSON.stringify(largeObject);
+
+        input.value = largeJSON;
+        input.dispatchEvent(new Event('input'));
+        await sleep(300);
+
+        const startTime = performance.now();
+        minifyBtn.click();
+        await sleep(500);
+        const endTime = performance.now();
+        const duration = endTime - startTime;
+
+        addTestCase(section, 'Large JSON (100KB) performance', duration < 1000,
+          'Completes in under 1 second',
+          `Duration: ${duration.toFixed(2)}ms`,
+          duration > 1000 ? 'Performance slower than expected' : ''
+        );
+
+      } catch (error) {
+        addTestCase(section, 'Edge Cases Tests', false, 'Tests to complete', 'Error: ' + error.message, error.stack);
+      }
+    }
+
+    async function testAccessibility(doc) {
+      const section = createSection('Test 15: Accessibility');
+      
+      try {
+        const input = doc.getElementById('json-input');
+        const validateBtn = doc.getElementById('validate-btn');
+        const beautifyBtn = doc.getElementById('beautify-btn');
+        const minifyBtn = doc.getElementById('minify-btn');
+        const statusMsg = doc.getElementById('status-message');
+
+        // Check ARIA labels
+        const inputHasLabel = input.getAttribute('aria-label') !== null;
+        const validateHasLabel = validateBtn.getAttribute('aria-label') !== null || validateBtn.textContent.trim().length > 0;
+
+        addTestCase(section, 'ARIA labels present', inputHasLabel,
+          'Textareas have aria-label attributes',
+          `Input has label: ${inputHasLabel}`,
+          ''
+        );
+
+        // Check buttons have text
+        const allButtonsHaveText = validateBtn.textContent.trim().length > 0 &&
+                                   beautifyBtn.textContent.trim().length > 0 &&
+                                   minifyBtn.textContent.trim().length > 0;
+
+        addTestCase(section, 'Buttons have accessible text', allButtonsHaveText,
+          'All buttons have visible text or labels',
+          `All have text: ${allButtonsHaveText}`,
+          ''
+        );
+
+        // Check status message has aria-live
+        const statusHasAriaLive = statusMsg.getAttribute('aria-live') !== null ||
+                                  statusMsg.getAttribute('role') === 'status';
+
+        addTestCase(section, 'Status messages accessible', statusHasAriaLive,
+          'Status element has aria-live for screen readers',
+          `Has aria-live: ${statusHasAriaLive}`,
+          ''
+        );
+
+        // Check tab order (elements exist and are focusable)
+        const elements = [input, validateBtn, minifyBtn, beautifyBtn];
+        const allFocusable = elements.every(el => {
+          const tabIndex = el.getAttribute('tabindex');
+          return tabIndex === null || parseInt(tabIndex) >= 0;
+        });
+
+        addTestCase(section, 'Keyboard accessible', allFocusable,
+          'All interactive elements are keyboard accessible',
+          `All focusable: ${allFocusable}`,
+          ''
+        );
+
+      } catch (error) {
+        addTestCase(section, 'Accessibility Tests', false, 'Tests to complete', 'Error: ' + error.message, error.stack);
+      }
+    }
+
+    async function testPerformance(doc) {
+      const section = createSection('Test 16: Performance Benchmarks');
+      
+      try {
+        const input = doc.getElementById('json-input');
+        const minifyBtn = doc.getElementById('minify-btn');
+
+        // 100KB test
+        const obj100KB = {};
+        for (let i = 0; i < 1000; i++) {
+          obj100KB[`key${i}`] = `value${i}_${'x'.repeat(50)}`;
+        }
+        const json100KB = JSON.stringify(obj100KB);
+
+        input.value = json100KB;
+        input.dispatchEvent(new Event('input'));
+        await sleep(300);
+
+        const start100 = performance.now();
+        minifyBtn.click();
+        await sleep(300);
+        const end100 = performance.now();
+        const time100 = end100 - start100;
+
+        addTestCase(section, '100KB JSON performance', time100 < 500,
+          'Processes in < 500ms',
+          `Time: ${time100.toFixed(2)}ms, Size: ${(json100KB.length / 1024).toFixed(1)}KB`,
+          time100 > 500 ? 'Performance slower than target' : ''
+        );
+
+        // 1MB test
+        const obj1MB = {};
+        for (let i = 0; i < 10000; i++) {
+          obj1MB[`key${i}`] = `value${i}_${'x'.repeat(50)}`;
+        }
+        const json1MB = JSON.stringify(obj1MB);
+
+        input.value = json1MB;
+        input.dispatchEvent(new Event('input'));
+        await sleep(300);
+
+        const start1M = performance.now();
+        minifyBtn.click();
+        await sleep(500);
+        const end1M = performance.now();
+        const time1M = end1M - start1M;
+
+        addTestCase(section, '1MB JSON performance', time1M < 1000,
+          'Processes in < 1000ms',
+          `Time: ${time1M.toFixed(2)}ms, Size: ${(json1MB.length / 1024 / 1024).toFixed(1)}MB`,
+          time1M > 1000 ? 'Performance slower than target' : ''
+        );
+
+      } catch (error) {
+        addTestCase(section, 'Performance Tests', false, 'Tests to complete', 'Error: ' + error.message, error.stack);
+      }
+    }
+
+    function createSection(title) {
+      const section = document.createElement('div');
+      section.className = 'test-section';
+      section.innerHTML = `<h2>${title}</h2>`;
+      return section;
+    }
+
+    function addTestCase(section, name, passed, expected, actual, notes) {
+      addTestResult(section.querySelector('h2').textContent, name, passed, expected, actual, notes);
+      
+      const testCase = document.createElement('div');
+      testCase.className = 'test-case';
+      testCase.innerHTML = `
+        <strong>${name}</strong>
+        <span class="test-result ${passed ? 'pass' : 'fail'}">${passed ? '✓ PASS' : '✗ FAIL'}</span>
+        <div style="margin-top: 8px; font-size: 14px; color: #666;">
+          <strong>Expected:</strong> ${expected}<br>
+          <strong>Actual:</strong> ${actual}
+          ${notes ? `<br><strong>Notes:</strong> ${notes}` : ''}
+        </div>
+      `;
+      section.appendChild(testCase);
+    }
+
+    function displayResults() {
+      const container = document.getElementById('testResults');
+      container.innerHTML = '';
+
+      // Group by category
+      const categories = {};
+      testResults.forEach(result => {
+        if (!categories[result.category]) {
+          categories[result.category] = [];
+        }
+        categories[result.category].push(result);
+      });
+
+      // Display each category
+      for (const [category, results] of Object.entries(categories)) {
+        const section = createSection(category);
+        results.forEach(result => {
+          addTestCase(section, result.testName, result.passed, result.expected, result.actual, result.notes);
+        });
+        container.appendChild(section);
+      }
+
+      // Display bugs if any
+      if (bugsFound.length > 0) {
+        const bugSection = document.createElement('div');
+        bugSection.className = 'test-section';
+        bugSection.style.borderLeftColor = '#dc2626';
+        bugSection.innerHTML = '<h2>🐛 Bugs Found</h2>';
+        
+        bugsFound.forEach(bug => {
+          const bugDiv = document.createElement('div');
+          bugDiv.className = 'bug-report';
+          bugDiv.innerHTML = `
+            <h4>Bug #${bug.id}: ${bug.title}</h4>
+            <p><strong>Severity:</strong> ${bug.severity}</p>
+            <p><strong>Category:</strong> ${bug.category}</p>
+            <p><strong>Steps:</strong></p>
+            <ol>${bug.steps.map(s => `<li>${s}</li>`).join('')}</ol>
+            <p><strong>Expected:</strong> ${bug.expected}</p>
+            <p><strong>Actual:</strong> ${bug.actual}</p>
+            <p><strong>Impact:</strong> ${bug.impact}</p>
+            <p><strong>Recommended Fix:</strong> ${bug.fix}</p>
+          `;
+          bugSection.appendChild(bugDiv);
+        });
+        
+        container.appendChild(bugSection);
+      }
+
+      // Update summary
+      const total = testResults.length;
+      const passed = testResults.filter(r => r.passed).length;
+      const failed = total - passed;
+      const successRate = total > 0 ? ((passed / total) * 100).toFixed(1) : 0;
+
+      document.getElementById('totalTests').textContent = total;
+      document.getElementById('passedTests').textContent = passed;
+      document.getElementById('failedTests').textContent = failed;
+      document.getElementById('successRate').textContent = successRate + '%';
+      document.getElementById('summary').style.display = 'block';
+    }
+
+    function copyReport() {
+      let report = '# JSON Schema Enhancement - Test Report\n\n';
+      report += `**Date:** ${new Date().toLocaleString()}\n\n`;
+      report += '## Test Summary\n\n';
+      
+      const total = testResults.length;
+      const passed = testResults.filter(r => r.passed).length;
+      const failed = total - passed;
+      const successRate = ((passed / total) * 100).toFixed(1);
+
+      report += `- Total Tests: ${total}\n`;
+      report += `- Passed: ${passed}\n`;
+      report += `- Failed: ${failed}\n`;
+      report += `- Success Rate: ${successRate}%\n\n`;
+
+      report += '## Detailed Results\n\n';
+      testResults.forEach((result, i) => {
+        report += `### Test ${i + 1}: ${result.testName}\n`;
+        report += `- **Category:** ${result.category}\n`;
+        report += `- **Result:** ${result.passed ? '✓ PASS' : '✗ FAIL'}\n`;
+        report += `- **Expected:** ${result.expected}\n`;
+        report += `- **Actual:** ${result.actual}\n`;
+        if (result.notes) {
+          report += `- **Notes:** ${result.notes}\n`;
+        }
+        report += '\n';
+      });
+
+      if (bugsFound.length > 0) {
+        report += '## Bugs Found\n\n';
+        bugsFound.forEach(bug => {
+          report += `### Bug #${bug.id}: ${bug.title}\n`;
+          report += `- **Severity:** ${bug.severity}\n`;
+          report += `- **Category:** ${bug.category}\n`;
+          report += `- **Expected:** ${bug.expected}\n`;
+          report += `- **Actual:** ${bug.actual}\n`;
+          report += `- **Impact:** ${bug.impact}\n`;
+          report += `- **Fix:** ${bug.fix}\n\n`;
+        });
+      }
+
+      navigator.clipboard.writeText(report).then(() => {
+        alert('Test report copied to clipboard!');
+      });
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+  </script>
+</body>
+</html>
