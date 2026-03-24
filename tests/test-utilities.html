@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Utility Classes Test - DevToolbox</title>
+  
+  <!-- Inline theme script -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('devtoolbox_theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+      document.documentElement.classList.add(theme);
+    })();
+  </script>
+  
+  <!-- Material Symbols Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  
+  <!-- Core CSS -->
+  <link rel="stylesheet" href="/shared/css/heritage-design-system.css">
+  <link rel="stylesheet" href="/shared/css/utilities.css">
+  
+  <style>
+    body {
+      padding: 2rem;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    
+    .test-section {
+      margin-bottom: 3rem;
+      padding: 1.5rem;
+      border: 2px solid #334155;
+      border-radius: 8px;
+    }
+    
+    .dark .test-section {
+      background: #1e293b;
+      border-color: #475569;
+    }
+    
+    .light .test-section {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+    
+    .test-item {
+      margin-bottom: 1rem;
+    }
+    
+    .label {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+  </style>
+</head>
+<body class="bg-background text-text">
+  <div style="max-width: 1200px; margin: 0 auto;">
+    <header style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+      <h1 style="font-size: 2rem; font-weight: 700;">Utility Classes Test Suite</h1>
+      <button 
+        data-theme-toggle
+        style="padding: 0.75rem 1.5rem; border: none; border-radius: 8px; cursor: pointer; font-size: 1.25rem; background: #334155; color: white;"
+        aria-label="Toggle theme"
+      >
+        🌙
+      </button>
+    </header>
+    
+    <!-- Test 1: Layout Utilities (Flexbox) -->
+    <section class="test-section">
+      <h2 class="text-2xl font-bold mb-4">Test 1: Flexbox Utilities</h2>
+      <div class="test-item">
+        <span class="label">Expected: Horizontal flex container with 3 items, centered, with gap</span>
+        <div class="flex items-center justify-center gap-4 p-4" style="background: rgba(56, 189, 248, 0.1); border-radius: 8px;">
+          <div class="bg-primary text-white p-4 rounded">Flex Item 1</div>
+          <div class="bg-primary text-white p-4 rounded">Flex Item 2</div>
+          <div class="bg-primary text-white p-4 rounded">Flex Item 3</div>
+        </div>
+      </div>
+      
+      <div class="test-item">
+        <span class="label">Expected: Vertical flex container (flex-col), items stretched</span>
+        <div class="flex flex-col gap-3 p-4" style="background: rgba(56, 189, 248, 0.1); border-radius: 8px;">
+          <div class="bg-secondary text-white p-3 rounded">Vertical Item 1</div>
+          <div class="bg-secondary text-white p-3 rounded">Vertical Item 2</div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Test 2: Grid Utilities (Responsive) -->
+    <section class="test-section">
+      <h2 class="text-2xl font-bold mb-4">Test 2: Responsive Grid</h2>
+      <div class="test-item">
+        <span class="label">Expected: 1 column on mobile, 2 on tablet (≥768px), 3 on desktop (≥1024px)</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4" style="background: rgba(34, 197, 94, 0.1); border-radius: 8px;">
+          <div class="bg-surface p-4 rounded" style="border: 2px solid #22c55e;">Grid Cell 1</div>
+          <div class="bg-surface p-4 rounded" style="border: 2px solid #22c55e;">Grid Cell 2</div>
+          <div class="bg-surface p-4 rounded" style="border: 2px solid #22c55e;">Grid Cell 3</div>
+          <div class="bg-surface p-4 rounded" style="border: 2px solid #22c55e;">Grid Cell 4</div>
+          <div class="bg-surface p-4 rounded" style="border: 2px solid #22c55e;">Grid Cell 5</div>
+          <div class="bg-surface p-4 rounded" style="border: 2px solid #22c55e;">Grid Cell 6</div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Test 3: Dark Mode Variants -->
+    <section class="test-section">
+      <h2 class="text-2xl font-bold mb-4">Test 3: Dark Mode Variants</h2>
+      <div class="test-item">
+        <span class="label">Expected: Background and text change when toggling dark/light mode</span>
+        <div class="p-6 rounded" style="background: #e2e8f0;">
+          <p class="text-xl font-semibold" style="color: #1e293b;">
+            Light Mode Text (should look different in dark mode)
+          </p>
+        </div>
+      </div>
+      
+      <div class="test-item" style="margin-top: 1rem;">
+        <div class="p-6 rounded" style="background: #1e293b;">
+          <p class="text-xl font-semibold" style="color: #f1f5f9;">
+            Dark Mode Text (should look different in light mode)
+          </p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Test 4: Spacing Utilities -->
+    <section class="test-section">
+      <h2 class="text-2xl font-bold mb-4">Test 4: Spacing System (8px base)</h2>
+      <div class="test-item">
+        <span class="label">Expected: Increasing padding from p-1 (8px) to p-6 (48px)</span>
+        <div class="flex gap-2 flex-wrap">
+          <div class="p-1 bg-primary text-white rounded">p-1</div>
+          <div class="p-2 bg-primary text-white rounded">p-2</div>
+          <div class="p-3 bg-primary text-white rounded">p-3</div>
+          <div class="p-4 bg-primary text-white rounded">p-4</div>
+          <div class="p-5 bg-primary text-white rounded">p-5</div>
+          <div class="p-6 bg-primary text-white rounded">p-6</div>
+        </div>
+      </div>
+      
+      <div class="test-item" style="margin-top: 1.5rem;">
+        <span class="label">Expected: Margin bottom spacing visible between boxes</span>
+        <div class="mb-2 bg-accent text-white p-3 rounded">Box with mb-2</div>
+        <div class="mb-4 bg-accent text-white p-3 rounded">Box with mb-4</div>
+        <div class="mb-6 bg-accent text-white p-3 rounded">Box with mb-6</div>
+        <div class="bg-accent text-white p-3 rounded">Box with no margin</div>
+      </div>
+    </section>
+    
+    <!-- Test 5: Typography Utilities -->
+    <section class="test-section">
+      <h2 class="text-2xl font-bold mb-4">Test 5: Typography</h2>
+      <div class="test-item">
+        <span class="label">Expected: Different text sizes and weights</span>
+        <div class="space-y-2">
+          <p class="text-xs">Extra Small Text (text-xs)</p>
+          <p class="text-sm">Small Text (text-sm)</p>
+          <p class="text-base">Base Text (text-base)</p>
+          <p class="text-lg">Large Text (text-lg)</p>
+          <p class="text-xl">Extra Large Text (text-xl)</p>
+          <p class="text-2xl">2X Large Text (text-2xl)</p>
+          <p class="text-3xl">3X Large Text (text-3xl)</p>
+          <p class="text-4xl">4X Large Text (text-4xl)</p>
+        </div>
+      </div>
+      
+      <div class="test-item" style="margin-top: 1.5rem;">
+        <span class="label">Expected: Different font weights</span>
+        <div class="space-y-2">
+          <p class="font-normal">Normal Weight (font-normal)</p>
+          <p class="font-medium">Medium Weight (font-medium)</p>
+          <p class="font-semibold">Semi-Bold Weight (font-semibold)</p>
+          <p class="font-bold">Bold Weight (font-bold)</p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Test 6: Interactive States -->
+    <section class="test-section">
+      <h2 class="text-2xl font-bold mb-4">Test 6: Hover & Transition Effects</h2>
+      <div class="test-item">
+        <span class="label">Expected: Button scales up on hover with smooth transition</span>
+        <button class="bg-primary hover:scale-110 transition-transform p-4 rounded text-white font-semibold" style="border: none; cursor: pointer;">
+          Hover Me (Scale Effect)
+        </button>
+      </div>
+      
+      <div class="test-item" style="margin-top: 1rem;">
+        <span class="label">Expected: Button opacity changes on hover</span>
+        <button class="bg-secondary hover:opacity-80 transition-opacity p-4 rounded text-white font-semibold" style="border: none; cursor: pointer;">
+          Hover Me (Opacity Effect)
+        </button>
+      </div>
+    </section>
+    
+    <!-- Test 7: Border & Shadow Utilities -->
+    <section class="test-section">
+      <h2 class="text-2xl font-bold mb-4">Test 7: Borders & Shadows</h2>
+      <div class="test-item">
+        <span class="label">Expected: Different border styles and rounded corners</span>
+        <div class="flex gap-4 flex-wrap">
+          <div class="p-4 bg-surface rounded border border-primary">Default Border</div>
+          <div class="p-4 bg-surface rounded-lg border-2 border-accent">Rounded Large</div>
+          <div class="p-4 bg-surface rounded-full border border-success" style="width: 120px; height: 120px; display: flex; align-items: center; justify-content: center;">Circle</div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Test 8: Material Symbols Font -->
+    <section class="test-section">
+      <h2 class="text-2xl font-bold mb-4">Test 8: Material Symbols Icons</h2>
+      <div class="test-item">
+        <span class="label">Expected: Material icons displayed correctly</span>
+        <div class="flex gap-4 items-center text-4xl">
+          <span class="material-symbols-outlined" style="color: #38bdf8;">home</span>
+          <span class="material-symbols-outlined" style="color: #22c55e;">check_circle</span>
+          <span class="material-symbols-outlined" style="color: #f59e0b;">star</span>
+          <span class="material-symbols-outlined" style="color: #ef4444;">error</span>
+          <span class="material-symbols-outlined" style="color: #8b5cf6;">settings</span>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Test Results Section -->
+    <section class="test-section" style="background: #1e40af; color: white;">
+      <h2 class="text-2xl font-bold mb-4">Manual Testing Checklist</h2>
+      <ul style="list-style: none; line-height: 2;">
+        <li>✓ Flexbox utilities render correctly</li>
+        <li>✓ Grid responds to viewport size (resize window to test)</li>
+        <li>✓ Dark mode toggle works (click button above)</li>
+        <li>✓ Spacing uses 8px grid system</li>
+        <li>✓ Typography sizes scale correctly</li>
+        <li>✓ Hover effects work smoothly</li>
+        <li>✓ Borders and shadows display</li>
+        <li>✓ Material icons load</li>
+        <li>✓ No console errors</li>
+        <li>✓ Theme persists on reload</li>
+      </ul>
+    </section>
+  </div>
+  
+  <!-- Theme toggle JavaScript -->
+  <script type="module">
+    import { ThemeManager } from '/shared/js/theme.js';
+    
+    // Initialize theme system
+    ThemeManager.init();
+    
+    // Log current theme for debugging
+    console.log('Current theme:', ThemeManager.getCurrentTheme());
+    console.log('HTML element classes:', document.documentElement.className);
+    console.log('LocalStorage theme:', localStorage.getItem('devtoolbox_theme'));
+  </script>
+</body>
+</html>

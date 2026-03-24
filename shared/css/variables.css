@@ -8,36 +8,52 @@
 :root {
   /* ========================================
      COLOR SYSTEM - DARK THEME (DEFAULT)
+     Heritage Evolution Design System
      ======================================== */
   
-  /* Background Colors */
-  --color-bg-primary: #0f172a;      /* Main background */
-  --color-bg-secondary: #1e293b;    /* Card backgrounds */
-  --color-bg-tertiary: #334155;     /* Hover states */
+  /* Background Colors - Dark Theme (Neon Heritage) */
+  --color-bg-primary: #08080C;      /* Near black background */
+  --color-bg-secondary: #12131C;    /* Surface dark */
+  --color-bg-tertiary: #1E1E2E;     /* Slightly lighter surface */
   
-  /* Text Colors */
-  --color-text-primary: #f1f5f9;    /* Primary text */
+  /* Background alias for utilities */
+  --color-background: #08080C;
+  --color-background-dark: #08080C;
+  --color-surface: #12131C;
+  --color-surface-dark: #12131C;
+  
+  /* Text Colors - Dark Theme */
+  --color-text-primary: #E8E9F3;    /* Off-white primary text */
   --color-text-secondary: #cbd5e1;  /* Secondary text */
-  --color-text-muted: #94a3b8;      /* Muted text, placeholders */
+  --color-text-muted: #5B5F77;      /* Muted dark text */
   
-  /* Brand & Accent Colors */
-  --color-accent: #38bdf8;          /* Primary accent (sky blue) */
-  --color-accent-hover: #0ea5e9;    /* Accent hover state */
-  --color-accent-light: rgba(56, 189, 248, 0.1);  /* Accent with transparency */
+  /* Text alias for utilities */
+  --color-text-light: #E8E9F3;      /* For dark mode */
+  --color-text-dark: #E8E9F3;
+  --color-muted-dark: #5B5F77;
+  
+  /* Brand & Accent Colors - Dark Theme (Neon Heritage) */
+  --color-primary: #FF6B35;         /* Neon orange */
+  --color-primary-dark: #FF6B35;
+  --color-accent: #00F0FF;          /* Neon cyan */
+  --color-accent-dark: #00F0FF;
+  --color-accent-hover: #0ea5e9;
+  --color-accent-light: rgba(0, 240, 255, 0.1);
   
   /* Semantic Colors */
-  --color-success: #22c55e;         /* Success states */
+  --color-success: #22c55e;
   --color-success-bg: rgba(34, 197, 94, 0.1);
-  --color-error: #ef4444;           /* Error states */
+  --color-error: #ef4444;
   --color-error-bg: rgba(239, 68, 68, 0.1);
-  --color-warning: #f59e0b;         /* Warning states */
+  --color-warning: #f59e0b;
   --color-warning-bg: rgba(245, 158, 11, 0.1);
-  --color-info: #3b82f6;            /* Info states */
+  --color-info: #3b82f6;
   --color-info-bg: rgba(59, 130, 246, 0.1);
   
   /* Border Colors */
-  --color-border: #475569;          /* Default borders */
-  --color-border-light: #64748b;    /* Lighter borders */
+  --color-border: #475569;
+  --color-border-light: #64748b;
+  --color-muted-light: #9C9283;
   
   /* ========================================
      SPACING SYSTEM

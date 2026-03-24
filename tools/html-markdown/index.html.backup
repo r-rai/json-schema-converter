@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Inline theme script to prevent FOUC -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('devtoolbox_theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+      document.documentElement.classList.add(theme);
+    })();
+  </script>
+  
+  <title>HTML ↔ Markdown Converter - DevToolbox</title>
+  
+  <!-- Material Symbols Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/shared/css/variables.css">
+  <link rel="stylesheet" href="/shared/css/reset.css">
+  <link rel="stylesheet" href="/shared/css/components.css">
+  <link rel="stylesheet" href="/shared/css/themes.css">
+  <link rel="stylesheet" href="/shared/css/utilities.css">
+  <link rel="stylesheet" href="/shared/css/responsive.css">
+  <link rel="stylesheet" href="./html-markdown.css">
+  <link rel="stylesheet" href="/shared/css/tool-styles.css">
+</head>
+<body>
+  <header class="header">
+    <nav class="nav">
+      <a href="/" class="logo">DevToolbox</a>
+      <button data-theme-toggle class="btn btn-ghost" aria-label="Toggle theme">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </nav>
+    <div class="page-header">
+      <h1>🔄 HTML ↔ Markdown Converter</h1>
+      <p class="subtitle">Convert between HTML and Markdown formats</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="converter-layout">
+      <!-- Input Section -->
+      <section class="input-section card">
+        <div class="section-header">
+          <h2>Input</h2>
+          <div class="format-selector">
+            <label class="radio-label">
+              <input type="radio" name="input-format" value="html" checked>
+              <span>HTML</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="input-format" value="markdown">
+              <span>Markdown</span>
+            </label>
+          </div>
+        </div>
+        
+        <textarea
+          id="input-editor"
+          class="code-editor"
+          placeholder="Enter HTML or Markdown here..."
+          aria-label="Input editor"
+          spellcheck="false"
+        ></textarea>
+
+        <div class="editor-actions">
+          <button id="clear-input-btn" class="btn btn-ghost btn-sm">
+            🗑️ Clear
+          </button>
+          <button id="paste-btn" class="btn btn-ghost btn-sm">
+            📋 Paste
+          </button>
+          <button id="sample-btn" class="btn btn-ghost btn-sm">
+            📄 Load Sample
+          </button>
+        </div>
+
+        <div class="input-stats" aria-live="polite">
+          <span id="input-char-count">0 characters</span>
+          <span id="input-line-count">0 lines</span>
+        </div>
+      </section>
+
+      <!-- Conversion Controls -->
+      <section class="controls-section">
+        <button id="html-to-md-btn" class="btn btn-primary btn-large">
+          HTML → Markdown
+        </button>
+        
+        <button id="swap-btn" class="btn btn-secondary btn-icon" aria-label="Swap input and output">
+          🔄
+        </button>
+        
+        <button id="md-to-html-btn" class="btn btn-primary btn-large">
+          Markdown → HTML
+        </button>
+
+        <div id="status-message" class="status-message" role="status" aria-live="polite"></div>
+
+        <div class="conversion-options card">
+          <h3>Options</h3>
+          
+          <label class="checkbox-label">
+            <input type="checkbox" id="gfm-enabled" checked>
+            <span>GitHub Flavored Markdown (GFM)</span>
+          </label>
+          
+          <label class="checkbox-label">
+            <input type="checkbox" id="sanitize-html" checked>
+            <span>Sanitize HTML (Security)</span>
+          </label>
+          
+          <label class="checkbox-label">
+            <input type="checkbox" id="preserve-whitespace">
+            <span>Preserve Whitespace</span>
+          </label>
+          
+          <label class="checkbox-label">
+            <input type="checkbox" id="code-highlighting" checked>
+            <span>Syntax Highlighting</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Output Section -->
+      <section class="output-section card">
+        <div class="section-header">
+          <h2>Output</h2>
+          <div class="view-mode-selector">
+            <label class="radio-label">
+              <input type="radio" name="view-mode" value="code" checked>
+              <span>Code</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="view-mode" value="preview">
+              <span>Preview</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Code View -->
+        <textarea
+          id="output-editor"
+          class="code-editor"
+          placeholder="Output will appear here..."
+          aria-label="Output display"
+          readonly
+        ></textarea>
+
+        <!-- Preview View -->
+        <div id="output-preview" class="output-preview hidden" aria-label="HTML preview"></div>
+
+        <div class="editor-actions">
+          <button id="copy-output-btn" class="btn btn-ghost btn-sm" disabled>
+            📋 Copy
+          </button>
+          <button id="download-output-btn" class="btn btn-ghost btn-sm" disabled>
+            💾 Download
+          </button>
+          <button id="open-preview-btn" class="btn btn-ghost btn-sm" disabled>
+            🔍 Open in New Tab
+          </button>
+        </div>
+
+        <div class="output-stats" aria-live="polite">
+          <span id="output-char-count">0 characters</span>
+          <span id="output-format"></span>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import { ThemeManager } from '/shared/js/theme.js';
+    ThemeManager.init();
+  </script>
+</body>
+</html>

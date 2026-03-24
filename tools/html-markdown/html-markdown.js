@@ -92,6 +92,9 @@ function init() {
   [gfmEnabled, sanitizeHtml, preserveWhitespace, codeHighlighting].forEach(checkbox => {
     checkbox.addEventListener('change', saveOptions);
   });
+  
+  // Initialize help modal
+  initHelpModal();
 }
 
 /**
@@ -497,9 +500,63 @@ function handleViewModeChange() {
   }
 }
 
+/**
+ * Initialize Help Modal
+ */
+function initHelpModal() {
+  const helpBtn = document.getElementById('help-btn');
+  const helpModal = document.getElementById('help-modal');
+  const helpClose = document.getElementById('help-close');
+  const helpOk = document.getElementById('help-ok');
+  
+  if (!helpBtn || !helpModal) return;
+  
+  // Open modal
+  helpBtn.addEventListener('click', () => {
+    helpModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    helpClose.focus();
+  });
+  
+  // Close modal functions
+  const closeModal = () => {
+    helpModal.classList.add('hidden');
+    document.body.style.overflow = '';
+    helpBtn.focus();
+  };
+  
+  // Close button
+  helpClose.addEventListener('click', closeModal);
+  helpOk.addEventListener('click', closeModal);
+  
+  // ESC key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !helpModal.classList.contains('hidden')) {
+      closeModal();
+    }
+  });
+  
+  // Click outside
+  helpModal.addEventListener('click', (e) => {
+    if (e.target === helpModal) {
+      closeModal();
+    }
+  });
+}
+
 // Initialize on load
 // Export initialization function for router
 window.initHtmlMarkdown = init;
 
-// Note: init() is called by router via window.initHtmlMarkdown
-// Do NOT auto-initialize here as it would run before HTML is loaded
+// Auto-initialize if loaded directly (not via router)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.location.pathname.includes('html-markdown')) {
+      init();
+    }
+  });
+} else {
+  if (window.location.pathname.includes('html-markdown')) {
+    init();
+  }
+}

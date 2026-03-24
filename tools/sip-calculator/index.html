@@ -3,277 +3,494 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="SIP Calculator - Calculate returns from Systematic Investment Plans">
+  
+  <!-- FOUC Prevention Script - MUST BE FIRST -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('devtoolbox_theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+      document.documentElement.classList.add(theme);
+    })();
+  </script>
+  
+  <meta name="description" content="Calculate returns from Systematic Investment Plans with growth visualization">
   <title>SIP Calculator - DevToolbox</title>
   
-  <!-- Shared Styles -->
-  <link rel="stylesheet" href="/shared/css/variables.css">
+  <!-- Preconnect to Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Fonts: Rozha One, Plus Jakarta Sans, Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Rozha+One&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  
+  <!-- Heritage Design System CSS -->
   <link rel="stylesheet" href="/shared/css/reset.css">
-  <link rel="stylesheet" href="/shared/css/components.css">
+  <link rel="stylesheet" href="/shared/css/variables.css">
   <link rel="stylesheet" href="/shared/css/themes.css">
   <link rel="stylesheet" href="/shared/css/utilities.css">
-  <link rel="stylesheet" href="/shared/css/responsive.css">
+  <link rel="stylesheet" href="./sip-calculator.css">
   
-  <!-- Tool-Specific Styles -->
-  <link rel="stylesheet" href="sip-calculator.css">
-  <link rel="stylesheet" href="/shared/css/tool-styles.css">
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛠️</text></svg>">
 </head>
-<body>
-  <div id="app">
-    <div class="container">
-      <header class="tool-header">
-        <div class="header-content">
-          <h1>💰 SIP Calculator</h1>
-          <p class="text-secondary">Calculate returns from Systematic Investment Plans</p>
-        </div>
-        <button data-theme-toggle class="btn btn-ghost theme-toggle" aria-label="Toggle theme">
-          <span class="theme-icon">🌙</span>
-        </button>
-      </header>
+
+<body class="bg-background-light dark:bg-background-dark 
+             text-text-light dark:text-text-dark 
+             font-display min-h-screen transition-colors duration-300">
+  
+  <!-- Shared Header Component -->
+  <header class="flex items-center justify-between whitespace-nowrap 
+                 border-b border-solid border-muted-light/20 dark:border-muted-dark/30 
+                 px-4 py-3">
+    <!-- Logo + Title (Left) -->
+    <div class="flex items-center gap-4 text-text-light dark:text-text-dark">
+      <div class="size-6 text-primary dark:text-accent-dark flex items-center justify-center">
+        <span class="material-symbols-outlined" style="font-size: 24px;">temple_hindu</span>
+      </div>
+      <h2 class="font-heading text-2xl leading-tight tracking-[-0.015em]">
+        <a href="/" class="hover:text-primary dark:hover:text-primary-dark transition-colors">DevToolbox</a>
+      </h2>
+    </div>
+    
+    <!-- Navigation + Theme Toggle (Right) -->
+    <div class="flex items-center gap-8">
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex items-center gap-9" aria-label="Primary navigation">
+        <a href="/" 
+           class="text-text-light dark:text-text-dark 
+                  text-sm font-medium leading-normal 
+                  hover:text-primary dark:hover:text-primary-dark 
+                  transition-colors font-display">
+          Home
+        </a>
+        <a href="/#tools" 
+           class="text-text-light dark:text-text-dark 
+                  text-sm font-medium leading-normal 
+                  hover:text-primary dark:hover:text-primary-dark 
+                  transition-colors font-display">
+          Tools
+        </a>
+        <a href="/#about" 
+           class="text-text-light dark:text-text-dark 
+                  text-sm font-medium leading-normal 
+                  hover:text-primary dark:hover:text-primary-dark 
+                  transition-colors font-display">
+          About
+        </a>
+      </nav>
       
-      <main class="tool-main">
+      <!-- Search Button -->
+      <button id="search-btn" 
+              class="flex h-10 w-10 cursor-pointer items-center justify-center 
+                     overflow-hidden rounded-full 
+                     bg-surface-light dark:bg-surface-dark 
+                     text-text-light dark:text-accent-dark 
+                     hover:scale-110 transition-transform" 
+              aria-label="Search tools (Ctrl+K)"
+              title="Search tools (Ctrl+K)">
+        <span class="material-symbols-outlined" aria-hidden="true">search</span>
+      </button>
+      
+      <!-- Theme Toggle -->
+      <button aria-label="Toggle Theme" 
+              data-theme-toggle
+              class="flex h-10 w-10 cursor-pointer items-center justify-center 
+                     overflow-hidden rounded-full 
+                     bg-surface-light dark:bg-surface-dark 
+                     text-text-light dark:text-accent-dark 
+                     hover:scale-110 transition-transform">
+        <span class="material-symbols-outlined text-current theme-icon-light block dark:hidden">
+          light_mode
+        </span>
+        <span class="material-symbols-outlined text-current theme-icon-dark hidden dark:block">
+          dark_mode
+        </span>
+      </button>
+      
+      <!-- Mobile Hamburger Menu (optional future implementation) -->
+      <button aria-label="Menu" 
+              class="flex md:hidden h-10 w-10 cursor-pointer items-center justify-center 
+                     bg-surface-light dark:bg-surface-dark rounded-full">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+    </div>
+  </header>
+  
+  <!-- Main Content Container -->
+  <main class="px-4 sm:px-10 lg:px-20 py-5">
+    <div class="max-w-[1440px] mx-auto">
+      
+      <!-- Breadcrumb Navigation -->
+      <nav aria-label="Breadcrumb" class="mb-6">
+        <ol class="flex items-center gap-2 text-sm text-muted-light dark:text-muted-dark">
+          <li>
+            <a href="/" class="hover:text-primary dark:hover:text-primary-dark transition-colors">
+              Home
+            </a>
+          </li>
+          <li>
+            <span class="material-symbols-outlined text-xs">chevron_right</span>
+          </li>
+          <li class="text-text-light dark:text-text-dark font-medium" aria-current="page">
+            SIP Calculator
+          </li>
+        </ol>
+      </nav>
+      
+      <!-- Tool Hero Section - Compact -->
+      <section class="py-3 px-4 mb-6 bg-surface-light/50 dark:bg-surface-dark/50 rounded-lg">
+        <div class="max-w-7xl mx-auto flex items-center gap-3">
+          <span class="material-symbols-outlined text-3xl text-primary dark:text-accent-dark">trending_up</span>
+          <h1 class="font-heading text-2xl text-text-light dark:text-text-dark">SIP Calculator</h1>
+        </div>
+      </section>
+      
+      <!-- Tool Content Area -->
+      <section class="tool-content-area">
+        
         <!-- Calculator Form -->
-        <section class="calculator-section">
-          <h2>Investment Details</h2>
-          
-          <form id="sip-form" class="sip-form">
-            <!-- Monthly Investment -->
-            <div class="form-group">
-              <label for="monthly-investment" class="form-label">
-                Monthly Investment (₹)
-                <span class="required">*</span>
-              </label>
-              <input 
-                type="number" 
-                id="monthly-investment"
-                class="form-input"
-                placeholder="5000"
-                min="500"
-                max="10000000"
-                step="500"
-                value="5000"
-                required
-                aria-describedby="monthly-investment-help"
-              />
-              <small id="monthly-investment-help" class="form-help">
-                Minimum: ₹500, Maximum: ₹10,00,000
-              </small>
-            </div>
+        <div class="max-w-3xl mx-auto mb-8">
+          <div class="p-6 md:p-8 bg-surface-light dark:bg-surface-dark rounded-lg theme-shadow">
             
-            <!-- Expected Return Rate -->
-            <div class="form-group">
-              <label for="return-rate" class="form-label">
-                Expected Annual Return (%)
-                <span class="required">*</span>
-              </label>
-              <input 
-                type="number" 
-                id="return-rate"
-                class="form-input"
-                placeholder="12"
-                min="1"
-                max="30"
-                step="0.5"
-                value="12"
-                required
-                aria-describedby="return-rate-help"
-              />
-              <small id="return-rate-help" class="form-help">
-                Historical equity mutual fund returns: 10-15% p.a.
-              </small>
-            </div>
+            <h2 class="font-heading text-2xl text-text-light dark:text-text-dark mb-6">
+              Investment Details
+            </h2>
             
-            <!-- Investment Duration -->
-            <div class="form-group">
-              <label for="duration" class="form-label">
-                Investment Duration (Years)
-                <span class="required">*</span>
-              </label>
-              <input 
-                type="number" 
-                id="duration"
-                class="form-input"
-                placeholder="10"
-                min="1"
-                max="50"
-                step="1"
-                value="10"
-                required
-                aria-describedby="duration-help"
-              />
-              <small id="duration-help" class="form-help">
-                Long-term investments (5+ years) show better compounding
-              </small>
-            </div>
-            
-            <!-- Step-up Rate (Optional) -->
-            <div class="form-group">
-              <label for="stepup-rate" class="form-label">
-                Annual Step-Up Rate (%) <span class="optional">[Optional]</span>
-              </label>
-              <input 
-                type="number" 
-                id="stepup-rate"
-                class="form-input"
-                placeholder="0"
-                min="0"
-                max="50"
-                step="1"
-                value="0"
-                aria-describedby="stepup-rate-help"
-              />
-              <small id="stepup-rate-help" class="form-help">
-                Increase monthly investment by this % each year (0 = no step-up)
-              </small>
-            </div>
-            
-            <!-- Form Actions -->
-            <div class="form-actions">
-              <button 
-                type="submit" 
-                id="calculate-btn"
-                class="btn btn-primary btn-large"
-                aria-label="Calculate SIP returns"
-              >
-                <span class="btn-icon">🧮</span>
-                <span class="btn-text">Calculate</span>
-              </button>
+            <form id="sip-form" class="space-y-5">
               
-              <button 
-                type="reset" 
-                id="reset-btn"
-                class="btn btn-ghost"
-                aria-label="Reset form to default values"
-              >
-                <span class="btn-icon">↻</span>
-                <span class="btn-text">Reset</span>
-              </button>
-            </div>
-            
-            <!-- Validation Messages -->
-            <div 
-              id="form-errors" 
-              class="form-errors"
-              role="alert"
-              aria-live="assertive"
-            ></div>
-          </form>
-        </section>
+              <!-- Monthly Investment -->
+              <div class="form-group">
+                <label for="monthly-investment" class="block mb-2 text-sm font-medium text-text-light dark:text-text-dark">
+                  Monthly Investment (₹)
+                  <span class="text-red-500">*</span>
+                </label>
+                <input type="number" 
+                       id="monthly-investment"
+                       class="w-full px-4 py-3 bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border border-muted-light/30 dark:border-accent-dark/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark transition-all"
+                       placeholder="5000"
+                       min="500"
+                       max="10000000"
+                       step="500"
+                       value="5000"
+                       required
+                       aria-describedby="monthly-investment-help" />
+                <small id="monthly-investment-help" class="block mt-1 text-xs text-muted-light dark:text-muted-dark">
+                  Minimum: ₹500, Maximum: ₹1,00,00,000
+                </small>
+              </div>
+              
+              <!-- Expected Return Rate -->
+              <div class="form-group">
+                <label for="return-rate" class="block mb-2 text-sm font-medium text-text-light dark:text-text-dark">
+                  Expected Annual Return (%)
+                  <span class="text-red-500">*</span>
+                </label>
+                <input type="number" 
+                       id="return-rate"
+                       class="w-full px-4 py-3 bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border border-muted-light/30 dark:border-accent-dark/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark transition-all"
+                       placeholder="12"
+                       min="1"
+                       max="30"
+                       step="0.5"
+                       value="12"
+                       required
+                       aria-describedby="return-rate-help" />
+                <small id="return-rate-help" class="block mt-1 text-xs text-muted-light dark:text-muted-dark">
+                  Historical equity mutual fund returns: 10-15% p.a.
+                </small>
+              </div>
+              
+              <!-- Investment Duration -->
+              <div class="form-group">
+                <label for="duration" class="block mb-2 text-sm font-medium text-text-light dark:text-text-dark">
+                  Investment Duration (Years)
+                  <span class="text-red-500">*</span>
+                </label>
+                <input type="number" 
+                       id="duration"
+                       class="w-full px-4 py-3 bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border border-muted-light/30 dark:border-accent-dark/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark transition-all"
+                       placeholder="10"
+                       min="1"
+                       max="50"
+                       step="1"
+                       value="10"
+                       required
+                       aria-describedby="duration-help" />
+                <small id="duration-help" class="block mt-1 text-xs text-muted-light dark:text-muted-dark">
+                  Long-term investments (5+ years) show better compounding
+                </small>
+              </div>
+              
+              <!-- Step-up Rate (Optional) -->
+              <div class="form-group">
+                <label for="stepup-rate" class="block mb-2 text-sm font-medium text-text-light dark:text-text-dark">
+                  Annual Step-Up Rate (%) 
+                  <span class="text-muted-light dark:text-muted-dark text-xs">[Optional]</span>
+                </label>
+                <input type="number" 
+                       id="stepup-rate"
+                       class="w-full px-4 py-3 bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border border-muted-light/30 dark:border-accent-dark/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark transition-all"
+                       placeholder="0"
+                       min="0"
+                       max="50"
+                       step="1"
+                       value="0"
+                       aria-describedby="stepup-rate-help" />
+                <small id="stepup-rate-help" class="block mt-1 text-xs text-muted-light dark:text-muted-dark">
+                  Increase monthly investment by this % each year (0 = no step-up)
+                </small>
+              </div>
+              
+              <!-- Form Errors -->
+              <div id="form-errors" class="hidden p-3 bg-red-100 dark:bg-red-900/20 border border-red-500 rounded-lg text-sm text-red-700 dark:text-red-300" role="alert"></div>
+              
+              <!-- Form Actions -->
+              <div class="flex flex-col sm:flex-row items-center gap-3 pt-4">
+                <button type="submit" 
+                        id="calculate-btn"
+                        class="w-full sm:w-auto btn-primary">
+                  <span class="material-symbols-outlined">calculate</span>
+                  <span>Calculate Returns</span>
+                </button>
+                <button type="reset" 
+                        id="reset-btn"
+                        class="w-full sm:w-auto px-4 py-2 bg-transparent border border-primary/30 dark:border-primary-dark/30 text-primary dark:text-primary-dark rounded-lg hover:bg-primary/10 dark:hover:bg-primary-dark/10 transition-all">
+                  <span class="material-symbols-outlined mr-2">refresh</span>
+                  <span>Reset</span>
+                </button>
+                <!-- Help Button -->
+                <button type="button"
+                        id="help-btn" 
+                        class="p-3 rounded-lg hover:bg-muted-light/20 dark:hover:bg-accent-dark/20 transition-colors" 
+                        aria-label="Help - How to use this tool" 
+                        title="How to use this tool">
+                  <span class="material-symbols-outlined text-2xl text-primary-light dark:text-primary-dark">help</span>
+                </button>
+              </div>
+              
+            </form>
+          </div>
+        </div>
         
         <!-- Results Section -->
-        <section id="results-section" class="results-section hidden">
-          <h2>Investment Summary</h2>
+        <div id="results-section" class="hidden" role="region" aria-label="SIP calculation results">
           
-          <!-- Summary Cards -->
-          <div class="summary-cards">
-            <div class="summary-card card-primary">
-              <h3 class="card-title">Total Investment</h3>
-              <p id="total-investment" class="card-value">₹0</p>
-              <small class="card-subtitle">Amount you will invest</small>
+          <h2 class="font-heading text-2xl text-text-light dark:text-text-dark mb-6 text-center">
+            Investment Results
+          </h2>
+          
+          <!-- Summary Cards Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" role="status" aria-live="polite">
+            
+            <!-- Maturity Value Card (Primary) -->
+            <div class="p-6 bg-surface-light dark:bg-surface-dark border-l-4 border-primary rounded-r-lg theme-shadow">
+              <div class="text-sm font-medium text-muted-light dark:text-muted-dark mb-2">
+                Maturity Value
+              </div>
+              <div class="text-3xl font-bold text-primary dark:text-primary-dark" id="maturity-value">
+                ₹0
+              </div>
             </div>
             
-            <div class="summary-card card-success">
-              <h3 class="card-title">Expected Returns</h3>
-              <p id="expected-returns" class="card-value">₹0</p>
-              <small class="card-subtitle">Wealth gained</small>
+            <!-- Total Investment Card -->
+            <div class="p-6 bg-surface-light dark:bg-surface-dark rounded-lg theme-shadow">
+              <div class="text-sm font-medium text-muted-light dark:text-muted-dark mb-2">
+                Total Invested
+              </div>
+              <div class="text-3xl font-bold text-text-light dark:text-text-dark" id="total-investment">
+                ₹0
+              </div>
             </div>
             
-            <div class="summary-card card-accent">
-              <h3 class="card-title">Maturity Value</h3>
-              <p id="maturity-value" class="card-value">₹0</p>
-              <small class="card-subtitle">Total corpus at maturity</small>
+            <!-- Expected Returns Card (Wealth Gained) -->
+            <div class="p-6 bg-surface-light dark:bg-surface-dark border-l-4 border-green-500 rounded-r-lg theme-shadow">
+              <div class="text-sm font-medium text-muted-light dark:text-muted-dark mb-2">
+                Wealth Gained
+              </div>
+              <div class="text-3xl font-bold text-green-600 dark:text-green-400" id="expected-returns">
+                ₹0
+              </div>
             </div>
             
-            <div class="summary-card card-info">
-              <h3 class="card-title">Absolute Return</h3>
-              <p id="absolute-return" class="card-value">0%</p>
-              <small class="card-subtitle">Percentage gain</small>
-            </div>
           </div>
           
-          <!-- Export Actions -->
-          <div class="export-actions">
-            <button 
-              id="copy-results-btn"
-              class="btn btn-secondary"
-              aria-label="Copy results to clipboard"
-            >
-              <span class="btn-icon">📋</span>
-              <span class="btn-text">Copy Results</span>
-            </button>
-            
-            <button 
-              id="download-csv-btn"
-              class="btn btn-secondary"
-              aria-label="Download results as CSV"
-            >
-              <span class="btn-icon">💾</span>
-              <span class="btn-text">Download CSV</span>
-            </button>
-          </div>
-          
-          <!-- Year-wise Breakdown -->
-          <div class="breakdown-section">
-            <h3>Year-wise Breakdown</h3>
-            <div class="table-container">
-              <table id="breakdown-table" class="breakdown-table" aria-label="SIP year-wise breakdown">
-                <thead>
-                  <tr>
-                    <th scope="col">Year</th>
-                    <th scope="col">Yearly Investment</th>
-                    <th scope="col">Total Investment</th>
-                    <th scope="col">Expected Value</th>
-                    <th scope="col">Returns</th>
-                  </tr>
-                </thead>
-                <tbody id="breakdown-tbody">
-                  <!-- Dynamic rows will be inserted here -->
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <!-- Absolute Return (Hidden, for JS compatibility) -->
+          <div id="absolute-return" class="hidden"></div>
           
           <!-- Chart Visualization -->
-          <div class="chart-section">
-            <h3>Growth Visualization</h3>
-            <div class="chart-container">
-              <canvas id="sip-chart" aria-label="SIP growth chart" role="img">
-                Your browser does not support the canvas element.
-              </canvas>
+          <div class="p-6 bg-surface-light dark:bg-surface-dark rounded-lg theme-shadow mb-8">
+            <h3 class="font-heading text-xl text-text-light dark:text-text-dark mb-4">
+              Growth Visualization
+            </h3>
+            <div class="w-full h-80">
+              <canvas id="sip-chart" aria-label="SIP growth chart visualization"></canvas>
             </div>
-            
-            <!-- Accessible data table for screen readers -->
-            <div class="sr-only">
-              <table aria-label="Chart data table">
-                <caption>Investment and returns data by year</caption>
+          </div>
+          
+          <!-- Chart Data Table (hidden, for accessibility) -->
+          <div id="chart-data-table" class="sr-only" role="table" aria-label="SIP growth data table"></div>
+          
+          <!-- Detailed Breakdown Table -->
+          <div class="p-6 bg-surface-light dark:bg-surface-dark rounded-lg theme-shadow">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-heading text-xl text-text-light dark:text-text-dark">
+                Year-wise Breakdown
+              </h3>
+              <div class="flex items-center gap-2">
+                <button id="copy-results-btn" class="btn-icon" aria-label="Copy results">
+                  <span class="material-symbols-outlined">content_copy</span>
+                </button>
+                <button id="download-csv-btn" class="btn-icon" aria-label="Download CSV">
+                  <span class="material-symbols-outlined">download</span>
+                </button>
+              </div>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
                 <thead>
-                  <tr>
-                    <th scope="col">Year</th>
-                    <th scope="col">Investment</th>
-                    <th scope="col">Value</th>
+                  <tr class="border-b border-muted-light/20 dark:border-muted-dark/20">
+                    <th class="text-left py-3 px-4 font-medium text-muted-light dark:text-muted-dark">Year</th>
+                    <th class="text-right py-3 px-4 font-medium text-muted-light dark:text-muted-dark">Invested</th>
+                    <th class="text-right py-3 px-4 font-medium text-muted-light dark:text-muted-dark">Interest</th>
+                    <th class="text-right py-3 px-4 font-medium text-muted-light dark:text-muted-dark">Total Value</th>
                   </tr>
                 </thead>
-                <tbody id="chart-data-table">
-                  <!-- Mirror of chart data for accessibility -->
+                <tbody id="breakdown-tbody" class="text-text-light dark:text-text-dark">
+                  <!-- Populated by JavaScript -->
                 </tbody>
               </table>
             </div>
           </div>
-        </section>
-      </main>
+          
+        </div>
+        
+      </section>
       
-      <!-- Footer -->
-      <footer class="tool-footer">
-        <p><a href="/#/">← Back to Home</a></p>
-        <p class="disclaimer">
-          <small>
-            Disclaimer: This calculator provides estimates based on assumed rates of return. 
-            Actual returns may vary. Past performance is not indicative of future results.
-          </small>
-        </p>
-      </footer>
+    </div>
+  </main>
+  
+  <!-- About This Tool - Bottom -->
+  <section class="py-6 px-4 bg-surface-light dark:bg-surface-dark border-t border-muted-light/20 dark:border-accent-dark/30">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="font-heading text-lg mb-2 text-text-light dark:text-text-dark">About This Tool</h2>
+      <p class="text-sm text-muted-light dark:text-muted-dark mb-3">
+        Calculate returns on systematic investment plans with compound interest. Visualize growth with interactive charts.
+      </p>
+      <div class="flex flex-wrap justify-center gap-3 text-xs">
+        <span class="px-3 py-1 rounded-full bg-primary-light/10 dark:bg-primary-dark/10 text-primary-light dark:text-primary-dark">
+          Privacy First
+        </span>
+        <span class="px-3 py-1 rounded-full bg-primary-light/10 dark:bg-primary-dark/10 text-primary-light dark:text-primary-dark">
+          Client-Side Only
+        </span>
+        <span class="px-3 py-1 rounded-full bg-primary-light/10 dark:bg-primary-dark/10 text-primary-light dark:text-primary-dark">
+          Open Source
+        </span>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Libraries -->
+  <script src="/lib/chart.umd.min.js"></script>
+    <!-- Help Modal -->
+  <div id="help-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 hidden z-50" role="dialog" aria-modal="true" aria-labelledby="help-modal-title">
+    <div class="bg-surface-light dark:bg-surface-dark rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto theme-shadow">
+      <div class="sticky top-0 bg-surface-light dark:bg-surface-dark border-b border-muted-light/20 dark:border-accent-dark/30 p-4 flex items-center justify-between">
+        <h2 id="help-modal-title" class="font-heading text-xl text-text-light dark:text-text-dark flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary-light dark:text-primary-dark">help</span>
+          How to Use This Tool
+        </h2>
+        <button id="help-close" class="p-2 rounded-lg hover:bg-muted-light/20 dark:hover:bg-accent-dark/20 transition-colors" aria-label="Close help">
+          <span class="material-symbols-outlined text-2xl text-text-light dark:text-text-dark">close</span>
+        </button>
+      </div>
+      
+      <div class="p-6 space-y-6">
+        <div id="help-content">
+          <section>
+            <h3 class="font-heading text-lg mb-3 text-text-light dark:text-text-dark">Quick Start</h3>
+            <ol class="space-y-2 text-sm text-muted-light dark:text-muted-dark list-decimal list-inside">
+              <li><strong>Monthly Investment:</strong> Enter amount you'll invest each month (e.g., ₹5,000)</li>
+              <li><strong>Expected Return:</strong> Enter annual return rate as percentage (e.g., 12 for 12%)</li>
+              <li><strong>Time Period:</strong> Enter investment duration in years (e.g., 10)</li>
+              <li><strong>Calculate:</strong> Click "Calculate SIP" to see projections and growth chart</li>
+            </ol>
+          </section>
+          
+          <section>
+            <h3 class="font-heading text-lg mb-3 text-text-light dark:text-text-dark">Understanding Results</h3>
+            <ul class="space-y-2 text-sm text-muted-light dark:text-muted-dark">
+              <li><strong>Total Investment:</strong> Sum of all monthly contributions (Principal)</li>
+              <li><strong>Interest Earned:</strong> Compound interest accumulated over time</li>
+              <li><strong>Total Value:</strong> Final portfolio value (Investment + Interest)</li>
+            </ul>
+          </section>
+          
+          <section>
+            <h3 class="font-heading text-lg mb-3 text-text-light dark:text-text-dark">Tips</h3>
+            <ul class="space-y-2 text-sm text-muted-light dark:text-muted-dark list-disc list-inside">
+              <li>Historical equity mutual fund returns: 10-15% annually</li>
+              <li>Longer time periods dramatically increase returns due to compounding</li>
+              <li>Chart shows growth trajectory over investment period</li>
+            </ul>
+          </section>
+        </div>
+        
+        <div class="pt-4 border-t border-muted-light/20 dark:border-accent-dark/30">
+          <p class="text-sm text-muted-light dark:text-muted-dark flex items-start gap-2">
+            <span class="material-symbols-outlined text-primary-light dark:text-primary-dark">lock</span>
+            <span>All processing happens in your browser. No data is sent to any server. Your privacy is guaranteed.</span>
+          </p>
+        </div>
+      </div>
+      
+      <div class="sticky bottom-0 bg-surface-light dark:bg-surface-dark border-t border-muted-light/20 dark:border-accent-dark/30 p-4">
+        <button id="help-ok" class="w-full px-6 py-3 bg-primary-light dark:bg-primary-dark text-white font-semibold rounded-lg hover:scale-105 transition-transform">
+          Got It!
+        </button>
+      </div>
     </div>
   </div>
+  
+  <!-- Search Modal -->
+  <div id="search-modal" class="fixed inset-0 bg-black/60 flex items-center justify-center p-4 hidden z-50" role="dialog" aria-modal="true" aria-labelledby="search-modal-title">
+    <div class="bg-surface-light dark:bg-surface-dark rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden theme-shadow">
+      <!-- Search Input -->
+      <div class="p-4 border-b border-muted-light/20 dark:border-accent-dark/30">
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-light dark:text-muted-dark">search</span>
+          <input 
+            type="text" 
+            id="search-input" 
+            class="w-full pl-12 pr-4 py-3 bg-bg-light dark:bg-bg-dark text-text-light dark:text-text-dark border border-muted-light/30 dark:border-accent-dark/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark"
+            placeholder="Search tools..."
+            aria-label="Search tools"
+          />
+          <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-light dark:text-muted-dark">
+            ESC to close
+          </span>
+        </div>
+      </div>
+      
+      <!-- Search Results -->
+      <div id="search-results" class="overflow-y-auto max-h-[60vh] p-2">
+        <!-- Results populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- Search -->
+  <script src="/shared/js/search.js"></script>
+  
+  <!-- Theme Toggle -->
+  <script src="/shared/js/theme.js"></script>
+  
+  <!-- Chart.js Library -->
+  <script src="/lib/chart.umd.min.js"></script>
+  
+  <!-- Tool JavaScript -->
+  <script type="module" src="./sip-calculator.js"></script>
+  
 </body>
-</html>
 </html>

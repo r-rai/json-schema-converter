@@ -1,6 +1,6 @@
 /**
  * JSON Schema Validator & Converter Tool
- * Features: Validate, Minify, Beautify JSON with customizable indentation
+ * Features: Dynamic layout, Multiple validation modes, Generate schema, Minify, Beautify
  */
 
 import { storage } from '../../shared/js/storage.js';
@@ -20,15 +20,34 @@ const clearInputBtn = document.getElementById('clear-input-btn');
 const pasteBtn = document.getElementById('paste-btn');
 const copyOutputBtn = document.getElementById('copy-output-btn');
 const downloadBtn = document.getElementById('download-btn');
+const clearOutputBtn = document.getElementById('clear-output-btn');
 const statusMessage = document.getElementById('status-message');
 const inputCharCount = document.getElementById('input-char-count');
 const inputLineCount = document.getElementById('input-line-count');
 const outputCharCount = document.getElementById('output-char-count');
 const outputReduction = document.getElementById('output-reduction');
+const outputLabel = document.getElementById('output-label');
 
-// State
-let currentJSON = null;
-let lastOperation = null;
+// Dynamic Layout Elements
+const container = document.getElementById('json-tool-container');
+const inputSection = document.getElementById('input-section');
+const outputSection = document.getElementById('output-section');
+const validationSchemaSection = document.getElementById('validation-schema-section');
+const validationSchemaInput = document.getElementById('validation-schema-input');
+const validationOptions = document.getElementById('validation-options');
+const validateGeneratedBtn = document.getElementById('validate-generated-btn');
+const validateCustomStartBtn = document.getElementById('validate-custom-start-btn');
+const validateCustomBtn = document.getElementById('validate-custom-btn');
+const cancelCustomValidationBtn = document.getElementById('cancel-custom-validation-btn');
+
+// State Management
+const state = {
+  hasGeneratedSchema: false,
+  layoutMode: 'single', // 'single' or 'split'
+  currentJSON: null,
+  lastOperation: null,
+  generatedSchema: null
+};
 
 /**
  * Initialize the tool
@@ -45,10 +64,10 @@ function init() {
     updateInputStats();
   }
   
-  // Event listeners
+  // Event listeners - Actions
   jsonInput.addEventListener('input', debounce(handleInputChange, 300));
-  validateBtn.addEventListener('click', handleValidate);
   generateSchemaBtn.addEventListener('click', handleGenerateSchema);
+  validateBtn.addEventListener('click', handleValidateClick);
   minifyBtn.addEventListener('click', handleMinify);
   beautifyBtn.addEventListener('click', handleBeautify);
   indentSelect.addEventListener('change', handleIndentChange);
@@ -56,10 +75,20 @@ function init() {
   pasteBtn.addEventListener('click', handlePaste);
   copyOutputBtn.addEventListener('click', handleCopyOutput);
   downloadBtn.addEventListener('click', handleDownload);
+  clearOutputBtn.addEventListener('click', handleClearOutput);
+  
+  // Event listeners - Validation options
+  validateGeneratedBtn.addEventListener('click', handleValidateGenerated);
+  validateCustomStartBtn.addEventListener('click', showCustomValidationInput);
+  validateCustomBtn.addEventListener('click', handleValidateCustom);
+  cancelCustomValidationBtn.addEventListener('click', hideCustomValidationInput);
+  
+  // Initialize help modal
+  initHelpModal();
   
   // Development-only logging
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    console.log('JSON Schema Tool initialized');
+    console.log('JSON Schema Tool initialized with dynamic layout');
   }
 }
 
@@ -75,11 +104,72 @@ function handleInputChange() {
   // Auto-save to localStorage
   storage.set('lastJSON', jsonInput.value);
   
-  // Clear output when input changes
-  if (lastOperation) {
-    jsonOutput.value = '';
-    updateOutputStats();
-    disableOutputActions();
+  // Clear output when input changes significantly
+  if (state.lastOperation) {
+    // Optional: could keep output visible for reference
+  }
+}
+
+/**
+ * Layout Management Functions
+ */
+
+/**
+ * Show split layout (input on left, output on right)
+ */
+function showSplitLayout() {
+  state.layoutMode = 'split';
+  
+  // Add grid layout
+  container.classList.remove('space-y-6');
+  container.classList.add('grid', 'grid-cols-1', 'lg:grid-cols-2', 'gap-6');
+  
+  // Show output section
+  outputSection.classList.remove('hidden');
+  outputSection.classList.add('flex');
+}
+
+/**
+ * Show single layout (input only, full width)
+ */
+function showSingleLayout() {
+  state.layoutMode = 'single';
+  
+  // Remove grid layout
+  container.classList.remove('grid', 'grid-cols-1', 'lg:grid-cols-2', 'gap-6');
+  container.classList.add('space-y-6');
+  
+  // Hide output and validation sections
+  outputSection.classList.remove('flex');
+  outputSection.classList.add('hidden');
+  validationSchemaSection.classList.remove('flex');
+  validationSchemaSection.classList.add('hidden');
+  validationOptions.classList.add('hidden');
+}
+
+/**
+ * Show custom validation input
+ */
+function showCustomValidationInput() {
+  validationSchemaSection.classList.remove('hidden');
+  validationSchemaSection.classList.add('flex');
+  validationOptions.classList.add('hidden');
+  
+  // Focus on the validation schema input
+  validationSchemaInput.focus();
+}
+
+/**
+ * Hide custom validation input
+ */
+function hideCustomValidationInput() {
+  validationSchemaSection.classList.remove('flex');
+  validationSchemaSection.classList.add('hidden');
+  validationSchemaInput.value = '';
+  
+  // Show validation options again if schema exists
+  if (state.hasGeneratedSchema) {
+    validationOptions.classList.remove('hidden');
   }
 }
 
@@ -118,16 +208,47 @@ function updateOutputStats(reductionBytes = null) {
  * Show status message
  */
 function showStatus(message, type = 'info') {
-  statusMessage.textContent = message;
-  statusMessage.className = `status-message ${type}`;
+  // Create status element HTML based on type
+  let iconHtml = '';
+  let bgClass = '';
+  let textClass = '';
+  let borderClass = '';
+  
+  switch(type) {
+    case 'success':
+      iconHtml = '<span class="material-symbols-outlined text-green-600 dark:text-green-400">check_circle</span>';
+      bgClass = 'bg-green-50 dark:bg-green-900/20';
+      textClass = 'text-green-800 dark:text-green-200';
+      borderClass = 'border-green-300 dark:border-green-700';
+      break;
+    case 'error':
+      iconHtml = '<span class="material-symbols-outlined text-red-600 dark:text-red-400">error</span>';
+      bgClass = 'bg-red-50 dark:bg-red-900/20';
+      textClass = 'text-red-800 dark:text-red-200';
+      borderClass = 'border-red-300 dark:border-red-700';
+      break;
+    case 'info':
+    default:
+      iconHtml = '<span class="material-symbols-outlined text-blue-600 dark:text-blue-400">info</span>';
+      bgClass = 'bg-blue-50 dark:bg-blue-900/20';
+      textClass = 'text-blue-800 dark:text-blue-200';
+      borderClass = 'border-blue-300 dark:border-blue-700';
+      break;
+  }
+  
+  statusMessage.innerHTML = `
+    <div class="flex items-center gap-3 p-4 rounded-lg border ${bgClass} ${borderClass} ${textClass}">
+      ${iconHtml}
+      <p class="text-sm">${message}</p>
+    </div>
+  `;
   statusMessage.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
   
-  // Auto-hide success messages after 3 seconds
-  if (type === 'success') {
+  // Auto-hide success and info messages after 5 seconds
+  if (type === 'success' || type === 'info') {
     setTimeout(() => {
-      statusMessage.textContent = '';
-      statusMessage.className = 'status-message';
-    }, 3000);
+      statusMessage.innerHTML = '';
+    }, 5000);
   }
 }
 
@@ -137,6 +258,7 @@ function showStatus(message, type = 'info') {
 function enableOutputActions() {
   copyOutputBtn.disabled = false;
   downloadBtn.disabled = false;
+  clearOutputBtn.disabled = false;
 }
 
 /**
@@ -145,12 +267,30 @@ function enableOutputActions() {
 function disableOutputActions() {
   copyOutputBtn.disabled = true;
   downloadBtn.disabled = true;
+  clearOutputBtn.disabled = true;
 }
 
 /**
- * Handle validate JSON
+ * Clear output and reset to single layout
  */
-function handleValidate() {
+function handleClearOutput() {
+  jsonOutput.value = '';
+  state.hasGeneratedSchema = false;
+  state.generatedSchema = null;
+  state.lastOperation = null;
+  state.currentJSON = null;
+  
+  updateOutputStats();
+  disableOutputActions();
+  showSingleLayout();
+  
+  showStatus('Output cleared', 'info');
+}
+
+/**
+ * Handle validate button click - Show options or start validation
+ */
+function handleValidateClick() {
   const input = jsonInput.value.trim();
   
   if (!input) {
@@ -158,32 +298,131 @@ function handleValidate() {
     return;
   }
   
+  // First check if JSON is valid syntax
   const validation = validateJSON(input);
-  
-  if (validation.valid) {
-    try {
-      const parsed = JSON.parse(input);
-      currentJSON = parsed;
-      lastOperation = 'validate';
-      
-      // Beautify with current indentation setting
-      const indent = getIndentValue();
-      const formatted = JSON.stringify(parsed, null, indent);
-      jsonOutput.value = formatted;
-      
-      updateOutputStats();
-      enableOutputActions();
-      
-      showStatus('✓ Valid JSON!', 'success');
-    } catch (error) {
-      showStatus(`Validation error: ${error.message}`, 'error');
-    }
-  } else {
-    showStatus(`Invalid JSON: ${validation.error}`, 'error');
-    jsonOutput.value = '';
-    updateOutputStats();
-    disableOutputActions();
+  if (!validation.valid) {
+    showStatus(`Invalid JSON syntax: ${validation.error}`, 'error');
+    return;
   }
+  
+  // If generated schema exists, show validation options
+  if (state.hasGeneratedSchema) {
+    validationOptions.classList.remove('hidden');
+    showStatus('Choose validation method below', 'info');
+  } else {
+    // No generated schema, prompt for custom schema
+    showCustomValidationInput();
+    showStatus('Paste a JSON schema to validate against', 'info');
+  }
+}
+
+/**
+ * Validate against generated schema
+ */
+function handleValidateGenerated() {
+  const input = jsonInput.value.trim();
+  
+  if (!input || !state.generatedSchema) {
+    showStatus('Missing JSON input or generated schema', 'error');
+    return;
+  }
+  
+  try {
+    const jsonObj = JSON.parse(input);
+    const isValid = validateAgainstSchema(jsonObj, state.generatedSchema);
+    
+    validationOptions.classList.add('hidden');
+    
+    if (isValid.valid) {
+      showStatus('✓ JSON is valid against the generated schema!', 'success');
+    } else {
+      showStatus(`✗ JSON validation failed: ${isValid.errors.join(', ')}`, 'error');
+    }
+  } catch (err) {
+    showStatus(`Validation error: ${err.message}`, 'error');
+  }
+}
+
+/**
+ * Validate against custom schema
+ */
+function handleValidateCustom() {
+  const input = jsonInput.value.trim();
+  const customSchema = validationSchemaInput.value.trim();
+  
+  if (!input) {
+    showStatus('Please enter JSON to validate', 'error');
+    return;
+  }
+  
+  if (!customSchema) {
+    showStatus('Please enter a JSON schema', 'error');
+    return;
+  }
+  
+  try {
+    const jsonObj = JSON.parse(input);
+    const schemaObj = JSON.parse(customSchema);
+    
+    const isValid = validateAgainstSchema(jsonObj, schemaObj);
+    
+    if (isValid.valid) {
+      showStatus('✓ JSON is valid against the custom schema!', 'success');
+      hideCustomValidationInput();
+    } else {
+      showStatus(`✗ JSON validation failed: ${isValid.errors.join(', ')}`, 'error');
+    }
+  } catch (err) {
+    showStatus(`Validation error: ${err.message}`, 'error');
+  }
+}
+
+/**
+ * Validate JSON against a schema
+ * Basic implementation - can be enhanced with ajv library
+ */
+function validateAgainstSchema(json, schema) {
+  const errors = [];
+  
+  // Basic type checking
+  if (schema.type) {
+    const actualType = getType(json);
+    if (actualType !== schema.type) {
+      errors.push(`Expected type "${schema.type}" but got "${actualType}"`);
+      return { valid: false, errors };
+    }
+  }
+  
+  // Object validation
+  if (schema.type === 'object' && schema.properties) {
+    for (const [key, propSchema] of Object.entries(schema.properties)) {
+      if (!(key in json)) {
+        if (schema.required && schema.required.includes(key)) {
+          errors.push(`Missing required property: ${key}`);
+        }
+      } else {
+        const propResult = validateAgainstSchema(json[key], propSchema);
+        if (!propResult.valid) {
+          errors.push(`Property "${key}": ${propResult.errors.join(', ')}`);
+        }
+      }
+    }
+  }
+  
+  // Array validation
+  if (schema.type === 'array' && schema.items) {
+    for (let i = 0; i < json.length; i++) {
+      const itemResult = validateAgainstSchema(json[i], schema.items);
+      if (!itemResult.valid) {
+        errors.push(`Item ${i}: ${itemResult.errors.join(', ')}`);
+      }
+    }
+  }
+  
+  return {
+    valid: errors.length === 0,
+    errors
+  };
 }
 
 /**
@@ -208,11 +447,17 @@ function handleGenerateSchema() {
     const parsed = JSON.parse(input);
     const schema = generateJSONSchema(parsed);
     
-    currentJSON = schema;
-    lastOperation = 'generate-schema';
+    state.currentJSON = schema;
+    state.generatedSchema = schema;
+    state.hasGeneratedSchema = true;
+    state.lastOperation = 'generate-schema';
     
     const indent = getIndentValue();
     jsonOutput.value = JSON.stringify(schema, null, indent);
+    outputLabel.textContent = 'Generated Schema';
+    
+    // Show split layout
+    showSplitLayout();
     
     updateOutputStats();
     enableOutputActions();
@@ -354,9 +599,13 @@ function handleMinify() {
     const parsed = JSON.parse(input);
     const minified = JSON.stringify(parsed);
     
-    currentJSON = parsed;
-    lastOperation = 'minify';
+    state.currentJSON = parsed;
+    state.lastOperation = 'minify';
     jsonOutput.value = minified;
+    outputLabel.textContent = 'Minified JSON';
+    
+    // Show split layout
+    showSplitLayout();
     
     const reduction = input.length - minified.length;
     updateOutputStats(reduction);
@@ -391,9 +640,13 @@ function handleBeautify() {
     const indent = getIndentValue();
     const beautified = JSON.stringify(parsed, null, indent);
     
-    currentJSON = parsed;
-    lastOperation = 'beautify';
+    state.currentJSON = parsed;
+    state.lastOperation = 'beautify';
     jsonOutput.value = beautified;
+    outputLabel.textContent = 'Beautified JSON';
+    
+    // Show split layout
+    showSplitLayout();
     
     const increase = beautified.length - input.length;
     updateOutputStats(-increase); // Negative reduction (size increased)
@@ -420,10 +673,10 @@ function handleIndentChange() {
   // Save preference
   storage.set('jsonIndentPreference', indentSelect.value);
   
-  // Re-beautify if last operation was beautify or validate
-  if ((lastOperation === 'beautify' || lastOperation === 'validate') && currentJSON) {
+  // Re-beautify if last operation was beautify, validate, or generate-schema
+  if ((state.lastOperation === 'beautify' || state.lastOperation === 'validate' || state.lastOperation === 'generate-schema') && state.currentJSON) {
     const indent = getIndentValue();
-    const beautified = JSON.stringify(currentJSON, null, indent);
+    const beautified = JSON.stringify(state.currentJSON, null, indent);
     jsonOutput.value = beautified;
     updateOutputStats();
     showStatus(`Indentation changed to ${indentSelect.options[indentSelect.selectedIndex].text}`, 'info');
@@ -436,12 +689,15 @@ function handleIndentChange() {
 function handleClearInput() {
   jsonInput.value = '';
   jsonOutput.value = '';
-  currentJSON = null;
-  lastOperation = null;
+  state.currentJSON = null;
+  state.lastOperation = null;
+  state.hasGeneratedSchema = false;
+  state.generatedSchema = null;
   
   updateInputStats();
   updateOutputStats();
   disableOutputActions();
+  showSingleLayout();
   
   storage.remove('lastJSON');
   showStatus('Input cleared', 'info');
@@ -501,5 +757,60 @@ function handleDownload() {
   showStatus('✓ Downloaded successfully', 'success');
 }
 
-// Note: init() is called by router via window.initJsonSchema
-// Do NOT auto-initialize here as it would run before HTML is loaded
+/**
+ * Initialize Help Modal
+ */
+function initHelpModal() {
+  const helpBtn = document.getElementById('help-btn');
+  const helpModal = document.getElementById('help-modal');
+  const helpClose = document.getElementById('help-close');
+  const helpOk = document.getElementById('help-ok');
+  
+  if (!helpBtn || !helpModal) return;
+  
+  // Open modal
+  helpBtn.addEventListener('click', () => {
+    helpModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // Prevent background scroll
+    // Focus trap (accessibility)
+    helpClose.focus();
+  });
+  
+  // Close modal functions
+  const closeModal = () => {
+    helpModal.classList.add('hidden');
+    document.body.style.overflow = ''; // Restore scroll
+    helpBtn.focus(); // Return focus to trigger button
+  };
+  
+  // Close button
+  helpClose.addEventListener('click', closeModal);
+  helpOk.addEventListener('click', closeModal);
+  
+  // ESC key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !helpModal.classList.contains('hidden')) {
+      closeModal();
+    }
+  });
+  
+  // Click outside
+  helpModal.addEventListener('click', (e) => {
+    if (e.target === helpModal) {
+      closeModal();
+    }
+  });
+}
+
+// Auto-initialize if loaded directly (not via router)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.location.pathname.includes('json-schema')) {
+      init();
+    }
+  });
+} else {
+  if (window.location.pathname.includes('json-schema')) {
+    init();
+  }
+}

@@ -1,51 +1,133 @@
-/* JSON Schema Tool Styles */
+/**
+ * JSON Schema Tool - Heritage Design System Styles
+ * Minimal custom CSS - most styling via utility classes
+ */
 
-.tool-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--spacing-xl);
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-@media (min-width: 768px) {
-  .tool-layout {
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-xl);
-  }
-  
-  .input-section,
-  .output-section {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .input-section .json-editor,
-  .output-section .json-editor {
-    flex: 1;
-    min-height: 500px;
-  }
-  
-  .actions-section {
-    grid-column: 1 / -1;
-  }
-}
-
-/* Section Headers */
-.section-header {
-  display: flex;
-  justify-content: space-between;
+/* Button Styles */
+.btn-primary {
+  display: inline-flex;
   align-items: center;
-  margin-bottom: var(--spacing-md);
-}
-  align-items: center;
-  margin-bottom: var(--spacing-md);
-}
-
-.section-header h2 {
-  font-size: var(--font-size-xl);
+  justify-content: center;
+  gap: 0.5rem;
+  
+  padding: 0.75rem 1.5rem;
+  
+  background-color: var(--color-primary);
+  color: #FFFFFF;
+  
   font-weight: 600;
-  color: var(--text-primary);
+  font-size: 1rem;
+  font-family: var(--font-display, 'Plus Jakarta Sans', sans-serif);
+  
+  border: none;
+  border-radius: 0.5rem;
+  
+  cursor: pointer;
+  
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: scale(1.05);
+}
+
+.btn-primary:active {
+  transform: scale(0.95);
+}
+
+.btn-primary:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.dark .btn-primary {
+  background-color: var(--color-primary-dark, #FF6B35);
+}
+
+/* Icon Buttons */
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 0.5rem;
+  background-color: transparent;
+  color: var(--color-muted-light, #94a3b8);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-icon:hover:not(:disabled) {
+  background-color: var(--color-surface-light, #FFFFFF);
+  color: var(--color-primary, #C84B31);
+}
+
+.btn-icon:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.dark .btn-icon {
+  color: var(--color-muted-dark, #5B5F77);
+}
+
+.dark .btn-icon:hover:not(:disabled) {
+  background-color: var(--color-surface-dark, #12131C);
+  color: var(--color-primary-dark, #FF6B35);
+}
+
+/* Theme Shadow Effect */
+.theme-shadow {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dark .theme-shadow {
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
+}
+
+/* Status Messages */
+#status-message:empty {
+  display: none;
+}
+
+#status-message .success {
+  display: flex;
+  align-items: start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: rgba(34, 197, 94, 0.1);
+  border-left: 4px solid #22c55e;
+  border-radius: 0 0.5rem 0.5rem 0;
+  color: #16a34a;
+}
+
+#status-message .error {
+  display: flex;
+  align-items: start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  border-left: 4px solid #ef4444;
+  border-radius: 0 0.5rem 0.5rem 0;
+  color: #dc2626;
+}
+
+.dark #status-message .success {
+  background-color: rgba(34, 197, 94, 0.05);
+  color: #4ade80;
+}
+
+.dark #status-message .error {
+  background-color: rgba(239, 68, 68, 0.05);
+  color: #f87171;
 }
 
 .action-group {

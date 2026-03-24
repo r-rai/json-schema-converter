@@ -3,163 +3,445 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- FOUC Prevention Script - MUST BE FIRST -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('devtoolbox_theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+      document.documentElement.classList.add(theme);
+    })();
+  </script>
+  
+  <meta name="description" content="Convert between HTML and Markdown formats with live preview">
   <title>HTML ↔ Markdown Converter - DevToolbox</title>
-  <link rel="stylesheet" href="/shared/css/variables.css">
+  
+  <!-- Preconnect to Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Fonts: Rozha One, Plus Jakarta Sans, Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Rozha+One&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  
+  <!-- Heritage Design System CSS -->
   <link rel="stylesheet" href="/shared/css/reset.css">
-  <link rel="stylesheet" href="/shared/css/components.css">
+  <link rel="stylesheet" href="/shared/css/variables.css">
   <link rel="stylesheet" href="/shared/css/themes.css">
   <link rel="stylesheet" href="/shared/css/utilities.css">
-  <link rel="stylesheet" href="/shared/css/responsive.css">
   <link rel="stylesheet" href="./html-markdown.css">
-  <link rel="stylesheet" href="/shared/css/tool-styles.css">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛠️</text></svg>">
 </head>
-<body>
-  <header class="header">
-    <nav class="nav">
-      <a href="/" class="logo">DevToolbox</a>
-      <button data-theme-toggle class="btn btn-ghost" aria-label="Toggle theme">
-        <span class="theme-icon">🌙</span>
+
+<body class="bg-background-light dark:bg-background-dark 
+             text-text-light dark:text-text-dark 
+             font-display min-h-screen transition-colors duration-300">
+  
+  <!-- Shared Header Component -->
+  <header class="flex items-center justify-between whitespace-nowrap 
+                 border-b border-solid border-muted-light/20 dark:border-muted-dark/30 
+                 px-4 py-3">
+    <!-- Logo + Title (Left) -->
+    <div class="flex items-center gap-4 text-text-light dark:text-text-dark">
+      <div class="size-6 text-primary dark:text-accent-dark flex items-center justify-center">
+        <span class="material-symbols-outlined" style="font-size: 24px;">temple_hindu</span>
+      </div>
+      <h2 class="font-heading text-2xl leading-tight tracking-[-0.015em]">
+        <a href="/" class="hover:text-primary dark:hover:text-primary-dark transition-colors">DevToolbox</a>
+      </h2>
+    </div>
+    
+    <!-- Navigation + Theme Toggle (Right) -->
+    <div class="flex items-center gap-8">
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex items-center gap-9" aria-label="Primary navigation">
+        <a href="/" 
+           class="text-text-light dark:text-text-dark 
+                  text-sm font-medium leading-normal 
+                  hover:text-primary dark:hover:text-primary-dark 
+                  transition-colors font-display">
+          Home
+        </a>
+        <a href="/#tools" 
+           class="text-text-light dark:text-text-dark 
+                  text-sm font-medium leading-normal 
+                  hover:text-primary dark:hover:text-primary-dark 
+                  transition-colors font-display">
+          Tools
+        </a>
+        <a href="/#about" 
+           class="text-text-light dark:text-text-dark 
+                  text-sm font-medium leading-normal 
+                  hover:text-primary dark:hover:text-primary-dark 
+                  transition-colors font-display">
+          About
+        </a>
+      </nav>
+      
+      <!-- Search Button -->
+      <button id="search-btn" 
+              class="flex h-10 w-10 cursor-pointer items-center justify-center 
+                     overflow-hidden rounded-full 
+                     bg-surface-light dark:bg-surface-dark 
+                     text-text-light dark:text-accent-dark 
+                     hover:scale-110 transition-transform" 
+              aria-label="Search tools (Ctrl+K)"
+              title="Search tools (Ctrl+K)">
+        <span class="material-symbols-outlined" aria-hidden="true">search</span>
       </button>
-    </nav>
-    <div class="page-header">
-      <h1>🔄 HTML ↔ Markdown Converter</h1>
-      <p class="subtitle">Convert between HTML and Markdown formats</p>
+      
+      <!-- Theme Toggle -->
+      <button aria-label="Toggle Theme" 
+              data-theme-toggle
+              class="flex h-10 w-10 cursor-pointer items-center justify-center 
+                     overflow-hidden rounded-full 
+                     bg-surface-light dark:bg-surface-dark 
+                     text-text-light dark:text-accent-dark 
+                     hover:scale-110 transition-transform">
+        <span class="material-symbols-outlined text-current theme-icon-light block dark:hidden">
+          light_mode
+        </span>
+        <span class="material-symbols-outlined text-current theme-icon-dark hidden dark:block">
+          dark_mode
+        </span>
+      </button>
+      
+      <!-- Mobile Hamburger Menu (optional future implementation) -->
+      <button aria-label="Menu" 
+              class="flex md:hidden h-10 w-10 cursor-pointer items-center justify-center 
+                     bg-surface-light dark:bg-surface-dark rounded-full">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
     </div>
   </header>
-
-  <main class="container">
-    <div class="converter-layout">
-      <!-- Input Section -->
-      <section class="input-section card">
-        <div class="section-header">
-          <h2>Input</h2>
-          <div class="format-selector">
-            <label class="radio-label">
-              <input type="radio" name="input-format" value="html" checked>
-              <span>HTML</span>
+  
+  <!-- Main Content Container -->
+  <main class="px-4 sm:px-10 lg:px-20 py-5">
+    <div class="max-w-[1440px] mx-auto">
+      
+      <!-- Breadcrumb Navigation -->
+      <nav aria-label="Breadcrumb" class="mb-6">
+        <ol class="flex items-center gap-2 text-sm text-muted-light dark:text-muted-dark">
+          <li>
+            <a href="/" class="hover:text-primary dark:hover:text-primary-dark transition-colors">
+              Home
+            </a>
+          </li>
+          <li>
+            <span class="material-symbols-outlined text-xs">chevron_right</span>
+          </li>
+          <li class="text-text-light dark:text-text-dark font-medium" aria-current="page">
+            HTML ↔ Markdown Converter
+          </li>
+        </ol>
+      </nav>
+      
+      <!-- Tool Hero Section - Compact -->
+      <section class="py-3 px-4 mb-6 bg-surface-light/50 dark:bg-surface-dark/50 rounded-lg">
+        <div class="max-w-7xl mx-auto flex items-center gap-3">
+          <span class="material-symbols-outlined text-3xl text-primary dark:text-accent-dark">code_blocks</span>
+          <h1 class="font-heading text-2xl text-text-light dark:text-text-dark">HTML ↔ Markdown Converter</h1>
+        </div>
+      </section>
+      
+      <!-- Tool Content Area -->
+      <section class="tool-content-area">
+        
+        <!-- Conversion Controls (Center) -->
+        <div class="flex flex-col md:flex-row items-center justify-center gap-4 mb-8 p-6 bg-surface-light dark:bg-surface-dark rounded-lg theme-shadow">
+          
+          <button id="html-to-md-btn" class="btn-primary w-full md:w-auto">
+            <span>HTML</span>
+            <span class="material-symbols-outlined">arrow_forward</span>
+            <span>Markdown</span>
+          </button>
+          
+          <button id="swap-btn" 
+                  class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 dark:bg-primary-dark/10 text-primary dark:text-primary-dark hover:scale-110 transition-transform"
+                  aria-label="Swap input and output">
+            <span class="material-symbols-outlined">swap_horiz</span>
+          </button>
+          
+          <button id="md-to-html-btn" class="btn-primary w-full md:w-auto">
+            <span>Markdown</span>
+            <span class="material-symbols-outlined">arrow_forward</span>
+            <span>HTML</span>
+          </button>
+          
+          <!-- Help Button -->
+          <button id="help-btn" class="p-3 rounded-lg hover:bg-muted-light/20 dark:hover:bg-accent-dark/20 transition-colors" aria-label="Help - How to use this tool" title="How to use this tool">
+            <span class="material-symbols-outlined text-2xl text-primary-light dark:text-primary-dark">help</span>
+          </button>
+          
+        </div>
+        
+        <!-- Options Panel -->
+        <div class="mb-6 p-4 bg-surface-light dark:bg-surface-dark rounded-lg border border-muted-light/20 dark:border-accent-dark/20">
+          <h3 class="font-heading text-lg text-text-light dark:text-text-dark mb-3">
+            Conversion Options
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <label class="flex items-center gap-2 text-sm text-text-light dark:text-text-dark cursor-pointer">
+              <input type="checkbox" id="gfm-enabled" checked 
+                     class="w-4 h-4 text-primary border-muted-light/30 dark:border-accent-dark/30 rounded focus:ring-primary dark:focus:ring-primary-dark">
+              <span>GitHub Flavored Markdown (GFM)</span>
             </label>
-            <label class="radio-label">
-              <input type="radio" name="input-format" value="markdown">
-              <span>Markdown</span>
+            <label class="flex items-center gap-2 text-sm text-text-light dark:text-text-dark cursor-pointer">
+              <input type="checkbox" id="sanitize-html" checked 
+                     class="w-4 h-4 text-primary border-muted-light/30 dark:border-accent-dark/30 rounded focus:ring-primary dark:focus:ring-primary-dark">
+              <span>Sanitize HTML (Security)</span>
+            </label>
+            <label class="flex items-center gap-2 text-sm text-text-light dark:text-text-dark cursor-pointer">
+              <input type="checkbox" id="preserve-whitespace" 
+                     class="w-4 h-4 text-primary border-muted-light/30 dark:border-accent-dark/30 rounded focus:ring-primary dark:focus:ring-primary-dark">
+              <span>Preserve Whitespace</span>
+            </label>
+            <label class="flex items-center gap-2 text-sm text-text-light dark:text-text-dark cursor-pointer">
+              <input type="checkbox" id="code-highlighting" checked 
+                     class="w-4 h-4 text-primary border-muted-light/30 dark:border-accent-dark/30 rounded focus:ring-primary dark:focus:ring-primary-dark">
+              <span>Syntax Highlighting</span>
             </label>
           </div>
         </div>
         
-        <textarea
-          id="input-editor"
-          class="code-editor"
-          placeholder="Enter HTML or Markdown here..."
-          aria-label="Input editor"
-          spellcheck="false"
-        ></textarea>
-
-        <div class="editor-actions">
-          <button id="clear-input-btn" class="btn btn-ghost btn-sm">
-            🗑️ Clear
-          </button>
-          <button id="paste-btn" class="btn btn-ghost btn-sm">
-            📋 Paste
-          </button>
-          <button id="sample-btn" class="btn btn-ghost btn-sm">
-            📄 Load Sample
-          </button>
-        </div>
-
-        <div class="input-stats" aria-live="polite">
-          <span id="input-char-count">0 characters</span>
-          <span id="input-line-count">0 lines</span>
-        </div>
-      </section>
-
-      <!-- Conversion Controls -->
-      <section class="controls-section">
-        <button id="html-to-md-btn" class="btn btn-primary btn-large">
-          HTML → Markdown
-        </button>
-        
-        <button id="swap-btn" class="btn btn-secondary btn-icon" aria-label="Swap input and output">
-          🔄
-        </button>
-        
-        <button id="md-to-html-btn" class="btn btn-primary btn-large">
-          Markdown → HTML
-        </button>
-
-        <div id="status-message" class="status-message" role="status" aria-live="polite"></div>
-
-        <div class="conversion-options card">
-          <h3>Options</h3>
+        <!-- Split Layout: Input | Output -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
-          <label class="checkbox-label">
-            <input type="checkbox" id="gfm-enabled" checked>
-            <span>GitHub Flavored Markdown (GFM)</span>
-          </label>
-          
-          <label class="checkbox-label">
-            <input type="checkbox" id="sanitize-html" checked>
-            <span>Sanitize HTML (Security)</span>
-          </label>
-          
-          <label class="checkbox-label">
-            <input type="checkbox" id="preserve-whitespace">
-            <span>Preserve Whitespace</span>
-          </label>
-          
-          <label class="checkbox-label">
-            <input type="checkbox" id="code-highlighting" checked>
-            <span>Syntax Highlighting</span>
-          </label>
-        </div>
-      </section>
-
-      <!-- Output Section -->
-      <section class="output-section card">
-        <div class="section-header">
-          <h2>Output</h2>
-          <div class="view-mode-selector">
-            <label class="radio-label">
-              <input type="radio" name="view-mode" value="code" checked>
-              <span>Code</span>
-            </label>
-            <label class="radio-label">
-              <input type="radio" name="view-mode" value="preview">
-              <span>Preview</span>
-            </label>
+          <!-- Input Section -->
+          <div class="flex flex-col">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-heading text-xl text-text-light dark:text-text-dark">Input</h3>
+              <div class="flex items-center gap-2">
+                <button id="clear-input-btn" class="btn-icon" aria-label="Clear input">
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+                <button id="paste-btn" class="btn-icon" aria-label="Paste from clipboard">
+                  <span class="material-symbols-outlined">content_paste</span>
+                </button>
+                <button id="sample-btn" class="btn-icon" aria-label="Load sample">
+                  <span class="material-symbols-outlined">description</span>
+                </button>
+              </div>
+            </div>
+            
+            <textarea 
+              id="input-editor"
+              class="w-full h-96 min-h-96
+                     p-4 
+                     bg-surface-light dark:bg-surface-dark 
+                     text-text-light dark:text-text-dark 
+                     border border-muted-light/30 dark:border-accent-dark/30 
+                     rounded-lg 
+                     focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark 
+                     font-mono text-sm 
+                     resize-none
+                     transition-all"
+              placeholder="Enter HTML or Markdown here..."
+              spellcheck="false"
+              aria-label="Input editor"
+            ></textarea>
+            
+            <div class="flex items-center justify-between mt-2 text-xs text-muted-light dark:text-muted-dark">
+              <span id="input-char-count">0 characters</span>
+              <span id="input-line-count">0 lines</span>
+            </div>
           </div>
+          
+          <!-- Output Section -->
+          <div class="flex flex-col">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-heading text-xl text-text-light dark:text-text-dark">Output</h3>
+              <div class="flex items-center gap-2">
+                <!-- View Mode Toggle -->
+                <div class="flex items-center gap-1 p-1 bg-muted-light/20 dark:bg-muted-dark/20 rounded-lg">
+                  <input type="radio" name="view-mode" value="code" id="view-code" checked class="sr-only">
+                  <label for="view-code" class="view-mode-label px-3 py-1 text-xs font-medium rounded cursor-pointer">
+                    Code
+                  </label>
+                  <input type="radio" name="view-mode" value="preview" id="view-preview" class="sr-only">
+                  <label for="view-preview" class="view-mode-label px-3 py-1 text-xs font-medium rounded cursor-pointer">
+                    Preview
+                  </label>
+                </div>
+                <button id="copy-output-btn" class="btn-icon" aria-label="Copy output">
+                  <span class="material-symbols-outlined">content_copy</span>
+                </button>
+                <button id="download-output-btn" class="btn-icon" aria-label="Download output">
+                  <span class="material-symbols-outlined">download</span>
+                </button>
+                <button id="open-preview-btn" class="btn-icon" aria-label="Open in new tab">
+                  <span class="material-symbols-outlined">open_in_new</span>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Code View -->
+            <textarea 
+              id="output-editor"
+              class="w-full h-96 min-h-96
+                     p-4 
+                     bg-surface-light dark:bg-surface-dark 
+                     text-text-light dark:text-text-dark 
+                     border border-muted-light/30 dark:border-accent-dark/30 
+                     rounded-lg 
+                     font-mono text-sm 
+                     resize-none"
+              placeholder="Output will appear here..."
+              readonly
+              aria-label="Output display"
+            ></textarea>
+            
+            <!-- Preview View (Hidden by default) -->
+            <div id="output-preview" 
+                 class="hidden w-full h-96 min-h-96
+                        p-4 overflow-auto
+                        bg-surface-light dark:bg-surface-dark 
+                        text-text-light dark:text-text-dark 
+                        border border-muted-light/30 dark:border-accent-dark/30 
+                        rounded-lg 
+                        prose dark:prose-invert max-w-none"
+                 aria-label="Output preview">
+            </div>
+            
+            <div class="flex items-center justify-between mt-2 text-xs text-muted-light dark:text-muted-dark">
+              <span id="output-char-count">0 characters</span>
+              <span id="output-format"></span>
+            </div>
+          </div>
+          
         </div>
-
-        <!-- Code View -->
-        <textarea
-          id="output-editor"
-          class="code-editor"
-          placeholder="Output will appear here..."
-          aria-label="Output display"
-          readonly
-        ></textarea>
-
-        <!-- Preview View -->
-        <div id="output-preview" class="output-preview hidden" aria-label="HTML preview"></div>
-
-        <div class="editor-actions">
-          <button id="copy-output-btn" class="btn btn-ghost btn-sm" disabled>
-            📋 Copy
-          </button>
-          <button id="download-output-btn" class="btn btn-ghost btn-sm" disabled>
-            💾 Download
-          </button>
-          <button id="open-preview-btn" class="btn btn-ghost btn-sm" disabled>
-            🔍 Open in New Tab
-          </button>
-        </div>
-
-        <div class="output-stats" aria-live="polite">
-          <span id="output-char-count">0 characters</span>
-          <span id="output-format"></span>
-        </div>
+        
+        <!-- Status Message Area -->
+        <div id="status-message" class="mt-6" role="status" aria-live="polite"></div>
+        
       </section>
+      
     </div>
   </main>
+  
+  <!-- About This Tool - Bottom -->
+  <section class="py-6 px-4 bg-surface-light dark:bg-surface-dark border-t border-muted-light/20 dark:border-accent-dark/30">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="font-heading text-lg mb-2 text-text-light dark:text-text-dark">About This Tool</h2>
+      <p class="text-sm text-muted-light dark:text-muted-dark mb-3">
+        Convert between HTML and Markdown formats instantly. Supports tables, code blocks, and more.
+      </p>
+      <div class="flex flex-wrap justify-center gap-3 text-xs">
+        <span class="px-3 py-1 rounded-full bg-primary-light/10 dark:bg-primary-dark/10 text-primary-light dark:text-primary-dark">
+          Privacy First
+        </span>
+        <span class="px-3 py-1 rounded-full bg-primary-light/10 dark:bg-primary-dark/10 text-primary-light dark:text-primary-dark">
+          Client-Side Only
+        </span>
+        <span class="px-3 py-1 rounded-full bg-primary-light/10 dark:bg-primary-dark/10 text-primary-light dark:text-primary-dark">
+          Open Source
+        </span>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Libraries -->
+  <script src="/lib/turndown.min.js"></script>
+  <script src="/lib/marked.min.js"></script>
+  <script src="/lib/purify.min.js"></script>
+  
+  <!-- Help Modal -->
+  <div id="help-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 hidden z-50" role="dialog" aria-modal="true" aria-labelledby="help-modal-title">
+    <div class="bg-surface-light dark:bg-surface-dark rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto theme-shadow">
+      <div class="sticky top-0 bg-surface-light dark:bg-surface-dark border-b border-muted-light/20 dark:border-accent-dark/30 p-4 flex items-center justify-between">
+        <h2 id="help-modal-title" class="font-heading text-xl text-text-light dark:text-text-dark flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary-light dark:text-primary-dark">help</span>
+          How to Use This Tool
+        </h2>
+        <button id="help-close" class="p-2 rounded-lg hover:bg-muted-light/20 dark:hover:bg-accent-dark/20 transition-colors" aria-label="Close help">
+          <span class="material-symbols-outlined text-2xl text-text-light dark:text-text-dark">close</span>
+        </button>
+      </div>
+      
+      <div class="p-6 space-y-6">
+        <div id="help-content">
+          <section>
+            <h3 class="font-heading text-lg mb-3 text-text-light dark:text-text-dark">Quick Start</h3>
+            <ol class="space-y-2 text-sm text-muted-light dark:text-muted-dark list-decimal list-inside">
+              <li><strong>HTML to Markdown:</strong> Paste HTML → Click "Convert to Markdown" → Markdown appears</li>
+              <li><strong>Markdown to HTML:</strong> Paste Markdown → Click "Convert to HTML" → HTML appears</li>
+              <li><strong>Copy Result:</strong> Use Copy button to copy output to clipboard</li>
+            </ol>
+          </section>
+          
+          <section>
+            <h3 class="font-heading text-lg mb-3 text-text-light dark:text-text-dark">Supported Features</h3>
+            <ul class="space-y-2 text-sm text-muted-light dark:text-muted-dark list-disc list-inside">
+              <li>Headings, paragraphs, lists (ordered & unordered)</li>
+              <li>Links, images, code blocks, inline code</li>
+              <li>Tables, blockquotes, horizontal rules</li>
+              <li>Bold, italic, strikethrough text</li>
+            </ul>
+          </section>
+          
+          <section>
+            <h3 class="font-heading text-lg mb-3 text-text-light dark:text-text-dark">Tips</h3>
+            <ul class="space-y-2 text-sm text-muted-light dark:text-muted-dark list-disc list-inside">
+              <li>Use options panel to customize conversion behavior</li>
+              <li>Preview mode shows rendered HTML for Markdown input</li>
+              <li>All HTML is sanitized to prevent XSS attacks</li>
+            </ul>
+          </section>
+        </div>
+        
+        <div class="pt-4 border-t border-muted-light/20 dark:border-accent-dark/30">
+          <p class="text-sm text-muted-light dark:text-muted-dark flex items-start gap-2">
+            <span class="material-symbols-outlined text-primary-light dark:text-primary-dark">lock</span>
+            <span>All processing happens in your browser. No data is sent to any server. Your privacy is guaranteed.</span>
+          </p>
+        </div>
+      </div>
+      
+      <div class="sticky bottom-0 bg-surface-light dark:bg-surface-dark border-t border-muted-light/20 dark:border-accent-dark/30 p-4">
+        <button id="help-ok" class="w-full px-6 py-3 bg-primary-light dark:bg-primary-dark text-white font-semibold rounded-lg hover:scale-105 transition-transform">
+          Got It!
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Search Modal -->
+  <div id="search-modal" class="fixed inset-0 bg-black/60 flex items-center justify-center p-4 hidden z-50" role="dialog" aria-modal="true" aria-labelledby="search-modal-title">
+    <div class="bg-surface-light dark:bg-surface-dark rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden theme-shadow">
+      <!-- Search Input -->
+      <div class="p-4 border-b border-muted-light/20 dark:border-accent-dark/30">
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-light dark:text-muted-dark">search</span>
+          <input 
+            type="text" 
+            id="search-input" 
+            class="w-full pl-12 pr-4 py-3 bg-bg-light dark:bg-bg-dark text-text-light dark:text-text-dark border border-muted-light/30 dark:border-accent-dark/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark"
+            placeholder="Search tools..."
+            aria-label="Search tools"
+          />
+          <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-light dark:text-muted-dark">
+            ESC to close
+          </span>
+        </div>
+      </div>
+      
+      <!-- Search Results -->
+      <div id="search-results" class="overflow-y-auto max-h-[60vh] p-2">
+        <!-- Results populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- Search -->
+  <script src="/shared/js/search.js"></script>
+  
+  <!-- Theme Toggle -->
+  <script src="/shared/js/theme.js"></script>
+  
+  <!-- Tool JavaScript -->
+  <script type="module" src="./html-markdown.js"></script>
+  
 </body>
-</html>
-</html>
 </html>

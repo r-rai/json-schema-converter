@@ -60,8 +60,14 @@ class EMICalculator {
     this.recalculateBtn = document.getElementById('recalculate-btn');
     this.copyTableBtn = document.getElementById('copy-table-btn');
     this.exportCsvBtn = document.getElementById('export-csv-btn');
+    this.calculatePrepaymentBtn = document.getElementById('calculate-prepayment-btn');
     
-    // Prepayment form
+    // Prepayment form (new simple prepayment calculator)
+    this.prepaymentAmountNew = document.getElementById('prepayment-amount');
+    this.prepaymentMonthNew = document.getElementById('prepayment-month');
+    this.prepaymentResults = document.getElementById('prepayment-results');
+    
+    // Prepayment form (legacy)
     this.prepaymentFormContainer = document.getElementById('prepayment-form-container');
     this.prepaymentType = document.getElementById('prepayment-type');
     this.prepaymentAmount = document.getElementById('prepayment-amount');
@@ -101,6 +107,58 @@ class EMICalculator {
     this.recalculateBtn.addEventListener('click', () => this.calculateWithPrepayments());
     this.copyTableBtn.addEventListener('click', () => this.copyTable());
     this.exportCsvBtn.addEventListener('click', () => this.exportCSV());
+    
+    // New simple prepayment calculator
+    if (this.calculatePrepaymentBtn) {
+      this.calculatePrepaymentBtn.addEventListener('click', () => this.calculatePrepayment());
+    }
+    
+    // Initialize help modal
+    this.initHelpModal();
+  }
+  
+  /**
+   * Initialize Help Modal
+   */
+  initHelpModal() {
+    const helpBtn = document.getElementById('help-btn');
+    const helpModal = document.getElementById('help-modal');
+    const helpClose = document.getElementById('help-close');
+    const helpOk = document.getElementById('help-ok');
+    
+    if (!helpBtn || !helpModal) return;
+    
+    // Open modal
+    helpBtn.addEventListener('click', () => {
+      helpModal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      helpClose.focus();
+    });
+    
+    // Close modal functions
+    const closeModal = () => {
+      helpModal.classList.add('hidden');
+      document.body.style.overflow = '';
+      helpBtn.focus();
+    };
+    
+    // Close button
+    helpClose.addEventListener('click', closeModal);
+    helpOk.addEventListener('click', closeModal);
+    
+    // ESC key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !helpModal.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
+    
+    // Click outside
+    helpModal.addEventListener('click', (e) => {
+      if (e.target === helpModal) {
+        closeModal();
+      }
+    });
   }
   
   /**
@@ -150,9 +208,23 @@ class EMICalculator {
     
     // Show sections
     this.resultsSection.style.display = 'block';
-    this.prepaymentSection.style.display = 'block';
+    this.prepaymentSection.classList.remove('hidden');
     this.amortizationSection.style.display = 'block';
     this.chartSection.style.display = 'block';
+    
+    // Set max month for prepayment
+    const maxMonthSpan = document.getElementById('max-month');
+    if (maxMonthSpan) {
+      maxMonthSpan.textContent = tenureMonths;
+    }
+    if (this.prepaymentMonthNew) {
+      this.prepaymentMonthNew.max = tenureMonths;
+    }
+    
+    // Hide prepayment results on new calculation
+    if (this.prepaymentResults) {
+      this.prepaymentResults.classList.add('hidden');
+    }
     
     // Scroll to results
     this.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -539,6 +611,198 @@ class EMICalculator {
   }
   
   /**
+   * Calculate Prepayment Impact (New Simple Prepayment Calculator)
+   */
+  calculatePrepayment() {
+    // Validate that main EMI is calculated
+    if (!this.state.monthlyEMI || this.state.monthlyEMI === 0) {
+      this.showToast('Please calculate EMI first', 'error');
+      return;
+    }
+    
+    // Get prepayment inputs
+    const prepaymentAmount = parseFloat(this.prepaymentAmountNew.value);
+    const prepaymentMonth = parseInt(this.prepaymentMonthNew.value);
+    const prepaymentOption = document.querySelector('input[name="prepayment-option"]:checked').value;
+    
+    // Validate inputs
+    if (!prepaymentAmount || prepaymentAmount <= 0) {
+      this.showToast('Please enter valid prepayment amount', 'error');
+      Validator.showValidationError(this.prepaymentAmountNew, 'Amount must be greater than 0');
+      return;
+    }
+    
+    Validator.clearValidationError(this.prepaymentAmountNew);
+    
+    const tenureMonths = this.state.tenure * 12;
+    
+    if (!prepaymentMonth || prepaymentMonth < 1 || prepaymentMonth > tenureMonths) {
+      this.showToast(`Prepayment month must be between 1 and ${tenureMonths}`, 'error');
+      Validator.showValidationError(this.prepaymentMonthNew, `Month must be between 1 and ${tenureMonths}`);
+      return;
+    }
+    
+    Validator.clearValidationError(this.prepaymentMonthNew);
+    
+    // Calculate outstanding balance at prepayment month
+    let outstandingBalance = this.state.loanAmount;
+    const monthlyRate = this.state.interestRate / 12 / 100;
+    
+    for (let i = 1; i <= prepaymentMonth; i++) {
+      const interestForMonth = outstandingBalance * monthlyRate;
+      const principalForMonth = this.state.monthlyEMI - interestForMonth;
+      outstandingBalance -= principalForMonth;
+    }
+    
+    // Apply prepayment
+    const newPrincipal = outstandingBalance - prepaymentAmount;
+    
+    if (newPrincipal <= 0) {
+      this.showToast('Prepayment amount covers entire remaining balance! Loan paid off.', 'success');
+      this.prepaymentResults.classList.remove('hidden');
+      
+      // Display full loan payoff
+      document.getElementById('interest-saved').textContent = 
+        this.formatCurrency(this.state.totalInterest - (this.state.monthlyEMI * prepaymentMonth - this.state.loanAmount));
+      document.getElementById('time-saved').textContent = 
+        `${tenureMonths - prepaymentMonth} months (${Math.floor((tenureMonths - prepaymentMonth) / 12)} years ${(tenureMonths - prepaymentMonth) % 12} months)`;
+      document.getElementById('new-tenure').textContent = 
+        `${Math.floor(prepaymentMonth / 12)} years ${prepaymentMonth % 12} months`;
+      
+      document.getElementById('time-saved-card').classList.remove('hidden');
+      document.getElementById('new-emi-card').classList.add('hidden');
+      
+      return;
+    }
+    
+    let newEMI, newTenure, interestSaved, timeSaved;
+    
+    if (prepaymentOption === 'reduce-tenure') {
+      // Keep EMI same, reduce tenure
+      newEMI = this.state.monthlyEMI;
+      
+      // Calculate new tenure using the EMI formula rearranged for n
+      newTenure = Math.ceil(
+        Math.log(newEMI / (newEMI - newPrincipal * monthlyRate)) / 
+        Math.log(1 + monthlyRate)
+      );
+      
+      const totalNewTenure = prepaymentMonth + newTenure;
+      timeSaved = tenureMonths - totalNewTenure;
+      
+      // Calculate interest without prepayment (from prepayment month onwards)
+      const remainingMonthsOld = tenureMonths - prepaymentMonth;
+      const remainingInterestOld = (this.state.monthlyEMI * remainingMonthsOld) - outstandingBalance;
+      
+      // Calculate interest with prepayment
+      const remainingInterestNew = (newEMI * newTenure) - newPrincipal;
+      
+      interestSaved = remainingInterestOld - remainingInterestNew;
+      
+    } else {
+      // Keep tenure same, reduce EMI
+      const remainingMonths = tenureMonths - prepaymentMonth;
+      
+      // Calculate new EMI using standard EMI formula
+      newEMI = (newPrincipal * monthlyRate * Math.pow(1 + monthlyRate, remainingMonths)) / 
+               (Math.pow(1 + monthlyRate, remainingMonths) - 1);
+      
+      newTenure = tenureMonths; // Tenure stays same
+      timeSaved = 0;
+      
+      // Calculate interest saved
+      const remainingInterestOld = (this.state.monthlyEMI * remainingMonths) - outstandingBalance;
+      const remainingInterestNew = (newEMI * remainingMonths) - newPrincipal;
+      
+      interestSaved = remainingInterestOld - remainingInterestNew;
+    }
+    
+    // Display results
+    this.displayPrepaymentResults({
+      interestSaved,
+      timeSaved,
+      newEMI,
+      newTenure: prepaymentOption === 'reduce-tenure' ? 
+        (prepaymentMonth + newTenure) : tenureMonths,
+      prepaymentOption,
+      prepaymentAmount,
+      prepaymentMonth
+    });
+    
+    this.showToast('Prepayment impact calculated!', 'success');
+  }
+  
+  /**
+   * Display Prepayment Results
+   */
+  displayPrepaymentResults(results) {
+    // Show results section
+    this.prepaymentResults.classList.remove('hidden');
+    
+    // Interest Saved
+    document.getElementById('interest-saved').textContent = 
+      this.formatCurrency(Math.round(results.interestSaved));
+    
+    // Time Saved or New EMI
+    if (results.prepaymentOption === 'reduce-tenure') {
+      document.getElementById('time-saved-card').classList.remove('hidden');
+      document.getElementById('new-emi-card').classList.add('hidden');
+      const years = Math.floor(results.timeSaved / 12);
+      const months = results.timeSaved % 12;
+      document.getElementById('time-saved').textContent = 
+        `${results.timeSaved} months (${years} years ${months} months)`;
+    } else {
+      document.getElementById('time-saved-card').classList.add('hidden');
+      document.getElementById('new-emi-card').classList.remove('hidden');
+      document.getElementById('new-emi-amount').textContent = 
+        this.formatCurrency(Math.round(results.newEMI));
+    }
+    
+    // New Tenure
+    const years = Math.floor(results.newTenure / 12);
+    const months = results.newTenure % 12;
+    document.getElementById('new-tenure').textContent = 
+      `${years} years ${months} months`;
+    
+    // Comparison Table
+    const tenureMonths = this.state.tenure * 12;
+    const comparisonHTML = `
+      <tr class="border-b border-muted-light/10 dark:border-accent-dark/10">
+        <td class="py-2 px-2 text-muted-light dark:text-muted-dark">Total Interest</td>
+        <td class="text-right py-2 px-2 text-text-light dark:text-text-dark">${this.formatCurrency(this.state.totalInterest)}</td>
+        <td class="text-right py-2 px-2 text-text-light dark:text-text-dark">${this.formatCurrency(Math.round(this.state.totalInterest - results.interestSaved))}</td>
+        <td class="text-right py-2 px-2 text-green-600 dark:text-green-400">-${this.formatCurrency(Math.round(results.interestSaved))}</td>
+      </tr>
+      <tr class="border-b border-muted-light/10 dark:border-accent-dark/10">
+        <td class="py-2 px-2 text-muted-light dark:text-muted-dark">Total Amount Paid</td>
+        <td class="text-right py-2 px-2 text-text-light dark:text-text-dark">${this.formatCurrency(this.state.totalAmount)}</td>
+        <td class="text-right py-2 px-2 text-text-light dark:text-text-dark">${this.formatCurrency(Math.round(this.state.totalAmount - results.interestSaved))}</td>
+        <td class="text-right py-2 px-2 text-green-600 dark:text-green-400">-${this.formatCurrency(Math.round(results.interestSaved))}</td>
+      </tr>
+      ${results.prepaymentOption === 'reduce-tenure' ? `
+      <tr>
+        <td class="py-2 px-2 text-muted-light dark:text-muted-dark">Loan Tenure</td>
+        <td class="text-right py-2 px-2 text-text-light dark:text-text-dark">${tenureMonths} months</td>
+        <td class="text-right py-2 px-2 text-text-light dark:text-text-dark">${results.newTenure} months</td>
+        <td class="text-right py-2 px-2 text-green-600 dark:text-green-400">-${results.timeSaved} months</td>
+      </tr>
+      ` : `
+      <tr>
+        <td class="py-2 px-2 text-muted-light dark:text-muted-dark">Monthly EMI</td>
+        <td class="text-right py-2 px-2 text-text-light dark:text-text-dark">${this.formatCurrency(this.state.monthlyEMI)}</td>
+        <td class="text-right py-2 px-2 text-text-light dark:text-text-dark">${this.formatCurrency(Math.round(results.newEMI))}</td>
+        <td class="text-right py-2 px-2 text-green-600 dark:text-green-400">-${this.formatCurrency(Math.round(this.state.monthlyEMI - results.newEMI))}</td>
+      </tr>
+      `}
+    `;
+    
+    document.getElementById('prepayment-comparison').innerHTML = comparisonHTML;
+    
+    // Scroll to results
+    this.prepaymentResults.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  
+  /**
    * Render loan balance chart
    */
   renderChart(originalSchedule, revisedSchedule) {
@@ -691,6 +955,14 @@ class EMICalculator {
     this.interestRateInput.value = '8.5';
     this.loanTenureInput.value = '20';
     
+    // Clear prepayment form
+    if (this.prepaymentAmountNew) {
+      this.prepaymentAmountNew.value = '';
+    }
+    if (this.prepaymentMonthNew) {
+      this.prepaymentMonthNew.value = '12';
+    }
+    
     this.state = {
       ...this.state,
       prepayments: [],
@@ -699,7 +971,10 @@ class EMICalculator {
     };
     
     this.resultsSection.style.display = 'none';
-    this.prepaymentSection.style.display = 'none';
+    this.prepaymentSection.classList.add('hidden');
+    if (this.prepaymentResults) {
+      this.prepaymentResults.classList.add('hidden');
+    }
     this.comparisonSection.style.display = 'none';
     this.chartSection.style.display = 'none';
     this.amortizationSection.style.display = 'none';
@@ -801,5 +1076,17 @@ window.initEmiCalculator = function() {
   window.emiApp = emiApp; // For inline onclick handlers
 };
 
-// Note: EMICalculator is instantiated by router via window.initEmiCalculator
-// Do NOT auto-initialize here as it would run before HTML is loaded
+// Auto-initialize if loaded directly (not via router)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.location.pathname.includes('emi-calculator')) {
+      emiApp = new EMICalculator();
+      window.emiApp = emiApp;
+    }
+  });
+} else {
+  if (window.location.pathname.includes('emi-calculator')) {
+    emiApp = new EMICalculator();
+    window.emiApp = emiApp;
+  }
+}

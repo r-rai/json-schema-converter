@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Inline theme script to prevent FOUC -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('devtoolbox_theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+      document.documentElement.classList.add(theme);
+    })();
+  </script>
+  
+  <meta name="description" content="EMI Calculator - Calculate home loan EMI and model prepayment scenarios">
+  <title>EMI Calculator - DevToolbox</title>
+  
+  <!-- Material Symbols Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  
+  <!-- Shared Styles -->
+  <link rel="stylesheet" href="/shared/css/variables.css">
+  <link rel="stylesheet" href="/shared/css/reset.css">
+  <link rel="stylesheet" href="/shared/css/components.css">
+  <link rel="stylesheet" href="/shared/css/themes.css">
+  <link rel="stylesheet" href="/shared/css/utilities.css">
+  <link rel="stylesheet" href="/shared/css/responsive.css">
+  
+  <!-- Tool-Specific Styles -->
+  <link rel="stylesheet" href="emi-calculator.css">
+  <link rel="stylesheet" href="/shared/css/tool-styles.css">
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <header class="tool-header">
+        <div class="header-content">
+          <h1>🏠 EMI Calculator</h1>
+          <p class="text-secondary">Calculate home loan EMI and optimize prepayment strategies</p>
+        </div>
+        <button data-theme-toggle class="btn btn-ghost theme-toggle" aria-label="Toggle theme">
+          <span class="theme-icon">🌙</span>
+        </button>
+      </header>
+      
+      <main class="tool-main">
+        <!-- Loan Details Form -->
+        <section class="loan-section">
+          <h2>Loan Details</h2>
+          
+          <form id="emi-form" class="emi-form">
+            <!-- Loan Amount -->
+            <div class="form-group">
+              <label for="loan-amount" class="form-label">
+                Loan Amount (₹)
+                <span class="required">*</span>
+              </label>
+              <input 
+                type="number" 
+                id="loan-amount"
+                class="form-input"
+                placeholder="2500000"
+                min="100000"
+                max="100000000"
+                step="100000"
+                value="2500000"
+                required
+                aria-describedby="loan-amount-help"
+              />
+              <small id="loan-amount-help" class="form-help">Minimum: ₹1,00,000 | Maximum: ₹10,00,00,000</small>
+            </div>
+            
+            <!-- Interest Rate -->
+            <div class="form-group">
+              <label for="interest-rate" class="form-label">
+                Annual Interest Rate (%)
+                <span class="required">*</span>
+              </label>
+              <input 
+                type="number" 
+                id="interest-rate"
+                class="form-input"
+                placeholder="8.5"
+                min="1"
+                max="20"
+                step="0.1"
+                value="8.5"
+                required
+                aria-describedby="interest-rate-help"
+              />
+              <small id="interest-rate-help" class="form-help">Current home loan rates: 8-10% p.a.</small>
+            </div>
+            
+            <!-- Loan Tenure -->
+            <div class="form-group">
+              <label for="loan-tenure" class="form-label">
+                Loan Tenure (Years)
+                <span class="required">*</span>
+              </label>
+              <input 
+                type="number" 
+                id="loan-tenure"
+                class="form-input"
+                placeholder="20"
+                min="1"
+                max="30"
+                step="1"
+                value="20"
+                required
+                aria-describedby="loan-tenure-help"
+              />
+              <small id="loan-tenure-help" class="form-help">Typical tenures: 15-20 years</small>
+            </div>
+            
+            <div class="form-actions">
+              <button type="button" id="calculate-btn" class="btn btn-primary btn-large" aria-label="Calculate EMI with provided loan details">
+                Calculate EMI
+              </button>
+              <button type="button" id="reset-btn" class="btn btn-secondary" aria-label="Reset form to default values">
+                Reset
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- EMI Results -->
+        <section id="results-section" class="results-section hidden" role="region" aria-label="EMI calculation results">
+          <h2>EMI Calculation Results</h2>
+          
+          <div class="results-grid" role="status" aria-live="polite">
+            <div class="result-card result-primary">
+              <div class="result-label">Monthly EMI</div>
+              <div class="result-value" id="monthly-emi">₹0</div>
+            </div>
+            
+            <div class="result-card">
+              <div class="result-label">Total Interest Payable</div>
+              <div class="result-value" id="total-interest">₹0</div>
+            </div>
+            
+            <div class="result-card">
+              <div class="result-label">Total Amount Payable</div>
+              <div class="result-value" id="total-amount">₹0</div>
+            </div>
+            
+            <div class="result-card">
+              <div class="result-label">Loan Amount</div>
+              <div class="result-value" id="principal-amount">₹0</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Prepayment Section -->
+        <section id="prepayment-section" class="prepayment-section hidden">
+          <div class="section-header">
+            <h2>Prepayment Modeling</h2>
+            <button id="toggle-prepayment-btn" class="btn btn-ghost btn-sm">
+              <span>+ Add Prepayment</span>
+            </button>
+          </div>
+          
+          <div id="prepayment-form-container" class="hidden">
+            <form id="prepayment-form" class="prepayment-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="prepayment-type" class="form-label">Prepayment Type</label>
+                  <select id="prepayment-type" class="form-input">
+                    <option value="lumpsum">One-time Lumpsum</option>
+                    <option value="monthly">Recurring Monthly</option>
+                    <option value="annual">Recurring Annual</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label for="prepayment-amount" class="form-label">Amount (₹)</label>
+                  <input 
+                    type="number" 
+                    id="prepayment-amount"
+                    class="form-input"
+                    placeholder="100000"
+                    min="1000"
+                    step="1000"
+                  />
+                </div>
+                
+                <div class="form-group">
+                  <label for="prepayment-start" class="form-label">Start (Month/Year)</label>
+                  <input 
+                    type="number" 
+                    id="prepayment-start"
+                    class="form-input"
+                    placeholder="12"
+                    min="1"
+                    value="12"
+                  />
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Prepayment Option</label>
+                <div class="radio-group">
+                  <label class="radio-label">
+                    <input type="radio" name="prepayment-option" value="reduce-tenure" checked>
+                    <span>Reduce Tenure</span>
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="prepayment-option" value="reduce-emi">
+                    <span>Reduce EMI</span>
+                  </label>
+                </div>
+              </div>
+              
+              <div class="form-actions">
+                <button type="button" id="add-prepayment-btn" class="btn btn-primary" aria-label="Add prepayment to calculation">
+                  Add Prepayment
+                </button>
+                <button type="button" id="cancel-prepayment-btn" class="btn btn-ghost" aria-label="Cancel prepayment entry">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+          
+          <!-- Prepayment List -->
+          <div id="prepayment-list" class="prepayment-list"></div>
+          
+          <!-- Recalculate Button -->
+          <div id="recalculate-container" class="hidden">
+            <button id="recalculate-btn" class="btn btn-primary btn-large" aria-label="Recalculate EMI with prepayments">
+              Calculate with Prepayments
+            </button>
+          </div>
+        </section>
+
+        <!-- Comparison Section -->
+        <section id="comparison-section" class="comparison-section hidden" role="region" aria-label="Loan comparison with and without prepayments">
+          <h2>Original vs Revised Comparison</h2>
+          
+          <div class="comparison-grid" role="status" aria-live="polite">
+            <div class="comparison-card">
+              <h3>Original Loan</h3>
+              <div class="comparison-item">
+                <span class="comparison-label">Monthly EMI</span>
+                <span class="comparison-value" id="original-emi">₹0</span>
+              </div>
+              <div class="comparison-item">
+                <span class="comparison-label">Tenure</span>
+                <span class="comparison-value" id="original-tenure">0 years</span>
+              </div>
+              <div class="comparison-item">
+                <span class="comparison-label">Total Interest</span>
+                <span class="comparison-value" id="original-interest">₹0</span>
+              </div>
+            </div>
+            
+            <div class="comparison-card comparison-revised">
+              <h3>Revised Loan</h3>
+              <div class="comparison-item">
+                <span class="comparison-label">Monthly EMI</span>
+                <span class="comparison-value" id="revised-emi">₹0</span>
+              </div>
+              <div class="comparison-item">
+                <span class="comparison-label">Tenure</span>
+                <span class="comparison-value" id="revised-tenure">0 years</span>
+              </div>
+              <div class="comparison-item">
+                <span class="comparison-label">Total Interest</span>
+                <span class="comparison-value" id="revised-interest">₹0</span>
+              </div>
+            </div>
+            
+            <div class="comparison-card comparison-savings">
+              <h3>Your Savings 💰</h3>
+              <div class="comparison-item">
+                <span class="comparison-label">Interest Saved</span>
+                <span class="comparison-value savings-amount" id="interest-saved">₹0</span>
+              </div>
+              <div class="comparison-item">
+                <span class="comparison-label">Tenure Reduced</span>
+                <span class="comparison-value" id="tenure-reduced">0 months</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Chart Section -->
+        <section id="chart-section" class="chart-section hidden" role="region" aria-label="Loan balance visualization">
+          <h2>Loan Balance Over Time</h2>
+          <div class="chart-container">
+            <canvas id="loan-chart" aria-label="Chart showing loan balance declining over time" role="img"></canvas>
+          </div>
+        </section>
+
+        <!-- Amortization Table -->
+        <section id="amortization-section" class="amortization-section hidden">
+          <div class="section-header">
+            <h2>Year-wise Amortization Schedule</h2>
+            <div class="button-group">
+              <button id="copy-table-btn" class="btn btn-secondary btn-sm">
+                📋 Copy Table
+              </button>
+              <button id="export-csv-btn" class="btn btn-secondary btn-sm">
+                📥 Export CSV
+              </button>
+            </div>
+          </div>
+          
+          <div class="table-wrapper">
+            <table id="amortization-table" class="amortization-table">
+              <thead>
+                <tr>
+                  <th>Year</th>
+                  <th>Opening Balance</th>
+                  <th>EMI Paid</th>
+                  <th>Principal Paid</th>
+                  <th>Interest Paid</th>
+                  <th>Prepayment</th>
+                  <th>Closing Balance</th>
+                </tr>
+              </thead>
+              <tbody id="amortization-tbody">
+                <!-- Populated by JavaScript -->
+              </tbody>
+              <tfoot id="amortization-tfoot">
+                <!-- Totals populated by JavaScript -->
+              </tfoot>
+            </table>
+          </div>
+        </section>
+      </main>
+
+      <footer class="tool-footer">
+        <div class="footer-content">
+          <p>&copy; 2026 DevToolbox. All calculations are performed locally in your browser.</p>
+          <a href="/" class="btn btn-ghost btn-sm">🏠 Back to Home</a>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <script type="module">
+    import { ThemeManager } from '/shared/js/theme.js';
+    ThemeManager.init();
+  </script>
+</body>
+</html>

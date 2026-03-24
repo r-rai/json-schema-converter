@@ -79,6 +79,9 @@ function attachEventListeners() {
   elements.form.addEventListener('reset', handleFormReset);
   elements.copyResultsBtn.addEventListener('click', handleCopyResults);
   elements.downloadCsvBtn.addEventListener('click', handleDownloadCSV);
+  
+  // Initialize help modal
+  initHelpModal();
 }
 
 /**
@@ -654,6 +657,50 @@ function showSuccessToast(message) {
 function showErrorToast(message) {
   console.error('✕', message);
   // Could add a toast notification UI here
+}
+
+/**
+ * Initialize Help Modal
+ */
+function initHelpModal() {
+  const helpBtn = document.getElementById('help-btn');
+  const helpModal = document.getElementById('help-modal');
+  const helpClose = document.getElementById('help-close');
+  const helpOk = document.getElementById('help-ok');
+  
+  if (!helpBtn || !helpModal) return;
+  
+  // Open modal
+  helpBtn.addEventListener('click', () => {
+    helpModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    helpClose.focus();
+  });
+  
+  // Close modal functions
+  const closeModal = () => {
+    helpModal.classList.add('hidden');
+    document.body.style.overflow = '';
+    helpBtn.focus();
+  };
+  
+  // Close button
+  helpClose.addEventListener('click', closeModal);
+  helpOk.addEventListener('click', closeModal);
+  
+  // ESC key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !helpModal.classList.contains('hidden')) {
+      closeModal();
+    }
+  });
+  
+  // Click outside
+  helpModal.addEventListener('click', (e) => {
+    if (e.target === helpModal) {
+      closeModal();
+    }
+  });
 }
 
 // Export initialization function for router

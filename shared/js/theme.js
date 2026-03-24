@@ -59,8 +59,14 @@ export const ThemeManager = {
       theme = this.THEMES.DARK;
     }
     
-    // Apply theme to DOM
-    document.documentElement.setAttribute('data-theme', theme);
+    // Apply theme to DOM using class-based approach
+    if (theme === this.THEMES.DARK) {
+      document.documentElement.classList.remove(this.THEMES.LIGHT);
+      document.documentElement.classList.add(this.THEMES.DARK);
+    } else {
+      document.documentElement.classList.remove(this.THEMES.DARK);
+      document.documentElement.classList.add(this.THEMES.LIGHT);
+    }
     
     // Update toggle button icon if it exists
     this.updateToggleButton(theme);
@@ -93,7 +99,12 @@ export const ThemeManager = {
    * @returns {string} Current theme ('dark' or 'light')
    */
   getCurrentTheme() {
-    return document.documentElement.getAttribute('data-theme') || this.THEMES.DARK;
+    if (document.documentElement.classList.contains(this.THEMES.DARK)) {
+      return this.THEMES.DARK;
+    } else if (document.documentElement.classList.contains(this.THEMES.LIGHT)) {
+      return this.THEMES.LIGHT;
+    }
+    return this.THEMES.DARK; // Default to dark
   },
   
   /**

@@ -19,9 +19,9 @@
 ## Architecture at a Glance
 
 ### Deployment Model
-- **Type:** Static Single-Page Application (SPA)
+- **Type:** Multi-Page Static Application (Standalone Pages)
 - **Hosting:** Cloudflare Pages
-- **Bundle:** Single HTML file (index.html) with embedded CSS and JavaScript
+- **Bundle:** Homepage + 5 separate tool pages with shared CSS/JS modules
 - **Dependencies:** Zero backend, all computation client-side
 - **Distribution:** Global CDN via Cloudflare Edge Network
 
@@ -48,42 +48,54 @@ External Libraries (CDN, lazy-loaded):
 │  ┌─────────────────────────────────────────────────┐ │
 │  │           DevToolbox Application                 │ │
 │  │                                                  │ │
-│  │  Navigation Layer (Hash-based Router)           │ │
+│  │  Multi-Page Navigation (Direct URLs)            │ │
 │  │        ↓                                         │ │
-│  │  ┌─────────┬─────────┬─────────┬─────────┐      │ │
-│  │  │  JSON   │   SIP   │   HTML  │  Diff   │      │ │
-│  │  │ Schema  │  Calc   │   ↔ MD  │ Checker │      │ │
-│  │  └─────────┴─────────┴─────────┴─────────┘      │ │
+│  │  ┌─────────┬─────────┬─────────┬─────────┬────┐ │ │
+│  │  │  JSON   │   HTML  │  Text   │   SIP   │EMI │ │ │
+│  │  │ Schema  │   ↔ MD  │  Diff   │  Calc   │Calc│ │ │
+│  │  │ /tools/ │ /tools/ │ /tools/ │ /tools/ │/to-│ │ │
+│  │  │   json- │  html-  │  text-  │   sip-  │ols/│ │ │
+│  │  │  schema │markdown │  diff   │calculat-│emi-│ │ │
+│  │  │         │         │         │    or   │calc│ │ │
+│  │  └─────────┴─────────┴─────────┴─────────┴────┘ │ │
 │  │                                                  │ │
-│  │  Design System (CSS Variables, Components)      │ │
-│  │  State Management (localStorage for theme/prefs)│ │
+│  │  Shared Resources:                               │ │
+│  │  ├── Heritage Design System (CSS)                │ │
+│  │  ├── Search Modal (Ctrl+K global shortcuts)      │ │
+│  │  ├── Theme Management (localStorage)             │ │
+│  │  └── Help System (contextual modals)             │ │
 │  └─────────────────────────────────────────────────┘ │
 └──────────────────────────────────────────────────────┘
 ```
 
 ### Key Architectural Decisions
 
-**Decision 1: Single-File Architecture**
-- **Rationale:** Simplifies deployment, maximizes performance (single HTTP request)
-- **Trade-off:** Larger initial bundle (~150KB) vs no subsequent requests
-- **Status:** Validated via 96 Lighthouse score, <1s load time
+**Decision 1: Multi-Page Architecture (Updated v2.0)**
+- **Rationale:** Simpler deployment, better separation of concerns, no routing complexity
+- **Trade-off:** Multiple HTTP requests vs cleaner code structure and direct URL access
+- **Status:** Successfully migrated from SPA; each tool is now a standalone page
 
-**Decision 2: No Framework/Library**
+**Decision 2: Shared Design System**
+- **Rationale:** Consistent UX across all tools, centralized theme management
+- **Trade-off:** Must import shared CSS/JS on every page vs code reusability
+- **Status:** Heritage Evolution Design System implemented, 100% consistent
+
+**Decision 3: No Framework/Library**
 - **Rationale:** Reduces bundle size, eliminates version dependencies, maximizes control
 - **Trade-off:** More manual DOM manipulation vs framework abstractions
 - **Status:** Successful, maintenance burden remains low
 
-**Decision 3: Template-Based Tool Rendering**
-- **Rationale:** Each tool is self-contained HTML template activated on route
-- **Trade-off:** Some code duplication vs cleaner separation
-- **Status:** Scales well to 5 tools, no performance issues
+**Decision 4: Auto-Initialization Pattern**
+- **Rationale:** Tools initialize on direct page load without router dependency
+- **Trade-off:** Small initialization code per tool vs guaranteed functionality
+- **Status:** Implemented post-Heritage migration, all tools now standalone-ready
 
-**Decision 4: Hash-Based Routing**
-- **Rationale:** No server-side routing needed, works on static hosting
-- **Trade-off:** URLs less clean (#json vs /json) vs zero config
-- **Status:** User-accepted, no SEO requirements for tools
+**Decision 5: Global Search (Ctrl+K)**
+- **Rationale:** Fast tool access, better discoverability, keyboard-first navigation
+- **Trade-off:** ~6KB additional JS + modal HTML vs improved UX
+- **Status:** Implemented v2.0, works across all pages with keyboard shortcuts
 
-**Decision 5: Lazy-Load External Libraries**
+**Decision 6: Lazy-Load External Libraries**
 - **Rationale:** Charts/diff only needed for specific tools
 - **Trade-off:** Small delay on first tool use vs 40% smaller initial bundle
 - **Status:** Optimal - most users don't use all tools in a session
@@ -93,23 +105,70 @@ External Libraries (CDN, lazy-loaded):
 ## Component Architecture
 
 ### Global Components
-- **Header:** Navigation, theme toggle, search modal
-- **Recent Apps Bar:** Quick access to last 5 used tools
-- **Home Page:** Tool grid/dashboard
-- **Search Modal:** Fuzzy tool search (Ctrl+K)
-- **Theme System:** Dark/light mode with localStorage persistence
+- **Header:** Navigation with logo, search button, theme toggle
+- **Search Modal:** Global search (Ctrl+K or "/") with real-time filtering, keyboard navigation
+- **Help System:** Contextual help modals on all 5 tools with usage instructions
+- **Home Page:** Tool card grid with descriptions and direct links
+- **Theme System:** Dark/light mode (Heritage Evolution design) with localStorage persistence
 
 ### Tool Components
 Each tool follows this pattern:
 ```
-<div id="tool-{name}" class="tool-container">
-  <div class="tool-header">...</div>
-  <div class="tool-content">
-    <!-- Tool-specific UI -->
-  </div>
-  <div class="action-buttons">...</div>
-</div>
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Heritage Design System CSS -->
+  <link rel="stylesheet" href="/shared/css/heritage-design-system.css">
+  <link rel="stylesheet" href="/shared/css/utilities.css">
+  <link rel="stylesheet" href="/shared/css/themes.css">
+  <!-- Material Symbols -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="/">Logo</a>
+      <div>
+        <button id="search-btn">🔍</button>
+        <button id="theme-toggle">🌙</button>
+      </div>
+    </nav>
+  </header>
+  
+  <main>
+    <!-- Compact hero section (py-3) -->
+    <section class="hero">
+      <h1>Tool Name</h1>
+      <p>Description</p>
+      <button id="help-btn">Help Icon</button>
+    </section>
+    
+    <!-- Tool-specific interface -->
+    <section class="tool-interface">
+      <!-- Input, buttons, output -->
+    </section>
+  </main>
+  
+  <!-- Help Modal -->
+  <div id="help-modal" class="hidden">...</div>
+  
+  <!-- Search Modal -->
+  <div id="search-modal" class="hidden">...</div>
+  
+  <!-- Scripts -->
+  <script src="/shared/js/theme-toggle.js"></script>
+  <script src="/shared/js/search.js"></script>
+  <script src="tool-specific.js"></script>
+</body>
+</html>
 ```
+
+**Tool-Specific Features:**
+- **JSON Schema:** Dynamic layout (single → split view), multiple validation modes
+- **HTML/Markdown:** Bidirectional conversion with DOMPurify sanitization
+- **Text Diff:** Line-by-line comparison with highlighting
+- **SIP Calculator:** Investment growth chart with Chart.js
+- **EMI Calculator:** Amortization schedule + prepayment calculator (reduce tenure/EMI)
 
 ### Design System
 - **Tokens:** 50+ CSS custom properties (colors, spacing, typography, shadows)
@@ -123,25 +182,44 @@ Each tool follows this pattern:
 
 ### User Interaction Flow
 ```
-User Action (click, input)
+User Action (click, input, keyboard shortcut)
     ↓
-Event Handler (onclick, oninput)
+Event Handler (onclick, oninput, onkeydown)
     ↓
 Business Logic (calculation, validation, conversion)
     ↓
 DOM Update (innerHTML, textContent, classList)
     ↓
-Visual Feedback (toast, result panel, animation)
+Visual Feedback (toast, result panel, modal, animation)
+```
+
+### Navigation Flow
+```
+Homepage (/)
+    ↓
+User searches (Ctrl+K) or clicks tool card
+    ↓
+Navigate to tool page (/tools/tool-name/)
+    ↓
+Tool auto-initializes (DOMContentLoaded)
+    ↓
+User interacts with tool
+    ↓
+Can search (Ctrl+K) to switch to another tool
 ```
 
 ### State Management
 ```
 Application State:
-├── Theme: localStorage → document.documentElement[data-theme]
-├── Recent Apps: localStorage → rendered in header bar
-└── Tool State: In-memory (lost on navigation/reload)
+├── Theme: localStorage → document.documentElement.classList ('dark'/'light')
+├── Tool State: In-memory per page (lost on navigation)
+└── No global state - each tool manages own state independently
 
-No global state management library - each tool manages own state.
+Search State:
+├── Modal open/closed: DOM class manipulation
+├── Search query: Input value (not persisted)
+├── Selected result: Index in results array
+└── Tool database: Static array in search.js
 ```
 
 ---

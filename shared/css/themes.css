@@ -1,46 +1,60 @@
 /**
- * Theme System - Light Theme Overrides
- * CSS custom property overrides for light theme
+ * Theme System - Light Theme Overrides & Custom Theme Classes
+ * CSS custom property overrides for light theme (Heritage Evolution Design)
  * 
  * @file shared/css/themes.css
  * 
  * Dark theme is default (defined in variables.css)
- * Light theme overrides specific variables when [data-theme="light"] is set on <html>
+ * Light theme overrides specific variables when .light class is set on <html>
  */
 
 /* ========================================
-   LIGHT THEME
+   LIGHT THEME - INDIC FUTURISM
    ======================================== */
 
-[data-theme="light"] {
-  /* Background Colors */
-  --color-bg-primary: #ffffff;
-  --color-bg-secondary: #f8fafc;      /* Light gray */
-  --color-bg-tertiary: #e2e8f0;       /* Slightly darker gray */
+.light {
+  /* Background Colors - Light Theme */
+  --color-bg-primary: #FDFBF7;        /* Warm off-white */
+  --color-bg-secondary: #F4EFE6;      /* Surface light */
+  --color-bg-tertiary: #e2e8f0;       /* Slightly darker */
   
-  /* Text Colors */
-  --color-text-primary: #0f172a;      /* Dark blue-gray */
+  /* Background alias for utilities */
+  --color-background: #FDFBF7;
+  --color-background-light: #FDFBF7;
+  --color-surface: #F4EFE6;
+  --color-surface-light: #F4EFE6;
+  
+  /* Text Colors - Light Theme */
+  --color-text-primary: #2D2A26;      /* Dark brown */
   --color-text-secondary: #475569;    /* Medium gray */
-  --color-text-muted: #64748b;        /* Light gray */
+  --color-text-muted: #9C9283;        /* Muted light */
   
-  /* Brand & Accent Colors */
-  --color-accent: #0284c7;            /* Darker sky blue for better contrast */
-  --color-accent-hover: #0369a1;      /* Even darker on hover */
-  --color-accent-light: rgba(2, 132, 199, 0.1);
+  /* Text alias for utilities */
+  --color-text-light: #2D2A26;        /* For light mode */
+  --color-text-dark: #E8E9F3;         /* Keep for dark utilities */
+  --color-muted-light: #9C9283;
   
-  /* Semantic Colors - slightly adjusted for light backgrounds */
-  --color-success: #16a34a;           /* Darker green */
+  /* Brand & Accent Colors - Light Theme (Indic Futurism) */
+  --color-primary: #C84B31;           /* Terracotta */
+  --color-primary-dark: #FF6B35;      /* Keep for dark utilities */
+  --color-accent: #E3A857;            /* Honey gold */
+  --color-accent-light: #E3A857;
+  --color-accent-dark: #00F0FF;       /* Keep for dark utilities */
+  --color-accent-hover: #C84B31;
+  
+  /* Semantic Colors - adjusted for light backgrounds */
+  --color-success: #16a34a;
   --color-success-bg: rgba(22, 163, 74, 0.1);
-  --color-error: #dc2626;             /* Darker red */
+  --color-error: #dc2626;
   --color-error-bg: rgba(220, 38, 38, 0.1);
-  --color-warning: #ea580c;           /* Darker orange */
+  --color-warning: #ea580c;
   --color-warning-bg: rgba(234, 88, 12, 0.1);
-  --color-info: #2563eb;              /* Darker blue */
+  --color-info: #2563eb;
   --color-info-bg: rgba(37, 99, 235, 0.1);
   
   /* Border Colors */
-  --color-border: #cbd5e1;            /* Light border */
-  --color-border-light: #e2e8f0;      /* Even lighter border */
+  --color-border: #cbd5e1;
+  --color-border-light: #e2e8f0;
   
   /* Shadows - lighter for light theme */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
@@ -56,37 +70,37 @@
    ======================================== */
 
 /* Code blocks in light theme */
-[data-theme="light"] pre {
+.light pre {
   background-color: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
 }
 
-[data-theme="light"] code {
+.light code {
   background-color: var(--color-bg-tertiary);
 }
 
 /* Input focus in light theme - subtler glow */
-[data-theme="light"] input:focus,
-[data-theme="light"] select:focus,
-[data-theme="light"] textarea:focus {
+.light input:focus,
+.light select:focus,
+.light textarea:focus {
   box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
 }
 
 /* Scrollbar in light theme */
-[data-theme="light"] ::-webkit-scrollbar-track {
+.light ::-webkit-scrollbar-track {
   background: var(--color-bg-secondary);
 }
 
-[data-theme="light"] ::-webkit-scrollbar-thumb {
+.light ::-webkit-scrollbar-thumb {
   background: var(--color-border);
 }
 
-[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+.light ::-webkit-scrollbar-thumb:hover {
   background: var(--color-text-muted);
 }
 
 /* Selection in light theme */
-[data-theme="light"] ::selection {
+.light ::selection {
   background-color: var(--color-accent);
   color: white;
 }
@@ -96,13 +110,56 @@
    Smooth transition when switching themes
    ======================================== */
 
-html[data-theme-transition] {
+html.transition-theme {
   transition: background-color var(--duration-slow) var(--easing),
               color var(--duration-slow) var(--easing);
 }
 
-html[data-theme-transition] * {
+html.transition-theme * {
   transition: background-color var(--duration-slow) var(--easing),
               color var(--duration-slow) var(--easing),
               border-color var(--duration-slow) var(--easing);
 }
+
+/* ========================================
+   HERITAGE EVOLUTION CUSTOM THEME CLASSES
+   Auto-adapting visual effects for dual themes
+   ======================================== */
+
+/* Theme Image Radius - Arch in light, Sharp in dark */
+.theme-image-radius {
+  border-radius: 4px; /* Default (dark mode) */
+}
+
+.light .theme-image-radius {
+  border-radius: 200px 200px 0 0; /* Arch shape in light mode */
+}
+
+/* Theme Border - Invisible in light, Cyan glow in dark */
+.theme-border {
+  border: 1px solid rgba(0, 240, 255, 0.2); /* Default (dark mode) */
+}
+
+.light .theme-border {
+  border: 1px solid transparent; /* Invisible in light mode */
+}
+
+/* Theme Shadow - Neon glow in dark, Drop shadow in light */
+.theme-shadow {
+  box-shadow: 0 0 15px rgba(255, 107, 53, 0.4); /* Default (dark mode) */
+}
+
+.light .theme-shadow {
+  box-shadow: 0 8px 30px rgba(200, 75, 49, 0.08); /* Soft drop shadow in light */
+}
+
+/* Theme Shadow Hover - Enhanced effects on hover */
+.theme-shadow-hover:hover {
+  box-shadow: 0 0 25px rgba(255, 107, 53, 0.6); /* Default (dark mode) */
+  border-color: #00F0FF; /* Cyan border glow */
+}
+
+.light .theme-shadow-hover:hover {
+  box-shadow: 0 12px 40px rgba(200, 75, 49, 0.15); /* Enhanced drop shadow */
+}
+

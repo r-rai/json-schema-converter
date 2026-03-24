@@ -106,6 +106,53 @@ class DiffApp {
     this.copyDiffBtn.addEventListener('click', () => this.copyDiff());
     this.downloadHtmlBtn.addEventListener('click', () => this.downloadHtml());
     this.downloadTextBtn.addEventListener('click', () => this.downloadText());
+    
+    // Initialize help modal
+    this.initHelpModal();
+  }
+  
+  /**
+   * Initialize Help Modal
+   */
+  initHelpModal() {
+    const helpBtn = document.getElementById('help-btn');
+    const helpModal = document.getElementById('help-modal');
+    const helpClose = document.getElementById('help-close');
+    const helpOk = document.getElementById('help-ok');
+    
+    if (!helpBtn || !helpModal) return;
+    
+    // Open modal
+    helpBtn.addEventListener('click', () => {
+      helpModal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      helpClose.focus();
+    });
+    
+    // Close modal functions
+    const closeModal = () => {
+      helpModal.classList.add('hidden');
+      document.body.style.overflow = '';
+      helpBtn.focus();
+    };
+    
+    // Close button
+    helpClose.addEventListener('click', closeModal);
+    helpOk.addEventListener('click', closeModal);
+    
+    // ESC key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !helpModal.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
+    
+    // Click outside
+    helpModal.addEventListener('click', (e) => {
+      if (e.target === helpModal) {
+        closeModal();
+      }
+    });
   }
   
   /**
@@ -612,5 +659,15 @@ window.initTextDiff = function() {
   new DiffApp();
 };
 
-// Note: DiffApp is instantiated by router via window.initTextDiff
-// Do NOT auto-initialize here as it would run before HTML is loaded
+// Auto-initialize if loaded directly (not via router)
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    if (window.location.pathname.includes('text-diff')) {
+      new DiffApp();
+    }
+  });
+} else {
+  if (window.location.pathname.includes('text-diff')) {
+    new DiffApp();
+  }
+}

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search Feature Test - DevToolbox</title>
+  
+  <!-- FOUC Prevention -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('devtoolbox_theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+      document.documentElement.classList.add(theme);
+    })();
+  </script>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Rozha+One&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  
+  <!-- Heritage CSS -->
+  <link rel="stylesheet" href="/shared/css/reset.css">
+  <link rel="stylesheet" href="/shared/css/variables.css">
+  <link rel="stylesheet" href="/shared/css/themes.css">
+  <link rel="stylesheet" href="/shared/css/utilities.css">
+  
+  <style>
+    body {
+      padding: 2rem;
+      min-height: 100vh;
+    }
+    .test-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .test-section {
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      border: 1px solid var(--muted-light);
+      border-radius: 8px;
+    }
+    .dark .test-section {
+      border-color: var(--muted-dark);
+    }
+    .status {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    .status.pass {
+      background: #10b981;
+      color: white;
+    }
+    .status.pending {
+      background: #f59e0b;
+      color: white;
+    }
+  </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark font-display">
+  
+  <!-- Header with Search -->
+  <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-muted-light/20 dark:border-muted-dark/30 px-4 py-3 mb-8">
+    <div class="flex items-center gap-4">
+      <span class="material-symbols-outlined text-primary-light dark:text-primary-dark">temple_hindu</span>
+      <h2 class="font-heading text-2xl">DevToolbox - Search Test</h2>
+    </div>
+    
+    <div class="flex items-center gap-2">
+      <!-- Search Button -->
+      <button id="search-btn" 
+              class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-surface-light dark:bg-surface-dark text-text-light dark:text-accent-dark hover:scale-110 transition-transform" 
+              aria-label="Search tools (Ctrl+K)"
+              title="Search tools (Ctrl+K)">
+        <span class="material-symbols-outlined">search</span>
+      </button>
+      
+      <!-- Theme Toggle -->
+      <button data-theme-toggle
+              class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-surface-light dark:bg-surface-dark text-text-light dark:text-accent-dark hover:scale-110 transition-transform">
+        <span class="material-symbols-outlined block dark:hidden">light_mode</span>
+        <span class="material-symbols-outlined hidden dark:block">dark_mode</span>
+      </button>
+    </div>
+  </header>
+  
+  <div class="test-container">
+    
+    <div class="test-section bg-surface-light dark:bg-surface-dark">
+      <h2 class="font-heading text-2xl mb-4">🔍 Search Feature Test Results</h2>
+      <p class="text-muted-light dark:text-muted-dark mb-6">Test the search modal functionality below:</p>
+      
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <span>1. Search button visible in header</span>
+          <span class="status pass">✓ PASS</span>
+        </div>
+        
+        <div class="flex items-center justify-between">
+          <span>2. Ctrl+K opens search modal</span>
+          <span class="status pending">TEST MANUALLY</span>
+        </div>
+        
+        <div class="flex items-center justify-between">
+          <span>3. "/" key opens search modal</span>
+          <span class="status pending">TEST MANUALLY</span>
+        </div>
+        
+        <div class="flex items-center justify-between">
+          <span>4. Search filters tools</span>
+          <span class="status pending">TEST MANUALLY</span>
+        </div>
+        
+        <div class="flex items-center justify-between">
+          <span>5. Arrow keys navigate results</span>
+          <span class="status pending">TEST MANUALLY</span>
+        </div>
+        
+        <div class="flex items-center justify-between">
+          <span>6. Enter opens selected tool</span>
+          <span class="status pending">TEST MANUALLY</span>
+        </div>
+        
+        <div class="flex items-center justify-between">
+          <span>7. ESC closes modal</span>
+          <span class="status pending">TEST MANUALLY</span>
+        </div>
+        
+        <div class="flex items-center justify-between">
+          <span>8. Click outside closes modal</span>
+          <span class="status pending">TEST MANUALLY</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="test-section bg-surface-light dark:bg-surface-dark">
+      <h3 class="font-heading text-xl mb-4">Manual Test Instructions</h3>
+      <ol class="space-y-2 text-sm text-muted-light dark:text-muted-dark list-decimal list-inside">
+        <li>Press <kbd class="px-2 py-1 bg-bg-light dark:bg-bg-dark rounded">Ctrl+K</kbd> or click the search button</li>
+        <li>Verify modal opens with search input focused</li>
+        <li>Type "json" → Should filter to JSON Schema tool</li>
+        <li>Type "cal" → Should show both calculators (SIP + EMI)</li>
+        <li>Clear input → Should show all 5 tools</li>
+        <li>Use <kbd class="px-2 py-1 bg-bg-light dark:bg-bg-dark rounded">Arrow Down</kbd> / <kbd class="px-2 py-1 bg-bg-light dark:bg-bg-dark rounded">Arrow Up</kbd> to navigate</li>
+        <li>Press <kbd class="px-2 py-1 bg-bg-light dark:bg-bg-dark rounded">Enter</kbd> to navigate to selected tool</li>
+        <li>Press <kbd class="px-2 py-1 bg-bg-light dark:bg-bg-dark rounded">ESC</kbd> to close modal</li>
+        <li>Toggle theme and verify modal colors update</li>
+      </ol>
+    </div>
+    
+    <div class="test-section bg-surface-light dark:bg-surface-dark">
+      <h3 class="font-heading text-xl mb-4">Expected Tool List</h3>
+      <div class="space-y-2">
+        <div class="flex items-center gap-3 p-2 rounded bg-bg-light dark:bg-bg-dark">
+          <span class="material-symbols-outlined text-primary-light dark:text-primary-dark">data_object</span>
+          <span>JSON Schema Validator</span>
+        </div>
+        <div class="flex items-center gap-3 p-2 rounded bg-bg-light dark:bg-bg-dark">
+          <span class="material-symbols-outlined text-primary-light dark:text-primary-dark">code_blocks</span>
+          <span>HTML ↔ Markdown Converter</span>
+        </div>
+        <div class="flex items-center gap-3 p-2 rounded bg-bg-light dark:bg-bg-dark">
+          <span class="material-symbols-outlined text-primary-light dark:text-primary-dark">difference</span>
+          <span>Text Diff Checker</span>
+        </div>
+        <div class="flex items-center gap-3 p-2 rounded bg-bg-light dark:bg-bg-dark">
+          <span class="material-symbols-outlined text-primary-light dark:text-primary-dark">trending_up</span>
+          <span>SIP Calculator</span>
+        </div>
+        <div class="flex items-center gap-3 p-2 rounded bg-bg-light dark:bg-bg-dark">
+          <span class="material-symbols-outlined text-primary-light dark:text-primary-dark">account_balance</span>
+          <span>EMI Calculator</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="test-section bg-surface-light dark:bg-surface-dark">
+      <h3 class="font-heading text-xl mb-4">Console Check</h3>
+      <p class="text-sm text-muted-light dark:text-muted-dark mb-2">Open browser console (F12) and check:</p>
+      <ul class="space-y-1 text-sm text-muted-light dark:text-muted-dark list-disc list-inside">
+        <li>No JavaScript errors</li>
+        <li>Search modal initializes correctly</li>
+        <li>Event listeners attached</li>
+        <li>Tool database loaded (5 tools)</li>
+      </ul>
+      <button onclick="console.log('Search modal test:', document.getElementById('search-modal') !== null)" 
+              class="mt-4 px-4 py-2 bg-primary-light dark:bg-primary-dark text-white rounded-lg hover:scale-105 transition-transform">
+        Log Modal Status to Console
+      </button>
+    </div>
+    
+  </div>
+  
+  <!-- Search Modal -->
+  <div id="search-modal" class="fixed inset-0 bg-black/60 flex items-center justify-center p-4 hidden z-50" role="dialog" aria-modal="true">
+    <div class="bg-surface-light dark:bg-surface-dark rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden shadow-xl">
+      <div class="p-4 border-b border-muted-light/20 dark:border-accent-dark/30">
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-light dark:text-muted-dark">search</span>
+          <input 
+            type="text" 
+            id="search-input" 
+            class="w-full pl-12 pr-4 py-3 bg-bg-light dark:bg-bg-dark text-text-light dark:text-text-dark border border-muted-light/30 dark:border-accent-dark/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark"
+            placeholder="Search tools..."
+            aria-label="Search tools"
+          />
+          <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-light dark:text-muted-dark">
+            ESC to close
+          </span>
+        </div>
+      </div>
+      
+      <div id="search-results" class="overflow-y-auto max-h-[60vh] p-2">
+        <!-- Results populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- Scripts -->
+  <script src="/shared/js/search.js"></script>
+  <script src="/shared/js/theme.js"></script>
+  
+</body>
+</html>

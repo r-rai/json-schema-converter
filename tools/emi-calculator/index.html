@@ -3,327 +3,645 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="EMI Calculator - Calculate home loan EMI and model prepayment scenarios">
+  
+  <!-- FOUC Prevention Script - MUST BE FIRST -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('devtoolbox_theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+      document.documentElement.classList.add(theme);
+    })();
+  </script>
+  
+  <meta name="description" content="Calculate home loan EMI and optimize prepayment strategies">
   <title>EMI Calculator - DevToolbox</title>
   
-  <!-- Shared Styles -->
-  <link rel="stylesheet" href="/shared/css/variables.css">
+  <!-- Preconnect to Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Fonts: Rozha One, Plus Jakarta Sans, Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Rozha+One&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  
+  <!-- Heritage Design System CSS -->
   <link rel="stylesheet" href="/shared/css/reset.css">
-  <link rel="stylesheet" href="/shared/css/components.css">
+  <link rel="stylesheet" href="/shared/css/variables.css">
   <link rel="stylesheet" href="/shared/css/themes.css">
   <link rel="stylesheet" href="/shared/css/utilities.css">
-  <link rel="stylesheet" href="/shared/css/responsive.css">
+  <link rel="stylesheet" href="./emi-calculator.css">
   
-  <!-- Tool-Specific Styles -->
-  <link rel="stylesheet" href="emi-calculator.css">
-  <link rel="stylesheet" href="/shared/css/tool-styles.css">
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛠️</text></svg>">
 </head>
-<body>
-  <div id="app">
-    <div class="container">
-      <header class="tool-header">
-        <div class="header-content">
-          <h1>🏠 EMI Calculator</h1>
-          <p class="text-secondary">Calculate home loan EMI and optimize prepayment strategies</p>
-        </div>
-        <button data-theme-toggle class="btn btn-ghost theme-toggle" aria-label="Toggle theme">
-          <span class="theme-icon">🌙</span>
-        </button>
-      </header>
+
+<body class="bg-background-light dark:bg-background-dark 
+             text-text-light dark:text-text-dark 
+             font-display min-h-screen transition-colors duration-300">
+  
+  <!-- Shared Header Component -->
+  <header class="flex items-center justify-between whitespace-nowrap 
+                 border-b border-solid border-muted-light/20 dark:border-muted-dark/30 
+                 px-4 py-3">
+    <!-- Logo + Title (Left) -->
+    <div class="flex items-center gap-4 text-text-light dark:text-text-dark">
+      <div class="size-6 text-primary dark:text-accent-dark flex items-center justify-center">
+        <span class="material-symbols-outlined" style="font-size: 24px;">temple_hindu</span>
+      </div>
+      <h2 class="font-heading text-2xl leading-tight tracking-[-0.015em]">
+        <a href="/" class="hover:text-primary dark:hover:text-primary-dark transition-colors">DevToolbox</a>
+      </h2>
+    </div>
+    
+    <!-- Navigation + Theme Toggle (Right) -->
+    <div class="flex items-center gap-8">
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex items-center gap-9" aria-label="Primary navigation">
+        <a href="/" 
+           class="text-text-light dark:text-text-dark 
+                  text-sm font-medium leading-normal 
+                  hover:text-primary dark:hover:text-primary-dark 
+                  transition-colors font-display">
+          Home
+        </a>
+        <a href="/#tools" 
+           class="text-text-light dark:text-text-dark 
+                  text-sm font-medium leading-normal 
+                  hover:text-primary dark:hover:text-primary-dark 
+                  transition-colors font-display">
+          Tools
+        </a>
+        <a href="/#about" 
+           class="text-text-light dark:text-text-dark 
+                  text-sm font-medium leading-normal 
+                  hover:text-primary dark:hover:text-primary-dark 
+                  transition-colors font-display">
+          About
+        </a>
+      </nav>
       
-      <main class="tool-main">
+      <!-- Search Button -->
+      <button id="search-btn" 
+              class="flex h-10 w-10 cursor-pointer items-center justify-center 
+                     overflow-hidden rounded-full 
+                     bg-surface-light dark:bg-surface-dark 
+                     text-text-light dark:text-accent-dark 
+                     hover:scale-110 transition-transform" 
+              aria-label="Search tools (Ctrl+K)"
+              title="Search tools (Ctrl+K)">
+        <span class="material-symbols-outlined" aria-hidden="true">search</span>
+      </button>
+      
+      <!-- Theme Toggle -->
+      <button aria-label="Toggle Theme" 
+              data-theme-toggle
+              class="flex h-10 w-10 cursor-pointer items-center justify-center 
+                     overflow-hidden rounded-full 
+                     bg-surface-light dark:bg-surface-dark 
+                     text-text-light dark:text-accent-dark 
+                     hover:scale-110 transition-transform">
+        <span class="material-symbols-outlined text-current theme-icon-light block dark:hidden">
+          light_mode
+        </span>
+        <span class="material-symbols-outlined text-current theme-icon-dark hidden dark:block">
+          dark_mode
+        </span>
+      </button>
+      
+      <!-- Mobile Hamburger Menu (optional future implementation) -->
+      <button aria-label="Menu" 
+              class="flex md:hidden h-10 w-10 cursor-pointer items-center justify-center 
+                     bg-surface-light dark:bg-surface-dark rounded-full">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+    </div>
+  </header>
+  
+  <!-- Main Content Container -->
+  <main class="px-4 sm:px-10 lg:px-20 py-5">
+    <div class="max-w-[1440px] mx-auto">
+      
+      <!-- Breadcrumb Navigation -->
+      <nav aria-label="Breadcrumb" class="mb-6">
+        <ol class="flex items-center gap-2 text-sm text-muted-light dark:text-muted-dark">
+          <li>
+            <a href="/" class="hover:text-primary dark:hover:text-primary-dark transition-colors">
+              Home
+            </a>
+          </li>
+          <li>
+            <span class="material-symbols-outlined text-xs">chevron_right</span>
+          </li>
+          <li class="text-text-light dark:text-text-dark font-medium" aria-current="page">
+            EMI Calculator
+          </li>
+        </ol>
+      </nav>
+      
+      <!-- Tool Hero Section - Compact -->
+      <section class="py-3 px-4 mb-6 bg-surface-light/50 dark:bg-surface-dark/50 rounded-lg">
+        <div class="max-w-7xl mx-auto flex items-center gap-3">
+          <span class="material-symbols-outlined text-3xl text-primary dark:text-accent-dark">account_balance</span>
+          <h1 class="font-heading text-2xl text-text-light dark:text-text-dark">EMI Calculator</h1>
+        </div>
+      </section>
+      
+      <!-- Tool Content Area -->
+      <section class="tool-content-area">
+        
         <!-- Loan Details Form -->
-        <section class="loan-section">
-          <h2>Loan Details</h2>
-          
-          <form id="emi-form" class="emi-form">
-            <!-- Loan Amount -->
-            <div class="form-group">
-              <label for="loan-amount" class="form-label">
-                Loan Amount (₹)
-                <span class="required">*</span>
-              </label>
-              <input 
-                type="number" 
-                id="loan-amount"
-                class="form-input"
-                placeholder="2500000"
-                min="100000"
-                max="100000000"
-                step="100000"
-                value="2500000"
-                required
-                aria-describedby="loan-amount-help"
-              />
-              <small id="loan-amount-help" class="form-help">Minimum: ₹1,00,000 | Maximum: ₹10,00,00,000</small>
-            </div>
+        <div class="max-w-3xl mx-auto mb-8">
+          <div class="p-6 md:p-8 bg-surface-light dark:bg-surface-dark rounded-lg theme-shadow">
             
-            <!-- Interest Rate -->
-            <div class="form-group">
-              <label for="interest-rate" class="form-label">
-                Annual Interest Rate (%)
-                <span class="required">*</span>
-              </label>
-              <input 
-                type="number" 
-                id="interest-rate"
-                class="form-input"
-                placeholder="8.5"
-                min="1"
-                max="20"
-                step="0.1"
-                value="8.5"
-                required
-                aria-describedby="interest-rate-help"
-              />
-              <small id="interest-rate-help" class="form-help">Current home loan rates: 8-10% p.a.</small>
-            </div>
+            <h2 class="font-heading text-2xl text-text-light dark:text-text-dark mb-6">
+              Loan Details
+            </h2>
             
-            <!-- Loan Tenure -->
-            <div class="form-group">
-              <label for="loan-tenure" class="form-label">
-                Loan Tenure (Years)
-                <span class="required">*</span>
-              </label>
-              <input 
-                type="number" 
-                id="loan-tenure"
-                class="form-input"
-                placeholder="20"
-                min="1"
-                max="30"
-                step="1"
-                value="20"
-                required
-                aria-describedby="loan-tenure-help"
-              />
-              <small id="loan-tenure-help" class="form-help">Typical tenures: 15-20 years</small>
-            </div>
-            
-            <div class="form-actions">
-              <button type="button" id="calculate-btn" class="btn btn-primary btn-large" aria-label="Calculate EMI with provided loan details">
-                Calculate EMI
-              </button>
-              <button type="button" id="reset-btn" class="btn btn-secondary" aria-label="Reset form to default values">
-                Reset
-              </button>
-            </div>
-          </form>
-        </section>
-
-        <!-- EMI Results -->
-        <section id="results-section" class="results-section hidden" role="region" aria-label="EMI calculation results">
-          <h2>EMI Calculation Results</h2>
-          
-          <div class="results-grid" role="status" aria-live="polite">
-            <div class="result-card result-primary">
-              <div class="result-label">Monthly EMI</div>
-              <div class="result-value" id="monthly-emi">₹0</div>
-            </div>
-            
-            <div class="result-card">
-              <div class="result-label">Total Interest Payable</div>
-              <div class="result-value" id="total-interest">₹0</div>
-            </div>
-            
-            <div class="result-card">
-              <div class="result-label">Total Amount Payable</div>
-              <div class="result-value" id="total-amount">₹0</div>
-            </div>
-            
-            <div class="result-card">
-              <div class="result-label">Loan Amount</div>
-              <div class="result-value" id="principal-amount">₹0</div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Prepayment Section -->
-        <section id="prepayment-section" class="prepayment-section hidden">
-          <div class="section-header">
-            <h2>Prepayment Modeling</h2>
-            <button id="toggle-prepayment-btn" class="btn btn-ghost btn-sm">
-              <span>+ Add Prepayment</span>
-            </button>
-          </div>
-          
-          <div id="prepayment-form-container" class="hidden">
-            <form id="prepayment-form" class="prepayment-form">
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="prepayment-type" class="form-label">Prepayment Type</label>
-                  <select id="prepayment-type" class="form-input">
-                    <option value="lumpsum">One-time Lumpsum</option>
-                    <option value="monthly">Recurring Monthly</option>
-                    <option value="annual">Recurring Annual</option>
-                  </select>
-                </div>
-                
-                <div class="form-group">
-                  <label for="prepayment-amount" class="form-label">Amount (₹)</label>
-                  <input 
-                    type="number" 
-                    id="prepayment-amount"
-                    class="form-input"
-                    placeholder="100000"
-                    min="1000"
-                    step="1000"
-                  />
-                </div>
-                
-                <div class="form-group">
-                  <label for="prepayment-start" class="form-label">Start (Month/Year)</label>
-                  <input 
-                    type="number" 
-                    id="prepayment-start"
-                    class="form-input"
-                    placeholder="12"
-                    min="1"
-                    value="12"
-                  />
-                </div>
-              </div>
+            <form id="emi-form" class="space-y-5">
               
+              <!-- Loan Amount -->
               <div class="form-group">
-                <label class="form-label">Prepayment Option</label>
-                <div class="radio-group">
-                  <label class="radio-label">
-                    <input type="radio" name="prepayment-option" value="reduce-tenure" checked>
-                    <span>Reduce Tenure</span>
-                  </label>
-                  <label class="radio-label">
-                    <input type="radio" name="prepayment-option" value="reduce-emi">
-                    <span>Reduce EMI</span>
-                  </label>
-                </div>
+                <label for="loan-amount" class="block mb-2 text-sm font-medium text-text-light dark:text-text-dark">
+                  Loan Amount (₹)
+                  <span class="text-red-500">*</span>
+                </label>
+                <input type="number" 
+                       id="loan-amount"
+                       class="w-full px-4 py-3 bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border border-muted-light/30 dark:border-accent-dark/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark transition-all"
+                       placeholder="2500000"
+                       min="100000"
+                       max="100000000"
+                       step="100000"
+                       value="2500000"
+                       required
+                       aria-describedby="loan-amount-help" />
+                <small id="loan-amount-help" class="block mt-1 text-xs text-muted-light dark:text-muted-dark">
+                  Minimum: ₹1,00,000 | Maximum: ₹10,00,00,000
+                </small>
               </div>
               
-              <div class="form-actions">
-                <button type="button" id="add-prepayment-btn" class="btn btn-primary" aria-label="Add prepayment to calculation">
-                  Add Prepayment
+              <!-- Interest Rate -->
+              <div class="form-group">
+                <label for="interest-rate" class="block mb-2 text-sm font-medium text-text-light dark:text-text-dark">
+                  Annual Interest Rate (%)
+                  <span class="text-red-500">*</span>
+                </label>
+                <input type="number" 
+                       id="interest-rate"
+                       class="w-full px-4 py-3 bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border border-muted-light/30 dark:border-accent-dark/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark transition-all"
+                       placeholder="8.5"
+                       min="1"
+                       max="20"
+                       step="0.1"
+                       value="8.5"
+                       required
+                       aria-describedby="interest-rate-help" />
+                <small id="interest-rate-help" class="block mt-1 text-xs text-muted-light dark:text-muted-dark">
+                  Current home loan rates: 8-10% p.a.
+                </small>
+              </div>
+              
+              <!-- Loan Tenure -->
+              <div class="form-group">
+                <label for="loan-tenure" class="block mb-2 text-sm font-medium text-text-light dark:text-text-dark">
+                  Loan Tenure (Years)
+                  <span class="text-red-500">*</span>
+                </label>
+                <input type="number" 
+                       id="loan-tenure"
+                       class="w-full px-4 py-3 bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border border-muted-light/30 dark:border-accent-dark/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark transition-all"
+                       placeholder="20"
+                       min="1"
+                       max="30"
+                       step="1"
+                       value="20"
+                       required
+                       aria-describedby="loan-tenure-help" />
+                <small id="loan-tenure-help" class="block mt-1 text-xs text-muted-light dark:text-muted-dark">
+                  Typical tenures: 15-20 years
+                </small>
+              </div>
+              
+              <!-- Form Actions -->
+              <div class="flex flex-col sm:flex-row items-center gap-3 pt-4">
+                <button type="button" 
+                        id="calculate-btn"
+                        class="w-full sm:w-auto btn-primary">
+                  <span class="material-symbols-outlined">calculate</span>
+                  <span>Calculate EMI</span>
                 </button>
-                <button type="button" id="cancel-prepayment-btn" class="btn btn-ghost" aria-label="Cancel prepayment entry">
-                  Cancel
+                <button type="button" 
+                        id="reset-btn"
+                        class="w-full sm:w-auto px-4 py-2 bg-transparent border border-primary/30 dark:border-primary-dark/30 text-primary dark:text-primary-dark rounded-lg hover:bg-primary/10 dark:hover:bg-primary-dark/10 transition-all">
+                  <span class="material-symbols-outlined mr-2">refresh</span>
+                  <span>Reset</span>
+                </button>
+                <!-- Help Button -->
+                <button type="button"
+                        id="help-btn" 
+                        class="p-3 rounded-lg hover:bg-muted-light/20 dark:hover:bg-accent-dark/20 transition-colors" 
+                        aria-label="Help - How to use this tool" 
+                        title="How to use this tool">
+                  <span class="material-symbols-outlined text-2xl text-primary-light dark:text-primary-dark">help</span>
                 </button>
               </div>
+              
             </form>
           </div>
-          
-          <!-- Prepayment List -->
-          <div id="prepayment-list" class="prepayment-list"></div>
-          
-          <!-- Recalculate Button -->
-          <div id="recalculate-container" class="hidden">
-            <button id="recalculate-btn" class="btn btn-primary btn-large" aria-label="Recalculate EMI with prepayments">
-              Calculate with Prepayments
-            </button>
-          </div>
-        </section>
-
-        <!-- Comparison Section -->
-        <section id="comparison-section" class="comparison-section hidden" role="region" aria-label="Loan comparison with and without prepayments">
-          <h2>Original vs Revised Comparison</h2>
-          
-          <div class="comparison-grid" role="status" aria-live="polite">
-            <div class="comparison-card">
-              <h3>Original Loan</h3>
-              <div class="comparison-item">
-                <span class="comparison-label">Monthly EMI</span>
-                <span class="comparison-value" id="original-emi">₹0</span>
-              </div>
-              <div class="comparison-item">
-                <span class="comparison-label">Tenure</span>
-                <span class="comparison-value" id="original-tenure">0 years</span>
-              </div>
-              <div class="comparison-item">
-                <span class="comparison-label">Total Interest</span>
-                <span class="comparison-value" id="original-interest">₹0</span>
-              </div>
-            </div>
-            
-            <div class="comparison-card comparison-revised">
-              <h3>Revised Loan</h3>
-              <div class="comparison-item">
-                <span class="comparison-label">Monthly EMI</span>
-                <span class="comparison-value" id="revised-emi">₹0</span>
-              </div>
-              <div class="comparison-item">
-                <span class="comparison-label">Tenure</span>
-                <span class="comparison-value" id="revised-tenure">0 years</span>
-              </div>
-              <div class="comparison-item">
-                <span class="comparison-label">Total Interest</span>
-                <span class="comparison-value" id="revised-interest">₹0</span>
-              </div>
-            </div>
-            
-            <div class="comparison-card comparison-savings">
-              <h3>Your Savings 💰</h3>
-              <div class="comparison-item">
-                <span class="comparison-label">Interest Saved</span>
-                <span class="comparison-value savings-amount" id="interest-saved">₹0</span>
-              </div>
-              <div class="comparison-item">
-                <span class="comparison-label">Tenure Reduced</span>
-                <span class="comparison-value" id="tenure-reduced">0 months</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Chart Section -->
-        <section id="chart-section" class="chart-section hidden" role="region" aria-label="Loan balance visualization">
-          <h2>Loan Balance Over Time</h2>
-          <div class="chart-container">
-            <canvas id="loan-chart" aria-label="Chart showing loan balance declining over time" role="img"></canvas>
-          </div>
-        </section>
-
-        <!-- Amortization Table -->
-        <section id="amortization-section" class="amortization-section hidden">
-          <div class="section-header">
-            <h2>Year-wise Amortization Schedule</h2>
-            <div class="button-group">
-              <button id="copy-table-btn" class="btn btn-secondary btn-sm">
-                📋 Copy Table
-              </button>
-              <button id="export-csv-btn" class="btn btn-secondary btn-sm">
-                📥 Export CSV
-              </button>
-            </div>
-          </div>
-          
-          <div class="table-wrapper">
-            <table id="amortization-table" class="amortization-table">
-              <thead>
-                <tr>
-                  <th>Year</th>
-                  <th>Opening Balance</th>
-                  <th>EMI Paid</th>
-                  <th>Principal Paid</th>
-                  <th>Interest Paid</th>
-                  <th>Prepayment</th>
-                  <th>Closing Balance</th>
-                </tr>
-              </thead>
-              <tbody id="amortization-tbody">
-                <!-- Populated by JavaScript -->
-              </tbody>
-              <tfoot id="amortization-tfoot">
-                <!-- Totals populated by JavaScript -->
-              </tfoot>
-            </table>
-          </div>
-        </section>
-      </main>
-
-      <footer class="tool-footer">
-        <div class="footer-content">
-          <p>&copy; 2026 DevToolbox. All calculations are performed locally in your browser.</p>
-          <a href="/" class="btn btn-ghost btn-sm">🏠 Back to Home</a>
         </div>
-      </footer>
+        
+        <!-- EMI Results Section -->
+        <div id="results-section" class="hidden" role="region" aria-label="EMI calculation results">
+          
+          <h2 class="font-heading text-2xl text-text-light dark:text-text-dark mb-6 text-center">
+            EMI Calculation Results
+          </h2>
+          
+          <!-- Summary Cards Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" role="status" aria-live="polite">
+            
+            <!-- Monthly EMI Card (Primary) -->
+            <div class="md:col-span-2 p-6 bg-surface-light dark:bg-surface-dark border-l-4 border-primary rounded-r-lg theme-shadow">
+              <div class="text-sm font-medium text-muted-light dark:text-muted-dark mb-2">
+                Monthly EMI
+              </div>
+              <div class="text-4xl font-bold text-primary dark:text-primary-dark" id="monthly-emi">
+                ₹0
+              </div>
+            </div>
+            
+            <!-- Principal Amount Card -->
+            <div class="p-6 bg-surface-light dark:bg-surface-dark rounded-lg theme-shadow">
+              <div class="text-sm font-medium text-muted-light dark:text-muted-dark mb-2">
+                Loan Amount
+              </div>
+              <div class="text-2xl font-bold text-text-light dark:text-text-dark" id="principal-amount">
+                ₹0
+              </div>
+            </div>
+            
+            <!-- Total Interest Card -->
+            <div class="p-6 bg-surface-light dark:bg-surface-dark border-l-4 border-red-500 rounded-r-lg theme-shadow">
+              <div class="text-sm font-medium text-muted-light dark:text-muted-dark mb-2">
+                Total Interest
+              </div>
+              <div class="text-2xl font-bold text-red-600 dark:text-red-400" id="total-interest">
+                ₹0
+              </div>
+            </div>
+            
+            <!-- Total Amount Card -->
+            <div class="md:col-span-4 p-6 bg-surface-light dark:bg-surface-dark rounded-lg theme-shadow">
+              <div class="text-sm font-medium text-muted-light dark:text-muted-dark mb-2">
+                Total Amount Payable
+              </div>
+              <div class="text-3xl font-bold text-text-light dark:text-text-dark" id="total-amount">
+                ₹0
+              </div>
+            </div>
+            
+          </div>
+          
+          <!-- Chart Section -->
+          <div id="chart-section" class="mb-8" style="display: none;">
+            <div class="p-6 bg-surface-light dark:bg-surface-dark rounded-lg theme-shadow">
+              <h3 class="font-heading text-xl text-text-light dark:text-text-dark mb-4">
+                Loan Balance Over Time
+              </h3>
+              <div class="w-full h-80">
+                <canvas id="loan-chart" aria-label="Loan balance chart"></canvas>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Amortization Schedule Section -->
+          <div id="amortization-section" class="p-6 bg-surface-light dark:bg-surface-dark rounded-lg theme-shadow">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-heading text-xl text-text-light dark:text-text-dark">
+                Amortization Schedule
+              </h3>
+              <div class="flex items-center gap-2">
+                <button id="copy-table-btn" class="btn-icon" aria-label="Copy table">
+                  <span class="material-symbols-outlined">content_copy</span>
+                </button>
+                <button id="export-csv-btn" class="btn-icon" aria-label="Download CSV">
+                  <span class="material-symbols-outlined">download</span>
+                </button>
+              </div>
+            </div>
+            <div class="overflow-x-auto max-h-96 overflow-y-auto">
+              <table class="w-full text-sm" id="amortization-table">
+                <thead class="sticky top-0 bg-surface-light dark:bg-surface-dark">
+                  <tr class="border-b border-muted-light/20 dark:border-muted-dark/20">
+                    <th class="text-left py-3 px-4 font-medium text-muted-light dark:text-muted-dark">Month</th>
+                    <th class="text-right py-3 px-4 font-medium text-muted-light dark:text-muted-dark">EMI</th>
+                    <th class="text-right py-3 px-4 font-medium text-muted-light dark:text-muted-dark">Principal</th>
+                    <th class="text-right py-3 px-4 font-medium text-muted-light dark:text-muted-dark">Interest</th>
+                    <th class="text-right py-3 px-4 font-medium text-muted-light dark:text-muted-dark">Balance</th>
+                  </tr>
+                </thead>
+                <tbody id="amortization-tbody" class="text-text-light dark:text-text-dark">
+                  <!-- Populated by JavaScript -->
+                </tbody>
+                <tfoot id="amortization-tfoot">
+                  <!-- Totals row populated by JavaScript -->
+                </tfoot>
+              </table>
+            </div>
+          </div>
+          
+        </div>
+        
+        <!-- Prepayment Calculator Section -->
+        <div id="prepayment-section" class="hidden mt-8" role="region" aria-label="Prepayment calculator">
+          <div class="p-6 bg-surface-light dark:bg-surface-dark rounded-lg theme-shadow">
+            <h3 class="font-heading text-xl mb-4 text-text-light dark:text-text-dark flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary-light dark:text-primary-dark">payments</span>
+              Prepayment Calculator
+            </h3>
+            
+            <div class="space-y-4">
+              <!-- Prepayment Amount -->
+              <div>
+                <label for="prepayment-amount" class="block text-sm font-medium mb-2 text-text-light dark:text-text-dark">
+                  Prepayment Amount (₹)
+                </label>
+                <input 
+                  type="number" 
+                  id="prepayment-amount" 
+                  class="w-full px-4 py-3 bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border border-muted-light/30 dark:border-accent-dark/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark transition-all"
+                  placeholder="Enter lump-sum payment amount"
+                  min="0"
+                  aria-describedby="prepayment-amount-help"
+                />
+                <small id="prepayment-amount-help" class="block mt-1 text-xs text-muted-light dark:text-muted-dark">
+                  One-time payment toward loan principal
+                </small>
+              </div>
+              
+              <!-- Prepayment Month -->
+              <div>
+                <label for="prepayment-month" class="block text-sm font-medium mb-2 text-text-light dark:text-text-dark">
+                  Prepayment Month
+                </label>
+                <input 
+                  type="number" 
+                  id="prepayment-month" 
+                  class="w-full px-4 py-3 bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark border border-muted-light/30 dark:border-accent-dark/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark transition-all"
+                  placeholder="Month number (e.g., 12 for 1 year)"
+                  min="1"
+                  value="12"
+                  aria-describedby="prepayment-month-help"
+                />
+                <small id="prepayment-month-help" class="block mt-1 text-xs text-muted-light dark:text-muted-dark">
+                  Choose which month you'll make the prepayment (1 to <span id="max-month">360</span>)
+                </small>
+              </div>
+              
+              <!-- Prepayment Option -->
+              <div>
+                <label class="block text-sm font-medium mb-2 text-text-light dark:text-text-dark">
+                  Prepayment Option
+                </label>
+                <div class="flex flex-col sm:flex-row gap-4">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input 
+                      type="radio" 
+                      name="prepayment-option" 
+                      value="reduce-tenure" 
+                      checked
+                      class="w-4 h-4 text-primary-light dark:text-primary-dark focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark"
+                    />
+                    <span class="text-sm text-text-light dark:text-text-dark">Reduce Tenure (Keep EMI Same)</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input 
+                      type="radio" 
+                      name="prepayment-option" 
+                      value="reduce-emi"
+                      class="w-4 h-4 text-primary-light dark:text-primary-dark focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark"
+                    />
+                    <span class="text-sm text-text-light dark:text-text-dark">Reduce EMI (Keep Tenure Same)</span>
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Calculate Button -->
+              <button 
+                id="calculate-prepayment-btn" 
+                class="w-full px-6 py-3 bg-primary-light dark:bg-primary-dark text-white font-semibold rounded-lg hover:scale-105 transition-transform flex items-center justify-center gap-2"
+              >
+                <span class="material-symbols-outlined">trending_up</span>
+                <span>Calculate with Prepayment</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prepayment Results Section -->
+        <div id="prepayment-results" class="hidden mt-6" role="region" aria-label="Prepayment results" aria-live="polite">
+          <div class="p-6 bg-surface-light dark:bg-surface-dark rounded-lg theme-shadow">
+            <h4 class="font-heading text-lg mb-4 text-text-light dark:text-text-dark">Prepayment Impact</h4>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <!-- Interest Saved -->
+              <div class="p-4 bg-background-light dark:bg-background-dark rounded-lg border-l-4 border-green-500">
+                <p class="text-sm text-muted-light dark:text-muted-dark mb-1">Interest Saved</p>
+                <p class="text-2xl font-bold text-green-600 dark:text-green-400" id="interest-saved">₹0</p>
+              </div>
+              
+              <!-- Time Saved (if reduce tenure) -->
+              <div class="p-4 bg-background-light dark:bg-background-dark rounded-lg border-l-4 border-primary" id="time-saved-card">
+                <p class="text-sm text-muted-light dark:text-muted-dark mb-1">Time Saved</p>
+                <p class="text-2xl font-bold text-primary-light dark:text-primary-dark" id="time-saved">0 months</p>
+              </div>
+              
+              <!-- New EMI (if reduce emi) -->
+              <div class="p-4 bg-background-light dark:bg-background-dark rounded-lg border-l-4 border-primary hidden" id="new-emi-card">
+                <p class="text-sm text-muted-light dark:text-muted-dark mb-1">New EMI</p>
+                <p class="text-2xl font-bold text-primary-light dark:text-primary-dark" id="new-emi-amount">₹0</p>
+              </div>
+              
+              <!-- New Tenure -->
+              <div class="p-4 bg-background-light dark:bg-background-dark rounded-lg border-l-4 border-primary">
+                <p class="text-sm text-muted-light dark:text-muted-dark mb-1">New Tenure</p>
+                <p class="text-2xl font-bold text-text-light dark:text-text-dark" id="new-tenure">0 years</p>
+              </div>
+            </div>
+            
+            <!-- Comparison Table -->
+            <div class="overflow-x-auto">
+              <h5 class="font-heading text-base mb-3 text-text-light dark:text-text-dark">Comparison</h5>
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="border-b border-muted-light/20 dark:border-accent-dark/30">
+                    <th class="text-left py-2 px-2 text-text-light dark:text-text-dark font-medium">Metric</th>
+                    <th class="text-right py-2 px-2 text-text-light dark:text-text-dark font-medium">Without Prepayment</th>
+                    <th class="text-right py-2 px-2 text-text-light dark:text-text-dark font-medium">With Prepayment</th>
+                    <th class="text-right py-2 px-2 text-green-600 dark:text-green-400 font-medium">Savings</th>
+                  </tr>
+                </thead>
+                <tbody id="prepayment-comparison" class="text-text-light dark:text-text-dark">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Legacy containers for backward compatibility (hidden) -->
+        <div id="comparison-section" class="hidden"></div>
+        <div id="prepayment-form-container" class="hidden">
+          <select id="prepayment-type"></select>
+          <input type="number" id="prepayment-start">
+        </div>
+        <div id="prepayment-list" class="hidden"></div>
+        <div id="recalculate-container" class="hidden"></div>
+        <button id="toggle-prepayment-btn" class="hidden"></button>
+        <button id="add-prepayment-btn" class="hidden"></button>
+        <button id="cancel-prepayment-btn" class="hidden"></button>
+        <button id="recalculate-btn" class="hidden"></button>
+        
+      </section>
+      
+    </div>
+  </main>
+  
+  <!-- About This Tool - Bottom -->
+  <section class="py-6 px-4 bg-surface-light dark:bg-surface-dark border-t border-muted-light/20 dark:border-accent-dark/30">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="font-heading text-lg mb-2 text-text-light dark:text-text-dark">About This Tool</h2>
+      <p class="text-sm text-muted-light dark:text-muted-dark mb-3">
+        Calculate equated monthly installments for loans. View detailed amortization schedule and interest breakdown.
+      </p>
+      <div class="flex flex-wrap justify-center gap-3 text-xs">
+        <span class="px-3 py-1 rounded-full bg-primary-light/10 dark:bg-primary-dark/10 text-primary-light dark:text-primary-dark">
+          Privacy First
+        </span>
+        <span class="px-3 py-1 rounded-full bg-primary-light/10 dark:bg-primary-dark/10 text-primary-light dark:text-primary-dark">
+          Client-Side Only
+        </span>
+        <span class="px-3 py-1 rounded-full bg-primary-light/10 dark:bg-primary-dark/10 text-primary-light dark:text-primary-dark">
+          Open Source
+        </span>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Libraries -->
+  <script src="/lib/chart.umd.min.js"></script>
+    <!-- Help Modal -->
+  <div id="help-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 hidden z-50" role="dialog" aria-modal="true" aria-labelledby="help-modal-title">
+    <div class="bg-surface-light dark:bg-surface-dark rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto theme-shadow">
+      <div class="sticky top-0 bg-surface-light dark:bg-surface-dark border-b border-muted-light/20 dark:border-accent-dark/30 p-4 flex items-center justify-between">
+        <h2 id="help-modal-title" class="font-heading text-xl text-text-light dark:text-text-dark flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary-light dark:text-primary-dark">help</span>
+          How to Use This Tool
+        </h2>
+        <button id="help-close" class="p-2 rounded-lg hover:bg-muted-light/20 dark:hover:bg-accent-dark/20 transition-colors" aria-label="Close help">
+          <span class="material-symbols-outlined text-2xl text-text-light dark:text-text-dark">close</span>
+        </button>
+      </div>
+      
+      <div class="p-6 space-y-6">
+        <div id="help-content">
+          <section>
+            <h3 class="font-heading text-lg mb-3 text-text-light dark:text-text-dark">Quick Start</h3>
+            <ol class="space-y-2 text-sm text-muted-light dark:text-muted-dark list-decimal list-inside">
+              <li><strong>Loan Amount:</strong> Enter total loan amount (e.g., ₹5,00,000)</li>
+              <li><strong>Interest Rate:</strong> Enter annual interest rate as percentage (e.g., 10 for 10%)</li>
+              <li><strong>Loan Tenure:</strong> Enter loan duration in years (e.g., 5)</li>
+              <li><strong>Calculate:</strong> Click "Calculate EMI" to see monthly payment and breakdown</li>
+            </ol>
+          </section>
+          
+          <section>
+            <h3 class="font-heading text-lg mb-3 text-text-light dark:text-text-dark">Understanding Results</h3>
+            <ul class="space-y-2 text-sm text-muted-light dark:text-muted-dark">
+              <li><strong>Monthly EMI:</strong> Fixed amount to pay each month</li>
+              <li><strong>Total Amount:</strong> Sum of all EMI payments over loan tenure</li>
+              <li><strong>Total Interest:</strong> Extra amount paid beyond principal</li>
+              <li><strong>Amortization Table:</strong> Month-by-month payment breakdown</li>
+            </ul>
+          </section>
+          
+          <section>
+            <h3 class="font-heading text-lg mb-3 text-text-light dark:text-text-dark">Tips</h3>
+            <ul class="space-y-2 text-sm text-muted-light dark:text-muted-dark list-disc list-inside">
+              <li>Shorter tenure = higher EMI but less total interest</li>
+              <li>Longer tenure = lower EMI but more total interest</li>
+              <li>Chart shows principal vs interest proportion over time</li>
+              <li>Scroll amortization table to see detailed monthly breakdown</li>
+            </ul>
+          </section>
+          
+          <section>
+            <h3 class="font-heading text-lg mb-3 text-text-light dark:text-text-dark">Prepayment Calculator</h3>
+            <ol class="space-y-2 text-sm text-muted-light dark:text-muted-dark list-decimal list-inside">
+              <li><strong>Calculate EMI First:</strong> Main EMI must be calculated before prepayment</li>
+              <li><strong>Enter Prepayment Details:</strong> Amount, month, and option (reduce tenure or EMI)</li>
+              <li><strong>See Savings:</strong> View interest saved, time saved, and updated loan details</li>
+            </ol>
+            <p class="text-sm text-muted-light dark:text-muted-dark mt-3 pl-5">
+              <strong>💡 Tip:</strong> Prepayments in early years save more interest due to higher interest component in initial EMIs.
+            </p>
+          </section>
+        </div>
+        
+        <div class="pt-4 border-t border-muted-light/20 dark:border-accent-dark/30">
+          <p class="text-sm text-muted-light dark:text-muted-dark flex items-start gap-2">
+            <span class="material-symbols-outlined text-primary-light dark:text-primary-dark">lock</span>
+            <span>All processing happens in your browser. No data is sent to any server. Your privacy is guaranteed.</span>
+          </p>
+        </div>
+      </div>
+      
+      <div class="sticky bottom-0 bg-surface-light dark:bg-surface-dark border-t border-muted-light/20 dark:border-accent-dark/30 p-4">
+        <button id="help-ok" class="w-full px-6 py-3 bg-primary-light dark:bg-primary-dark text-white font-semibold rounded-lg hover:scale-105 transition-transform">
+          Got It!
+        </button>
+      </div>
     </div>
   </div>
+  
+  <!-- Search Modal -->
+  <div id="search-modal" class="fixed inset-0 bg-black/60 flex items-center justify-center p-4 hidden z-50" role="dialog" aria-modal="true" aria-labelledby="search-modal-title">
+    <div class="bg-surface-light dark:bg-surface-dark rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden theme-shadow">
+      <!-- Search Input -->
+      <div class="p-4 border-b border-muted-light/20 dark:border-accent-dark/30">
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-light dark:text-muted-dark">search</span>
+          <input 
+            type="text" 
+            id="search-input" 
+            class="w-full pl-12 pr-4 py-3 bg-bg-light dark:bg-bg-dark text-text-light dark:text-text-dark border border-muted-light/30 dark:border-accent-dark/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-light dark:focus:ring-primary-dark"
+            placeholder="Search tools..."
+            aria-label="Search tools"
+          />
+          <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-light dark:text-muted-dark">
+            ESC to close
+          </span>
+        </div>
+      </div>
+      
+      <!-- Search Results -->
+      <div id="search-results" class="overflow-y-auto max-h-[60vh] p-2">
+        <!-- Results populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- Search -->
+  <script src="/shared/js/search.js"></script>
+  
+  <!-- Theme Toggle -->
+  <script src="/shared/js/theme.js"></script>
+  
+  <!-- Chart.js Library -->
+  <script src="/lib/chart.umd.min.js"></script>
+  
+  <!-- Tool JavaScript -->
+  <script type="module" src="./emi-calculator.js"></script>
+  
 </body>
 </html>

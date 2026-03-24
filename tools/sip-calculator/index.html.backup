@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Inline theme script to prevent FOUC -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('devtoolbox_theme');
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+      document.documentElement.classList.add(theme);
+    })();
+  </script>
+  
+  <meta name="description" content="SIP Calculator - Calculate returns from Systematic Investment Plans">
+  <title>SIP Calculator - DevToolbox</title>
+  
+  <!-- Material Symbols Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  
+  <!-- Shared Styles -->
+  <link rel="stylesheet" href="/shared/css/variables.css">
+  <link rel="stylesheet" href="/shared/css/reset.css">
+  <link rel="stylesheet" href="/shared/css/components.css">
+  <link rel="stylesheet" href="/shared/css/themes.css">
+  <link rel="stylesheet" href="/shared/css/utilities.css">
+  <link rel="stylesheet" href="/shared/css/responsive.css">
+  
+  <!-- Tool-Specific Styles -->
+  <link rel="stylesheet" href="sip-calculator.css">
+  <link rel="stylesheet" href="/shared/css/tool-styles.css">
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <header class="tool-header">
+        <div class="header-content">
+          <h1>💰 SIP Calculator</h1>
+          <p class="text-secondary">Calculate returns from Systematic Investment Plans</p>
+        </div>
+        <button data-theme-toggle class="btn btn-ghost theme-toggle" aria-label="Toggle theme">
+          <span class="theme-icon">🌙</span>
+        </button>
+      </header>
+      
+      <main class="tool-main">
+        <!-- Calculator Form -->
+        <section class="calculator-section">
+          <h2>Investment Details</h2>
+          
+          <form id="sip-form" class="sip-form">
+            <!-- Monthly Investment -->
+            <div class="form-group">
+              <label for="monthly-investment" class="form-label">
+                Monthly Investment (₹)
+                <span class="required">*</span>
+              </label>
+              <input 
+                type="number" 
+                id="monthly-investment"
+                class="form-input"
+                placeholder="5000"
+                min="500"
+                max="10000000"
+                step="500"
+                value="5000"
+                required
+                aria-describedby="monthly-investment-help"
+              />
+              <small id="monthly-investment-help" class="form-help">
+                Minimum: ₹500, Maximum: ₹10,00,000
+              </small>
+            </div>
+            
+            <!-- Expected Return Rate -->
+            <div class="form-group">
+              <label for="return-rate" class="form-label">
+                Expected Annual Return (%)
+                <span class="required">*</span>
+              </label>
+              <input 
+                type="number" 
+                id="return-rate"
+                class="form-input"
+                placeholder="12"
+                min="1"
+                max="30"
+                step="0.5"
+                value="12"
+                required
+                aria-describedby="return-rate-help"
+              />
+              <small id="return-rate-help" class="form-help">
+                Historical equity mutual fund returns: 10-15% p.a.
+              </small>
+            </div>
+            
+            <!-- Investment Duration -->
+            <div class="form-group">
+              <label for="duration" class="form-label">
+                Investment Duration (Years)
+                <span class="required">*</span>
+              </label>
+              <input 
+                type="number" 
+                id="duration"
+                class="form-input"
+                placeholder="10"
+                min="1"
+                max="50"
+                step="1"
+                value="10"
+                required
+                aria-describedby="duration-help"
+              />
+              <small id="duration-help" class="form-help">
+                Long-term investments (5+ years) show better compounding
+              </small>
+            </div>
+            
+            <!-- Step-up Rate (Optional) -->
+            <div class="form-group">
+              <label for="stepup-rate" class="form-label">
+                Annual Step-Up Rate (%) <span class="optional">[Optional]</span>
+              </label>
+              <input 
+                type="number" 
+                id="stepup-rate"
+                class="form-input"
+                placeholder="0"
+                min="0"
+                max="50"
+                step="1"
+                value="0"
+                aria-describedby="stepup-rate-help"
+              />
+              <small id="stepup-rate-help" class="form-help">
+                Increase monthly investment by this % each year (0 = no step-up)
+              </small>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="form-actions">
+              <button 
+                type="submit" 
+                id="calculate-btn"
+                class="btn btn-primary btn-large"
+                aria-label="Calculate SIP returns"
+              >
+                <span class="btn-icon">🧮</span>
+                <span class="btn-text">Calculate</span>
+              </button>
+              
+              <button 
+                type="reset" 
+                id="reset-btn"
+                class="btn btn-ghost"
+                aria-label="Reset form to default values"
+              >
+                <span class="btn-icon">↻</span>
+                <span class="btn-text">Reset</span>
+              </button>
+            </div>
+            
+            <!-- Validation Messages -->
+            <div 
+              id="form-errors" 
+              class="form-errors"
+              role="alert"
+              aria-live="assertive"
+            ></div>
+          </form>
+        </section>
+        
+        <!-- Results Section -->
+        <section id="results-section" class="results-section hidden">
+          <h2>Investment Summary</h2>
+          
+          <!-- Summary Cards -->
+          <div class="summary-cards">
+            <div class="summary-card card-primary">
+              <h3 class="card-title">Total Investment</h3>
+              <p id="total-investment" class="card-value">₹0</p>
+              <small class="card-subtitle">Amount you will invest</small>
+            </div>
+            
+            <div class="summary-card card-success">
+              <h3 class="card-title">Expected Returns</h3>
+              <p id="expected-returns" class="card-value">₹0</p>
+              <small class="card-subtitle">Wealth gained</small>
+            </div>
+            
+            <div class="summary-card card-accent">
+              <h3 class="card-title">Maturity Value</h3>
+              <p id="maturity-value" class="card-value">₹0</p>
+              <small class="card-subtitle">Total corpus at maturity</small>
+            </div>
+            
+            <div class="summary-card card-info">
+              <h3 class="card-title">Absolute Return</h3>
+              <p id="absolute-return" class="card-value">0%</p>
+              <small class="card-subtitle">Percentage gain</small>
+            </div>
+          </div>
+          
+          <!-- Export Actions -->
+          <div class="export-actions">
+            <button 
+              id="copy-results-btn"
+              class="btn btn-secondary"
+              aria-label="Copy results to clipboard"
+            >
+              <span class="btn-icon">📋</span>
+              <span class="btn-text">Copy Results</span>
+            </button>
+            
+            <button 
+              id="download-csv-btn"
+              class="btn btn-secondary"
+              aria-label="Download results as CSV"
+            >
+              <span class="btn-icon">💾</span>
+              <span class="btn-text">Download CSV</span>
+            </button>
+          </div>
+          
+          <!-- Year-wise Breakdown -->
+          <div class="breakdown-section">
+            <h3>Year-wise Breakdown</h3>
+            <div class="table-container">
+              <table id="breakdown-table" class="breakdown-table" aria-label="SIP year-wise breakdown">
+                <thead>
+                  <tr>
+                    <th scope="col">Year</th>
+                    <th scope="col">Yearly Investment</th>
+                    <th scope="col">Total Investment</th>
+                    <th scope="col">Expected Value</th>
+                    <th scope="col">Returns</th>
+                  </tr>
+                </thead>
+                <tbody id="breakdown-tbody">
+                  <!-- Dynamic rows will be inserted here -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <!-- Chart Visualization -->
+          <div class="chart-section">
+            <h3>Growth Visualization</h3>
+            <div class="chart-container">
+              <canvas id="sip-chart" aria-label="SIP growth chart" role="img">
+                Your browser does not support the canvas element.
+              </canvas>
+            </div>
+            
+            <!-- Accessible data table for screen readers -->
+            <div class="sr-only">
+              <table aria-label="Chart data table">
+                <caption>Investment and returns data by year</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Year</th>
+                    <th scope="col">Investment</th>
+                    <th scope="col">Value</th>
+                  </tr>
+                </thead>
+                <tbody id="chart-data-table">
+                  <!-- Mirror of chart data for accessibility -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+      
+      <!-- Footer -->
+      <footer class="tool-footer">
+        <p><a href="/#/">← Back to Home</a></p>
+        <p class="disclaimer">
+          <small>
+            Disclaimer: This calculator provides estimates based on assumed rates of return. 
+            Actual returns may vary. Past performance is not indicative of future results.
+          </small>
+        </p>
+      </footer>
+    </div>
+  </div>
+
+  <script type="module">
+    import { ThemeManager } from '/shared/js/theme.js';
+    ThemeManager.init();
+  </script>
+</body>
+</html>
